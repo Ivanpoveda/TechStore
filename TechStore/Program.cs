@@ -1,36 +1,39 @@
 using Microsoft.EntityFrameworkCore;
-using TechStore.Models; // Aquí está tu TiendaDbContext
+using Microsoft.AspNetCore.Authentication.Cookies;
+using TechStore.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Registrar DbContext con Oracle usando la cadena de conexión de appsettings.json
 builder.Services.AddDbContext<TiendaDbContext>(options =>
     options.UseOracle(builder.Configuration.GetConnectionString("TechStoreConnection")));
 
-// 2. Registrar servicios MVC
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied"; // 👈 importante
+    });
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// 3. Configuración del pipeline HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts(); // Seguridad: Strict Transport Security
+    app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles(); // Necesario para CSS, JS, imágenes
-
+app.UseStaticFiles();
 app.UseRouting();
 
-app.UseAuthentication(); // Si luego agregas login con Identity
+app.UseAuthentication();
 app.UseAuthorization();
 
-// 4. Rutas por defecto
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
 
