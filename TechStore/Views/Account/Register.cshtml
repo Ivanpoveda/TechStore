@@ -1,0 +1,45 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Registro";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/styles.css" />
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <h2>Registro de Cliente</h2>
+            <p>Crea tu cuenta para acceder a TechStore</p>
+
+            <form asp-action="Register" method="post" class="login-form">
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" name="Nombre" required />
+
+                <label for="apellidos">Apellidos</label>
+                <input type="text" id="apellidos" name="Apellidos" required />
+
+                <label for="correo">Correo Electrónico</label>
+                <input type="email" id="correo" name="Correo" required />
+
+                <label for="contrasenia">Contraseña</label>
+                <input type="password" id="contrasenia" name="Contrasenia" required />
+
+                <label for="telefono">Teléfono</label>
+                <input type="text" id="telefono" name="Telefono" />
+
+                <button type="submit" class="btn-login">Registrarse</button>
+            </form>
+
+            <p class="register">
+                ¿Ya tienes cuenta?
+                <a asp-action="Login" asp-controller="Account">Inicia sesión aquí</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

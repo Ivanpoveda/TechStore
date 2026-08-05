@@ -79,7 +79,8 @@ body {
 }
 
 /* Botón */
-.login-form button {
+.login-form button,
+.btn-login {
     background: linear-gradient(90deg, #007bff, #6f42c1);
     color: #fff;
     border: none;
@@ -90,7 +91,8 @@ body {
     transition: 0.3s;
 }
 
-    .login-form button:hover {
+    .login-form button:hover,
+    .btn-login:hover {
         opacity: 0.9;
     }
 
@@ -109,3 +111,15 @@ body {
         .register a:hover {
             text-decoration: underline;
         }
+
+/* 🔴 Mensaje de error */
+.alert-error {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-align: center;
+}

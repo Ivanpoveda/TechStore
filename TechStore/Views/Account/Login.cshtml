@@ -8,7 +8,6 @@
 <head>
     <meta charset="utf-8" />
     <title>@ViewData["Title"]</title>
-    <!-- ✅ Aquí la ruta correcta -->
     <link rel="stylesheet" href="~/css/styles.css" />
 </head>
 <body>
@@ -23,6 +22,7 @@
 
                 <label for="contrasenia">Contraseña</label>
                 <input type="password" id="contrasenia" name="contrasenia" placeholder="••••••••" required />
+
                 <a href="#">¿Olvidaste tu clave?</a>
 
                 <div class="remember">
@@ -30,10 +30,18 @@
                     <label for="recordar">Recordar este dispositivo</label>
                 </div>
 
-                <button type="submit">Iniciar Sesión</button>
+                <button type="submit" class="btn-login">Iniciar Sesión</button>
             </form>
 
-            <p class="register">¿No tienes una cuenta? <a href="#">Regístrate aquí</a></p>
+            <p class="register">
+                ¿No tienes una cuenta?
+                <a asp-action="Register" asp-controller="Account">Regístrate aquí</a>
+            </p>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert-error">@ViewBag.Error</div>
+            }
         </div>
     </div>
 </body>

@@ -21,7 +21,7 @@ namespace TechStore.Controllers
         // GET: Venta
         public async Task<IActionResult> Index()
         {
-            var tiendaDbContext = _context.Venta.Include(v => v.IdUsuarioNavigation);
+            var tiendaDbContext = _context.Ventas.Include(v => v.IdUsuarioNavigation);
             return View(await tiendaDbContext.ToListAsync());
         }
 
@@ -33,7 +33,7 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var ventum = await _context.Venta
+            var ventum = await _context.Ventas
                 .Include(v => v.IdUsuarioNavigation)
                 .FirstOrDefaultAsync(m => m.IdVenta == id);
             if (ventum == null)
@@ -76,7 +76,7 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var ventum = await _context.Venta.FindAsync(id);
+            var ventum = await _context.Ventas.FindAsync(id);
             if (ventum == null)
             {
                 return NotFound();
@@ -129,7 +129,7 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var ventum = await _context.Venta
+            var ventum = await _context.Ventas
                 .Include(v => v.IdUsuarioNavigation)
                 .FirstOrDefaultAsync(m => m.IdVenta == id);
             if (ventum == null)
@@ -145,10 +145,10 @@ namespace TechStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(decimal id)
         {
-            var ventum = await _context.Venta.FindAsync(id);
+            var ventum = await _context.Ventas.FindAsync(id);
             if (ventum != null)
             {
-                _context.Venta.Remove(ventum);
+                _context.Ventas.Remove(ventum);
             }
 
             await _context.SaveChangesAsync();
@@ -157,7 +157,7 @@ namespace TechStore.Controllers
 
         private bool VentumExists(decimal id)
         {
-            return _context.Venta.Any(e => e.IdVenta == id);
+            return _context.Ventas.Any(e => e.IdVenta == id);
         }
     }
 }

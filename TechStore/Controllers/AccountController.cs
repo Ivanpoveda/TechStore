@@ -10,21 +10,24 @@ namespace TechStore.Controllers
     public class AccountController : Controller
     {
         private readonly TiendaDbContext _context;
-    
+
         public AccountController(TiendaDbContext context)
         {
             _context = context;
         }
 
+        // GET: Login
         [HttpGet]
         public IActionResult Login() => View();
 
+        // GET: AccessDenied
         [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
         }
 
+        // POST: Login
         [HttpPost]
         public async Task<IActionResult> Login(string correo, string contrasenia)
         {
@@ -50,6 +53,7 @@ namespace TechStore.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
+            // Redirigir según rol
             if (usuario.IdRolNavigation?.Nombre == "Administrador")
             {
                 return RedirectToAction("Dashboard", "Admin");
@@ -60,6 +64,32 @@ namespace TechStore.Controllers
             }
         }
 
+        // GET: Registro
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        // POST: Registro
+        [HttpPost]
+        public async Task<IActionResult> Register(Usuario nuevoUsuario)
+        {
+            // Asignamos rol Cliente automáticamente
+            var rolCliente = _context.Rols.FirstOrDefault(r => r.Nombre == "Cliente");
+            if (rolCliente != null)
+            {
+                nuevoUsuario.IdRol = rolCliente.IdRol;
+            }
+
+            _context.Usuarios.Add(nuevoUsuario);
+            await _context.SaveChangesAsync();
+
+            // Después de registrarse, lo mandamos al login
+            return RedirectToAction("Login");
+        }
+
+        // POST: Logout
         [HttpPost]
         public async Task<IActionResult> Logout()
         {

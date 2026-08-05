@@ -39,9 +39,15 @@ public partial class TiendaDbContext : DbContext
 
     public virtual DbSet<Rol> Rols { get; set; }
 
+    public virtual DbSet<Ventum> Ventas { get; set; }
+
+    public TiendaDbContext(DbSet<Ventum> ventas)
+    {
+        Ventas = ventas;
+    }
+
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
-    public virtual DbSet<Ventum> Venta { get; set; }
 
     public virtual DbSet<VisHistorialInventario> VisHistorialInventarios { get; set; }
 
