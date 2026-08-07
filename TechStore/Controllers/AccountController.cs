@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TechStore.Models;
+using Oracle.ManagedDataAccess.Client; // Necesario para OracleParameter
 
 namespace TechStore.Controllers
 {
@@ -71,23 +72,26 @@ namespace TechStore.Controllers
             return View();
         }
 
-        // POST: Registro
         [HttpPost]
         public async Task<IActionResult> Register(Usuario nuevoUsuario)
         {
-            // Asignamos rol Cliente automáticamente
-            var rolCliente = _context.Rols.FirstOrDefault(r => r.Nombre == "Cliente");
-            if (rolCliente != null)
+            var sql = @"BEGIN NEW_USUARIO(?, ?, ?, ?, ?, ?); END;";
+
+            var parameters = new[]
             {
-                nuevoUsuario.IdRol = rolCliente.IdRol;
-            }
+        new OracleParameter { Value = nuevoUsuario.Nombre },
+        new OracleParameter { Value = nuevoUsuario.Apellidos },
+        new OracleParameter { Value = nuevoUsuario.Correo },
+        new OracleParameter { Value = nuevoUsuario.Contrasenia },
+        new OracleParameter { Value = nuevoUsuario.Telefono ?? string.Empty },
+        new OracleParameter { Value = 2 } // Cliente
+    };
 
-            _context.Usuarios.Add(nuevoUsuario);
-            await _context.SaveChangesAsync();
+            await _context.Database.ExecuteSqlRawAsync(sql, parameters);
 
-            // Después de registrarse, lo mandamos al login
             return RedirectToAction("Login");
         }
+
 
         // POST: Logout
         [HttpPost]
@@ -98,5 +102,6 @@ namespace TechStore.Controllers
         }
     }
 }
+
 
 
