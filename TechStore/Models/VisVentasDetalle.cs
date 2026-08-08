@@ -5,15 +5,15 @@ namespace TechStore.Models;
 
 public partial class VisVentasDetalle
 {
-    public decimal IdVenta { get; set; }
+    public int IdVenta { get; set; }
 
-    public string? Cliente { get; set; }
+    public string Cliente { get; set; } = null!;
 
     public DateTime Fecha { get; set; }
 
     public string Producto { get; set; } = null!;
 
-    public decimal Cantidad { get; set; }
+    public int Cantidad { get; set; }
 
     public decimal PrecioUnitario { get; set; }
 

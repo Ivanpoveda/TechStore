@@ -5,7 +5,7 @@ namespace TechStore.Models;
 
 public partial class Usuario
 {
-    public decimal IdUsuario { get; set; }
+    public int IdUsuario { get; set; }
 
     public string Nombre { get; set; } = null!;
 
@@ -21,7 +21,7 @@ public partial class Usuario
 
     public string Estado { get; set; } = null!;
 
-    public decimal IdRol { get; set; }
+    public int IdRol { get; set; }
 
     public virtual ICollection<Carrito> Carritos { get; set; } = new List<Carrito>();
 

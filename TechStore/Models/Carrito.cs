@@ -5,13 +5,13 @@ namespace TechStore.Models;
 
 public partial class Carrito
 {
-    public decimal IdCarrito { get; set; }
+    public int IdCarrito { get; set; }
 
     public DateTime FechaCreacion { get; set; }
 
     public string Estado { get; set; } = null!;
 
-    public decimal IdUsuario { get; set; }
+    public int IdUsuario { get; set; }
 
     public virtual ICollection<DetalleCarrito> DetalleCarritos { get; set; } = new List<DetalleCarrito>();
 

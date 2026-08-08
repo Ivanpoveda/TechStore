@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace TechStore.Views.Account
+namespace TECHSTORE.Views.Account
 {
     public class LoginModel : PageModel
     {

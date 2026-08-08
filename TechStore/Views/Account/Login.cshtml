@@ -1,5 +1,4 @@
 ﻿@{
-    Layout = null;
     ViewData["Title"] = "Login";
 }
 
@@ -7,42 +6,58 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="~/css/styles.css" />
+    <title>@ViewData["Title"] - TechStore</title>
+    <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
-    <div class="login-wrapper">
+    <div class="container">
         <div class="login-card">
+            <div class="login-icon">
+                <i class="bi bi-person-circle"></i>
+            </div>
+
             <h2>Bienvenido a TechStore</h2>
             <p>Ingresa tus credenciales para acceder</p>
 
             <form asp-action="Login" method="post" class="login-form">
-                <label for="correo">Correo Electrónico</label>
-                <input type="email" id="correo" name="correo" placeholder="usuario@ejemplo.com" required />
+                <div class="form-group">
+                    <label for="correo">Correo Electrónico</label>
+                    <input type="email" id="correo" name="correo" placeholder="usuario@ejemplo.com" required />
+                </div>
 
-                <label for="contrasenia">Contraseña</label>
-                <input type="password" id="contrasenia" name="contrasenia" placeholder="••••••••" required />
-
-                <a href="#">¿Olvidaste tu clave?</a>
+                <div class="form-group">
+                    <label for="contrasenia">Contraseña</label>
+                    <input type="password" id="contrasenia" name="contrasenia" placeholder="••••••••" required />
+                    <a href="#" class="forgot">¿Olvidaste tu clave?</a>
+                </div>
 
                 <div class="remember">
                     <input type="checkbox" id="recordar" />
                     <label for="recordar">Recordar este dispositivo</label>
                 </div>
 
-                <button type="submit" class="btn-login">Iniciar Sesión</button>
+                <button type="submit">Iniciar Sesión</button>
             </form>
-
-            <p class="register">
-                ¿No tienes una cuenta?
-                <a asp-action="Register" asp-controller="Account">Regístrate aquí</a>
-            </p>
 
             @if (ViewBag.Error != null)
             {
-                <div class="alert-error">@ViewBag.Error</div>
+                <div class="alert alert-danger mt-3">
+                    @ViewBag.Error
+                </div>
             }
+
+            <p class="register">
+                ¿No tienes una cuenta?
+                <a asp-controller="Account"
+                   asp-action="Register">
+                    Regístrate aquí
+                </a>
+            </p>
+
         </div>
     </div>
 </body>
 </html>
+
+
+

@@ -5,7 +5,7 @@ namespace TechStore.Models;
 
 public partial class Marca
 {
-    public decimal IdMarca { get; set; }
+    public int IdMarca { get; set; }
 
     public string Nombre { get; set; } = null!;
 

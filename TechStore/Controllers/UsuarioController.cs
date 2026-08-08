@@ -11,9 +11,9 @@ namespace TechStore.Controllers
 {
     public class UsuarioController : Controller
     {
-        private readonly TiendaDbContext _context;
+        private readonly TechStoreContext _context;
 
-        public UsuarioController(TiendaDbContext context)
+        public UsuarioController(TechStoreContext context)
         {
             _context = context;
         }
@@ -21,12 +21,12 @@ namespace TechStore.Controllers
         // GET: Usuario
         public async Task<IActionResult> Index()
         {
-            var tiendaDbContext = _context.Usuarios.Include(u => u.IdRolNavigation);
-            return View(await tiendaDbContext.ToListAsync());
+            var techStoreContext = _context.Usuarios.Include(u => u.IdRolNavigation);
+            return View(await techStoreContext.ToListAsync());
         }
 
         // GET: Usuario/Details/5
-        public async Task<IActionResult> Details(decimal? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -69,7 +69,7 @@ namespace TechStore.Controllers
         }
 
         // GET: Usuario/Edit/5
-        public async Task<IActionResult> Edit(decimal? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
@@ -90,7 +90,7 @@ namespace TechStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(decimal id, [Bind("IdUsuario,Nombre,Apellidos,Correo,Contrasenia,Telefono,FechaRegistro,Estado,IdRol")] Usuario usuario)
+        public async Task<IActionResult> Edit(int id, [Bind("IdUsuario,Nombre,Apellidos,Correo,Contrasenia,Telefono,FechaRegistro,Estado,IdRol")] Usuario usuario)
         {
             if (id != usuario.IdUsuario)
             {
@@ -122,7 +122,7 @@ namespace TechStore.Controllers
         }
 
         // GET: Usuario/Delete/5
-        public async Task<IActionResult> Delete(decimal? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
@@ -143,7 +143,7 @@ namespace TechStore.Controllers
         // POST: Usuario/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(decimal id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario != null)
@@ -155,7 +155,7 @@ namespace TechStore.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool UsuarioExists(decimal id)
+        private bool UsuarioExists(int id)
         {
             return _context.Usuarios.Any(e => e.IdUsuario == id);
         }

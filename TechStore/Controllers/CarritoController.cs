@@ -1,163 +1,158 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TechStore.Models;
 
 namespace TechStore.Controllers
 {
     public class CarritoController : Controller
     {
-        private readonly TiendaDbContext _context;
+        private readonly TechStoreContext _context;
 
-        public CarritoController(TiendaDbContext context)
+        public CarritoController(TechStoreContext context)
         {
             _context = context;
         }
 
-        // GET: Carrito
+        // Mostrar carrito activo del usuario logueado
         public async Task<IActionResult> Index()
         {
-            var tiendaDbContext = _context.Carritos.Include(c => c.IdUsuarioNavigation);
-            return View(await tiendaDbContext.ToListAsync());
-        }
-
-        // GET: Carrito/Details/5
-        public async Task<IActionResult> Details(decimal? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+            var userId = int.Parse(userIdClaim);
 
             var carrito = await _context.Carritos
-                .Include(c => c.IdUsuarioNavigation)
-                .FirstOrDefaultAsync(m => m.IdCarrito == id);
+                .Include(c => c.DetalleCarritos)
+                .ThenInclude(dc => dc.IdProductoNavigation)
+                .FirstOrDefaultAsync(c => c.IdUsuario == userId && c.Estado == "Activo");
+
             if (carrito == null)
             {
-                return NotFound();
-            }
-
-            return View(carrito);
-        }
-
-        // GET: Carrito/Create
-        public IActionResult Create()
-        {
-            ViewData["IdUsuario"] = new SelectList(_context.Usuarios, "IdUsuario", "IdUsuario");
-            return View();
-        }
-
-        // POST: Carrito/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdCarrito,FechaCreacion,Estado,IdUsuario")] Carrito carrito)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(carrito);
+                carrito = new Carrito
+                {
+                    FechaCreacion = DateTime.Now,
+                    Estado = "Activo",
+                    IdUsuario = userId
+                };
+                _context.Carritos.Add(carrito);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["IdUsuario"] = new SelectList(_context.Usuarios, "IdUsuario", "IdUsuario", carrito.IdUsuario);
+
             return View(carrito);
         }
 
-        // GET: Carrito/Edit/5
-        public async Task<IActionResult> Edit(decimal? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var carrito = await _context.Carritos.FindAsync(id);
-            if (carrito == null)
-            {
-                return NotFound();
-            }
-            ViewData["IdUsuario"] = new SelectList(_context.Usuarios, "IdUsuario", "IdUsuario", carrito.IdUsuario);
-            return View(carrito);
-        }
-
-        // POST: Carrito/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // Agregar producto al carrito
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(decimal id, [Bind("IdCarrito,FechaCreacion,Estado,IdUsuario")] Carrito carrito)
+        public async Task<IActionResult> AgregarProducto(int productoId, int cantidad)
         {
-            if (id != carrito.IdCarrito)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(carrito);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CarritoExists(carrito.IdCarrito))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["IdUsuario"] = new SelectList(_context.Usuarios, "IdUsuario", "IdUsuario", carrito.IdUsuario);
-            return View(carrito);
-        }
-
-        // GET: Carrito/Delete/5
-        public async Task<IActionResult> Delete(decimal? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+            var userId = int.Parse(userIdClaim);
 
             var carrito = await _context.Carritos
-                .Include(c => c.IdUsuarioNavigation)
-                .FirstOrDefaultAsync(m => m.IdCarrito == id);
-            if (carrito == null)
+                .Include(c => c.DetalleCarritos)
+                .FirstOrDefaultAsync(c => c.IdUsuario == userId && c.Estado == "Activo");
+
+            var producto = await _context.Productos.FindAsync(productoId);
+            if (producto == null || producto.Stock < cantidad)
             {
-                return NotFound();
+                TempData["Error"] = "Stock insuficiente";
+                return RedirectToAction("Index");
             }
 
-            return View(carrito);
-        }
-
-        // POST: Carrito/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(decimal id)
-        {
-            var carrito = await _context.Carritos.FindAsync(id);
-            if (carrito != null)
+            var detalle = carrito.DetalleCarritos.FirstOrDefault(dc => dc.IdProducto == productoId);
+            if (detalle == null)
             {
-                _context.Carritos.Remove(carrito);
+                detalle = new DetalleCarrito
+                {
+                    IdCarrito = carrito.IdCarrito,
+                    IdProducto = productoId,
+                    Cantidad = cantidad
+                };
+                carrito.DetalleCarritos.Add(detalle);
+            }
+            else
+            {
+                detalle.Cantidad += cantidad;
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
 
-        private bool CarritoExists(decimal id)
+        // Quitar producto del carrito
+        [HttpPost]
+        public async Task<IActionResult> QuitarProducto(int productoId)
         {
-            return _context.Carritos.Any(e => e.IdCarrito == id);
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+            var userId = int.Parse(userIdClaim);
+
+            var carrito = await _context.Carritos
+                .Include(c => c.DetalleCarritos)
+                .FirstOrDefaultAsync(c => c.IdUsuario == userId && c.Estado == "Activo");
+
+            var detalle = carrito?.DetalleCarritos.FirstOrDefault(dc => dc.IdProducto == productoId);
+            if (detalle != null)
+            {
+                _context.DetalleCarritos.Remove(detalle);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        // Confirmar compra
+        [HttpPost]
+        public async Task<IActionResult> ConfirmarCompra()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+            var userId = int.Parse(userIdClaim);
+
+            var carrito = await _context.Carritos
+                .Include(c => c.DetalleCarritos)
+                .ThenInclude(dc => dc.IdProductoNavigation)
+                .FirstOrDefaultAsync(c => c.IdUsuario == userId && c.Estado == "Activo");
+
+            if (carrito == null || !carrito.DetalleCarritos.Any())
+            {
+                TempData["Error"] = "El carrito está vacío";
+                return RedirectToAction("Index");
+            }
+
+            // Crear venta
+            var venta = new Ventum
+            {
+                IdUsuario = userId,
+                Fecha = DateTime.Now, // Usa la propiedad real de tu modelo Ventum
+                Total = carrito.DetalleCarritos.Sum(dc => dc.Cantidad * dc.IdProductoNavigation.Precio)
+            };
+            _context.Venta.Add(venta);
+            await _context.SaveChangesAsync();
+
+            // Crear detalle de venta y actualizar stock
+            foreach (var item in carrito.DetalleCarritos)
+            {
+                var detalleVenta = new DetalleVentum
+                {
+                    IdVenta = venta.IdVenta,
+                    IdProducto = item.IdProducto,
+                    Cantidad = item.Cantidad,
+                    PrecioUnitario = item.IdProductoNavigation.Precio
+                };
+                _context.DetalleVenta.Add(detalleVenta);
+
+                item.IdProductoNavigation.Stock -= item.Cantidad;
+            }
+
+            carrito.Estado = "Finalizado";
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Compra realizada con éxito";
+            return RedirectToAction("Index", "Venta");
         }
     }
 }
+
+

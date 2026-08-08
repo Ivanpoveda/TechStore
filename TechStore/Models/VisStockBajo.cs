@@ -5,13 +5,13 @@ namespace TechStore.Models;
 
 public partial class VisStockBajo
 {
-    public decimal IdProducto { get; set; }
+    public int IdProducto { get; set; }
 
     public string Nombre { get; set; } = null!;
 
-    public decimal Stock { get; set; }
+    public int Stock { get; set; }
 
-    public decimal StockMin { get; set; }
+    public int StockMin { get; set; }
 
     public string Categoria { get; set; } = null!;
 

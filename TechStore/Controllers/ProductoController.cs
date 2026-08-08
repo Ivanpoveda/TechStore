@@ -11,9 +11,9 @@ namespace TechStore.Controllers
 {
     public class ProductoController : Controller
     {
-        private readonly TiendaDbContext _context;
+        private readonly TechStoreContext _context;
 
-        public ProductoController(TiendaDbContext context)
+        public ProductoController(TechStoreContext context)
         {
             _context = context;
         }
@@ -21,12 +21,12 @@ namespace TechStore.Controllers
         // GET: Producto
         public async Task<IActionResult> Index()
         {
-            var tiendaDbContext = _context.Productos.Include(p => p.IdCategoriaNavigation).Include(p => p.IdMarcaNavigation);
-            return View(await tiendaDbContext.ToListAsync());
+            var techStoreContext = _context.Productos.Include(p => p.IdCategoriaNavigation).Include(p => p.IdMarcaNavigation);
+            return View(await techStoreContext.ToListAsync());
         }
 
         // GET: Producto/Details/5
-        public async Task<IActionResult> Details(decimal? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -72,7 +72,7 @@ namespace TechStore.Controllers
         }
 
         // GET: Producto/Edit/5
-        public async Task<IActionResult> Edit(decimal? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
@@ -94,7 +94,7 @@ namespace TechStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(decimal id, [Bind("IdProducto,Nombre,Descripcion,Precio,Stock,StockMin,Estado,IdCategoria,IdMarca")] Producto producto)
+        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,Nombre,Descripcion,Precio,Stock,StockMin,Estado,IdCategoria,IdMarca")] Producto producto)
         {
             if (id != producto.IdProducto)
             {
@@ -127,7 +127,7 @@ namespace TechStore.Controllers
         }
 
         // GET: Producto/Delete/5
-        public async Task<IActionResult> Delete(decimal? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
@@ -149,7 +149,7 @@ namespace TechStore.Controllers
         // POST: Producto/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(decimal id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
             if (producto != null)
@@ -161,7 +161,7 @@ namespace TechStore.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductoExists(decimal id)
+        private bool ProductoExists(int id)
         {
             return _context.Productos.Any(e => e.IdProducto == id);
         }

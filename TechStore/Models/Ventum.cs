@@ -5,7 +5,7 @@ namespace TechStore.Models;
 
 public partial class Ventum
 {
-    public decimal IdVenta { get; set; }
+    public int IdVenta { get; set; }
 
     public DateTime Fecha { get; set; }
 
@@ -17,7 +17,7 @@ public partial class Ventum
 
     public string Estado { get; set; } = null!;
 
-    public decimal IdUsuario { get; set; }
+    public int IdUsuario { get; set; }
 
     public virtual ICollection<DetalleVentum> DetalleVenta { get; set; } = new List<DetalleVentum>();
 

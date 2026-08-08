@@ -5,7 +5,7 @@ namespace TechStore.Models;
 
 public partial class Garantium
 {
-    public decimal IdGarantia { get; set; }
+    public int IdGarantia { get; set; }
 
     public DateTime FechaSolicitud { get; set; }
 
@@ -17,7 +17,7 @@ public partial class Garantium
 
     public DateTime? FechaResolucion { get; set; }
 
-    public decimal IdDetalleVenta { get; set; }
+    public int IdDetalleVenta { get; set; }
 
     public virtual DetalleVentum IdDetalleVentaNavigation { get; set; } = null!;
 }

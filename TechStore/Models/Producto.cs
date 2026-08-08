@@ -5,7 +5,7 @@ namespace TechStore.Models;
 
 public partial class Producto
 {
-    public decimal IdProducto { get; set; }
+    public int IdProducto { get; set; }
 
     public string Nombre { get; set; } = null!;
 
@@ -13,15 +13,15 @@ public partial class Producto
 
     public decimal Precio { get; set; }
 
-    public decimal Stock { get; set; }
+    public int Stock { get; set; }
 
-    public decimal StockMin { get; set; }
+    public int StockMin { get; set; }
 
     public string Estado { get; set; } = null!;
 
-    public decimal IdCategoria { get; set; }
+    public int IdCategoria { get; set; }
 
-    public decimal IdMarca { get; set; }
+    public int IdMarca { get; set; }
 
     public virtual ICollection<DetalleCarrito> DetalleCarritos { get; set; } = new List<DetalleCarrito>();
 

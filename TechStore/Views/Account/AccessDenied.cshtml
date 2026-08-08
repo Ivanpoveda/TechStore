@@ -1,7 +1,28 @@
 ﻿@{
-    ViewData["Title"] = "Acceso Denegado";
+    ViewData["Title"] = "Acceso denegado";
 }
 
-<h2>Acceso Denegado</h2>
-<p>No tienes permisos para acceder a esta sección.</p>
-<a asp-controller="Account" asp-action="Login">Volver al Login</a>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - TechStore</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="login-icon">
+                <i class="bi bi-lock-fill"></i>
+            </div>
+
+            <h2 class="text-danger">Acceso denegado</h2>
+            <p>No tienes permisos para acceder a esta sección.</p>
+
+            <a asp-action="Login" asp-controller="Account" class="btn btn-primary">
+                Volver al inicio de sesión
+            </a>
+        </div>
+    </div>
+</body>
+</html>

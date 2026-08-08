@@ -11,9 +11,9 @@ namespace TechStore.Controllers
 {
     public class VentaController : Controller
     {
-        private readonly TiendaDbContext _context;
+        private readonly TechStoreContext _context;
 
-        public VentaController(TiendaDbContext context)
+        public VentaController(TechStoreContext context)
         {
             _context = context;
         }
@@ -21,19 +21,19 @@ namespace TechStore.Controllers
         // GET: Venta
         public async Task<IActionResult> Index()
         {
-            var tiendaDbContext = _context.Ventas.Include(v => v.IdUsuarioNavigation);
-            return View(await tiendaDbContext.ToListAsync());
+            var techStoreContext = _context.Venta.Include(v => v.IdUsuarioNavigation);
+            return View(await techStoreContext.ToListAsync());
         }
 
         // GET: Venta/Details/5
-        public async Task<IActionResult> Details(decimal? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var ventum = await _context.Ventas
+            var ventum = await _context.Venta
                 .Include(v => v.IdUsuarioNavigation)
                 .FirstOrDefaultAsync(m => m.IdVenta == id);
             if (ventum == null)
@@ -69,14 +69,14 @@ namespace TechStore.Controllers
         }
 
         // GET: Venta/Edit/5
-        public async Task<IActionResult> Edit(decimal? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var ventum = await _context.Ventas.FindAsync(id);
+            var ventum = await _context.Venta.FindAsync(id);
             if (ventum == null)
             {
                 return NotFound();
@@ -90,7 +90,7 @@ namespace TechStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(decimal id, [Bind("IdVenta,Fecha,Impuesto,Descuento,Total,Estado,IdUsuario")] Ventum ventum)
+        public async Task<IActionResult> Edit(int id, [Bind("IdVenta,Fecha,Impuesto,Descuento,Total,Estado,IdUsuario")] Ventum ventum)
         {
             if (id != ventum.IdVenta)
             {
@@ -122,14 +122,14 @@ namespace TechStore.Controllers
         }
 
         // GET: Venta/Delete/5
-        public async Task<IActionResult> Delete(decimal? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var ventum = await _context.Ventas
+            var ventum = await _context.Venta
                 .Include(v => v.IdUsuarioNavigation)
                 .FirstOrDefaultAsync(m => m.IdVenta == id);
             if (ventum == null)
@@ -143,21 +143,21 @@ namespace TechStore.Controllers
         // POST: Venta/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(decimal id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var ventum = await _context.Ventas.FindAsync(id);
+            var ventum = await _context.Venta.FindAsync(id);
             if (ventum != null)
             {
-                _context.Ventas.Remove(ventum);
+                _context.Venta.Remove(ventum);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool VentumExists(decimal id)
+        private bool VentumExists(int id)
         {
-            return _context.Ventas.Any(e => e.IdVenta == id);
+            return _context.Venta.Any(e => e.IdVenta == id);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace TechStore.Models;
 
 public partial class CompraProveedor
 {
-    public decimal IdCompra { get; set; }
+    public int IdCompra { get; set; }
 
     public DateTime FechaCompra { get; set; }
 
@@ -13,7 +13,7 @@ public partial class CompraProveedor
 
     public string Estado { get; set; } = null!;
 
-    public decimal IdProveedor { get; set; }
+    public int IdProveedor { get; set; }
 
     public virtual ICollection<DetalleCompra> DetalleCompras { get; set; } = new List<DetalleCompra>();
 

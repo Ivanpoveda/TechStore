@@ -5,7 +5,7 @@ namespace TechStore.Models;
 
 public partial class Proveedor
 {
-    public decimal IdProveedor { get; set; }
+    public int IdProveedor { get; set; }
 
     public string Nombre { get; set; } = null!;
 
