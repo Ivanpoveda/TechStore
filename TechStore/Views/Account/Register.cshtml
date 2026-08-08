@@ -1,5 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Registro";
+    Layout = null; 
 }
 
 <!DOCTYPE html>
@@ -12,14 +13,12 @@
 <body>
     <div class="container">
         <div class="login-card">
-            <div class="login-icon">
-                <i class="bi bi-person-plus-fill"></i>
-            </div>
-
-            <h2>Crear cuenta</h2>
+            <h2>Registro de Usuario</h2>
             <p>Completa tus datos para registrarte</p>
 
             <form asp-action="Register" method="post" class="login-form">
+                @Html.AntiForgeryToken()
+
                 <div class="form-group">
                     <label for="Nombre">Nombre</label>
                     <input type="text" id="Nombre" name="Nombre" placeholder="Ingrese su nombre" required />
@@ -57,7 +56,7 @@
 
             <p class="register">
                 ¿Ya tienes cuenta?
-                <a asp-action="Login" asp-controller="Account">Inicia sesión aquí</a>
+                <a href="/Account/Login">Inicia sesión aquí</a>
             </p>
         </div>
     </div>

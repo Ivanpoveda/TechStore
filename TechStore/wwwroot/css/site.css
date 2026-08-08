@@ -13,7 +13,7 @@ body {
     min-height: 100vh;
 }
 
-/* Tarjeta de login */
+/* Tarjeta (login y registro) */
 .login-card {
     background: #fff;
     padding: 40px;
@@ -23,7 +23,7 @@ body {
     text-align: center;
 }
 
-/* Icono superior */
+/* Icono superior opcional */
 .login-icon {
     font-size: 3rem;
     color: #007bff;
@@ -52,6 +52,13 @@ body {
     text-align: left;
 }
 
+    .form-group label {
+        font-size: 0.9rem;
+        color: #444;
+        margin-bottom: 5px;
+        display: block;
+    }
+
     .form-group input {
         width: 100%;
         padding: 12px;
@@ -60,6 +67,7 @@ body {
         font-size: 1rem;
     }
 
+/* Enlace recuperar contraseña */
 .forgot {
     font-size: 0.85rem;
     color: #007bff;
@@ -103,12 +111,11 @@ button {
     font-size: 0.9rem;
     color: #555;
 }
-
-    .register a {
+.register a {
         color: #007bff;
         text-decoration: none;
-    }
+}
 
-        .register a:hover {
-            text-decoration: underline;
-        }
+.register a:hover {
+        text-decoration: underline;
+}

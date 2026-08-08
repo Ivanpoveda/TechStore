@@ -70,13 +70,18 @@ namespace TechStore.Controllers
                 principal
             );
 
-            // Redireccionar según el rol
-            if (usuario.IdRolNavigation?.Nombre == "Administrador")
+            if (usuario.IdRol == 1)
             {
                 return RedirectToAction("Dashboard", "Admin");
             }
-
-            return RedirectToAction("Catalogo", "Cliente");
+            else if (usuario.IdRol == 2)
+            {
+                return RedirectToAction("Catalogo", "Cliente");
+            }
+            else
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
         }
 
 
@@ -96,29 +101,10 @@ namespace TechStore.Controllers
             string hashContrasenia =
                 HashPassword(nuevoUsuario.Contrasenia);
 
-            var sql = @"
-                INSERT INTO Usuario
-                (
-                    Nombre,
-                    Apellidos,
-                    Correo,
-                    Contrasenia,
-                    Telefono,
-                    FechaRegistro,
-                    Estado,
-                    IdRol
-                )
-                VALUES
-                (
-                    @Nombre,
-                    @Apellidos,
-                    @Correo,
-                    @Contrasenia,
-                    @Telefono,
-                    @FechaRegistro,
-                    @Estado,
-                    @IdRol
-                )";
+            var sql = @"INSERT INTO USUARIO (NOMBRE, APELLIDOS, CORREO, CONTRASENIA, TELEFONO, FECHA_REGISTRO, ESTADO, ID_ROL)
+VALUES (@Nombre, @Apellidos, @Correo, @Contrasenia, @Telefono, @FechaRegistro, @Estado, @IdRol);";
+
+
 
             var parameters = new[]
             {
