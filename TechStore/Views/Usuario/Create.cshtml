@@ -1,57 +1,114 @@
 @model TechStore.Models.Usuario
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Crear Usuario";
 }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TechStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen p-6">
 
-<h1>Create</h1>
+    <div class="max-w-lg mx-auto bg-white rounded-xl shadow p-6">
 
-<h4>Usuario</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
+        <h1 class="text-2xl font-bold text-slate-900 mb-6">
+            Crear Usuario
+        </h1>
+
+        <form action="/Usuario/Create" method="post" class="space-y-4">
+
+            @Html.AntiForgeryToken()
+
+            <div>
+                <label class="font-semibold text-slate-600">
+                    Nombre
+                </label>
+
+                <input type="text"
+                       name="Nombre"
+                       required
+                       class="w-full border border-slate-300 rounded-lg px-3 py-2 mt-1" />
             </div>
-            <div class="form-group">
-                <label asp-for="Apellidos" class="control-label"></label>
-                <input asp-for="Apellidos" class="form-control" />
-                <span asp-validation-for="Apellidos" class="text-danger"></span>
+
+            <div>
+                <label class="font-semibold text-slate-600">
+                    Apellidos
+                </label>
+
+                <input type="text"
+                       name="Apellidos"
+                       required
+                       class="w-full border border-slate-300 rounded-lg px-3 py-2 mt-1" />
             </div>
-            <div class="form-group">
-                <label asp-for="Correo" class="control-label"></label>
-                <input asp-for="Correo" class="form-control" />
-                <span asp-validation-for="Correo" class="text-danger"></span>
+
+            <div>
+                <label class="font-semibold text-slate-600">
+                    Correo
+                </label>
+
+                <input type="email"
+                       name="Correo"
+                       required
+                       class="w-full border border-slate-300 rounded-lg px-3 py-2 mt-1" />
             </div>
-            <div class="form-group">
-                <label asp-for="Contrasenia" class="control-label"></label>
-                <input asp-for="Contrasenia" class="form-control" />
-                <span asp-validation-for="Contrasenia" class="text-danger"></span>
+
+            <div>
+                <label class="font-semibold text-slate-600">
+                    Contraseña
+                </label>
+
+                <input type="password"
+                       name="Contrasenia"
+                       required
+                       class="w-full border border-slate-300 rounded-lg px-3 py-2 mt-1" />
             </div>
-            <div class="form-group">
-                <label asp-for="Telefono" class="control-label"></label>
-                <input asp-for="Telefono" class="form-control" />
-                <span asp-validation-for="Telefono" class="text-danger"></span>
+
+            <div>
+                <label class="font-semibold text-slate-600">
+                    Teléfono
+                </label>
+
+                <input type="text"
+                       name="Telefono"
+                       class="w-full border border-slate-300 rounded-lg px-3 py-2 mt-1" />
             </div>
-            <div class="form-group">
-                <label asp-for="IdRol" class="control-label"></label>
-                <select asp-for="IdRol" class ="form-control" asp-items="ViewBag.IdRol"></select>
+
+            <div>
+                <label class="font-semibold text-slate-600">
+                    Rol
+                </label>
+
+                <select name="IdRol"
+                        required
+                        class="w-full border border-slate-300 rounded-lg px-3 py-2 mt-1">
+
+                    <option value="1">Administrador</option>
+                    <option value="2">Cliente</option>
+
+                </select>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+
+            <div class="flex justify-end space-x-3 mt-6">
+
+                <a href="/Usuario/Index"
+                   class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition">
+                    Cancelar
+                </a>
+
+                <button type="submit"
+                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:bg-indigo-700 transition">
+                    Guardar
+                </button>
+
             </div>
+
         </form>
+
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+</body>
+</html>

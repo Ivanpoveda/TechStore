@@ -1,77 +1,375 @@
 @model IEnumerable<TechStore.Models.Producto>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Productos";
 }
 
-<h1>Index</h1>
+<!DOCTYPE html>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Descripcion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Precio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Stock)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StockMin)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Estado)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdCategoriaNavigation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdMarcaNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Descripcion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Precio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Stock)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StockMin)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Estado)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdCategoriaNavigation.IdCategoria)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdMarcaNavigation.IdMarca)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdProducto">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdProducto">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdProducto">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+    <div class="flex flex-col md:flex-row min-h-screen">
+
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 flex flex-col justify-between shrink-0">
+
+            <div>
+
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
+                        TS
+                    </div>
+
+                    <span class="font-bold text-lg tracking-wide">
+                        TechStore Admin
+                    </span>
+                </div>
+
+                <nav class="space-y-1">
+
+                    <a href="/Admin/Dashboard"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                        Dashboard
+                    </a>
+
+                    <a href="/Usuario/Index"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                        Usuarios
+                    </a>
+
+                    <a href="/Producto/Index"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        bg-indigo-600 text-white font-medium">
+                        Productos
+                    </a>
+
+                    <a href="/Venta/Index"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                        Ventas
+                    </a>
+
+                    <a href="/Garantia/Index"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                        Garantías
+                    </a>
+
+                    <a href="/Proveedor/Index"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                        Proveedores
+                    </a>
+
+                </nav>
+
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 flex items-center justify-between mt-6">
+
+                <div class="text-xs">
+                    <p class="font-semibold text-white">
+                        Administrador
+                    </p>
+
+                    <p class="text-slate-400">
+                        admin@techstore.com
+                    </p>
+                </div>
+
+                <a href="/Account/Login"
+                   class="text-xs text-rose-400 hover:underline hover:text-rose-300 transition">
+                    Salir
+                </a>
+
+            </div>
+
+        </aside>
+
+
+        <!-- CONTENIDO -->
+        <main class="flex-1 p-6 md:p-8 overflow-auto">
+
+            <div class="max-w-7xl mx-auto">
+
+                <div class="bg-white rounded-xl shadow p-6">
+
+                    <!-- ENCABEZADO -->
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+
+                        <div>
+                            <h1 class="text-2xl font-bold text-slate-900">
+                                Productos
+                            </h1>
+
+                            <p class="text-slate-500 mt-1">
+                                Catálogo de productos registrados
+                            </p>
+                        </div>
+
+                        <a href="/Producto/Create"
+                           class="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow
+                            hover:bg-indigo-700 transition text-center">
+                            + Crear Producto
+                        </a>
+
+                    </div>
+
+
+                    <!-- MENSAJE ÉXITO -->
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="mb-5 bg-green-50 border border-green-200
+                            text-green-700 px-4 py-3 rounded-lg">
+
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold">✓</span>
+
+                                <span>
+                                    @TempData["Success"]
+                                </span>
+                            </div>
+
+                        </div>
+                    }
+
+
+                    <!-- MENSAJE ERROR -->
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="mb-5 bg-red-50 border border-red-200
+                            text-red-700 px-4 py-3 rounded-lg">
+
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold">!</span>
+
+                                <span>
+                                    @TempData["Error"]
+                                </span>
+                            </div>
+
+                        </div>
+                    }
+
+
+                    @if (Model.Any())
+                    {
+                        <div class="overflow-x-auto">
+
+                            <table class="w-full">
+
+                                <thead>
+
+                                    <tr class="border-b border-slate-200">
+
+                                        <th class="text-left py-3 px-4 font-semibold text-slate-600">
+                                            Producto
+                                        </th>
+
+                                        <th class="text-left py-3 px-4 font-semibold text-slate-600">
+                                            Precio
+                                        </th>
+
+                                        <th class="text-left py-3 px-4 font-semibold text-slate-600">
+                                            Stock
+                                        </th>
+
+                                        <th class="text-left py-3 px-4 font-semibold text-slate-600">
+                                            Categoría
+                                        </th>
+
+                                        <th class="text-left py-3 px-4 font-semibold text-slate-600">
+                                            Marca
+                                        </th>
+
+                                        <th class="text-left py-3 px-4 font-semibold text-slate-600">
+                                            Estado
+                                        </th>
+
+                                        <th class="text-center py-3 px-4 font-semibold text-slate-600">
+                                            Acciones
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var producto in Model)
+                                    {
+                                        <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+
+                                            <!-- PRODUCTO -->
+                                            <td class="py-4 px-4 text-slate-900">
+
+                                                <div class="font-semibold">
+                                                    @producto.Nombre
+                                                </div>
+
+                                                <div class="text-xs text-slate-400 mt-1">
+                                                    ID: @producto.IdProducto
+                                                </div>
+
+                                            </td>
+
+
+                                            <!-- PRECIO -->
+                                            <td class="py-4 px-4 text-slate-700 font-medium">
+
+                                                ₡@producto.Precio.ToString("N2")
+
+                                            </td>
+
+
+                                            <!-- STOCK -->
+                                            <td class="py-4 px-4">
+
+                                                @if (producto.Stock <= producto.StockMin)
+                                                {
+                                                    <span class="inline-flex px-3 py-1 rounded-full
+                                                        text-sm bg-red-100 text-red-700">
+
+                                                        @producto.Stock unidades
+
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="inline-flex px-3 py-1 rounded-full
+                                                        text-sm bg-green-100 text-green-700">
+
+                                                        @producto.Stock unidades
+
+                                                    </span>
+                                                }
+
+                                            </td>
+
+
+                                            <!-- CATEGORIA -->
+                                            <td class="py-4 px-4 text-slate-600">
+
+                                                @(producto.IdCategoriaNavigation?.Nombre ?? "Sin categoría")
+
+                                            </td>
+
+
+                                            <!-- MARCA -->
+                                            <td class="py-4 px-4 text-slate-600">
+
+                                                @(producto.IdMarcaNavigation?.Nombre ?? "Sin marca")
+
+                                            </td>
+
+
+                                            <!-- ESTADO -->
+                                            <td class="py-4 px-4">
+
+                                                @if (producto.Estado == "Activo")
+                                                {
+                                                    <span class="inline-flex px-3 py-1 rounded-full
+                                                        text-sm bg-green-100 text-green-700">
+                                                        Activo
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="inline-flex px-3 py-1 rounded-full
+                                                        text-sm bg-red-100 text-red-700">
+                                                        @producto.Estado
+                                                    </span>
+                                                }
+
+                                            </td>
+
+
+                                            <!-- ACCIONES -->
+                                            <td class="py-4 px-4">
+
+                                                <div class="flex justify-center items-center gap-2">
+
+                                                    <a href="/Producto/Details/@producto.IdProducto"
+                                                       class="px-3 py-2 rounded-lg border
+                                                        border-slate-300 text-slate-600
+                                                        hover:bg-slate-100 transition">
+                                                        Ver
+                                                    </a>
+
+                                                    <a href="/Producto/Edit/@producto.IdProducto"
+                                                       class="bg-indigo-600 text-white px-3 py-2
+                                                        rounded-lg shadow hover:bg-indigo-700 transition">
+                                                        Editar
+                                                    </a>
+
+                                                    <a href="/Producto/Delete/@producto.IdProducto"
+                                                       class="bg-red-600 text-white px-3 py-2
+                                                        rounded-lg shadow hover:bg-red-700 transition">
+                                                        Eliminar
+                                                    </a>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-12">
+
+                            <div class="w-16 h-16 mx-auto mb-4 bg-slate-100
+                                rounded-full flex items-center justify-center">
+
+                                <span class="text-2xl">
+                                    📦
+                                </span>
+
+                            </div>
+
+                            <h2 class="text-lg font-semibold text-slate-900 mb-2">
+                                No hay productos registrados
+                            </h2>
+
+                            <p class="text-slate-500 mb-5">
+                                Actualmente no existen productos en el catálogo.
+                            </p>
+
+                            <a href="/Producto/Create"
+                               class="bg-indigo-600 text-white px-4 py-2
+                                rounded-lg shadow hover:bg-indigo-700 transition">
+                                Crear primer producto
+                            </a>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+</body>
+
+</html>

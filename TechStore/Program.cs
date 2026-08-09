@@ -4,8 +4,9 @@ using TechStore.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC
-builder.Services.AddControllersWithViews();
+// MVC con runtime compilation
+builder.Services.AddControllersWithViews()
+    .AddRazorRuntimeCompilation();
 
 // Conexión a la base TechStore
 builder.Services.AddDbContext<TechStoreContext>(options =>
@@ -20,25 +21,28 @@ builder.Services.AddAuthentication(
 )
 .AddCookie(options =>
 {
-    // Página de inicio de sesión
     options.LoginPath = "/Account/Login";
-
-    // Página de acceso denegado
     options.AccessDeniedPath = "/Account/AccessDenied";
-
-    // Ruta para cerrar sesión
     options.LogoutPath = "/Account/Logout";
 });
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+// Configuración del pipeline
+if (app.Environment.IsDevelopment())
 {
+    // 🔎 Mostrar errores detallados en desarrollo
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    // ⚠️ Manejo de errores en producción
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.UseRouting();
 
@@ -46,13 +50,11 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
 // Ruta por defecto
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}"
-)
-.WithStaticAssets();
+);
 
 app.Run();
+

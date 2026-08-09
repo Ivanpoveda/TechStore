@@ -1,69 +1,276 @@
 @model TechStore.Models.Producto
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Producto";
 }
 
-<h1>Edit</h1>
+<!DOCTYPE html>
 
-<h4>Producto</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdProducto" />
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TechStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+
+            <div class="flex items-center gap-3 mb-8">
+
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
+                    TS
+                </div>
+
+                <span class="font-bold text-lg tracking-wide">
+                    TechStore Admin
+                </span>
+
             </div>
-            <div class="form-group">
-                <label asp-for="Descripcion" class="control-label"></label>
-                <input asp-for="Descripcion" class="form-control" />
-                <span asp-validation-for="Descripcion" class="text-danger"></span>
+
+            <nav class="space-y-1">
+
+                <a href="/Admin/Dashboard"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Dashboard
+                </a>
+
+                <a href="/Usuario/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Usuarios
+                </a>
+
+                <a href="/Producto/Index"
+                   class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium">
+                    Productos
+                </a>
+
+                <a href="/Venta/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Ventas
+                </a>
+
+                <a href="/Garantia/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Garantías
+                </a>
+
+                <a href="/Proveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Proveedores
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- CONTENIDO -->
+        <main class="flex-1 p-6 md:p-8">
+
+            <div class="max-w-2xl mx-auto">
+
+                <div class="bg-white rounded-xl shadow p-6">
+
+                    <h1 class="text-2xl font-bold text-slate-900 mb-2">
+                        Editar Producto
+                    </h1>
+
+                    <p class="text-slate-500 mb-6">
+                        Modifica la información del producto.
+                    </p>
+
+
+                    <form action="/Producto/Edit" method="post" class="space-y-5">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="IdProducto"
+                               value="@Model.IdProducto" />
+
+
+                        <!-- NOMBRE -->
+                        <div>
+
+                            <label class="block font-semibold text-slate-600 mb-1">
+                                Nombre
+                            </label>
+
+                            <input type="text"
+                                   name="Nombre"
+                                   value="@Model.Nombre"
+                                   maxlength="80"
+                                   required
+                                   class="w-full border border-slate-300 rounded-lg px-3 py-2
+                            focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+
+                        </div>
+
+
+                        <!-- DESCRIPCION -->
+                        <div>
+
+                            <label class="block font-semibold text-slate-600 mb-1">
+                                Descripción
+                            </label>
+
+                            <textarea name="Descripcion"
+                                      rows="4"
+                                      maxlength="300"
+                                      class="w-full border border-slate-300 rounded-lg px-3 py-2
+                            focus:outline-none focus:ring-2 focus:ring-indigo-500">@Model.Descripcion</textarea>
+
+                        </div>
+
+
+                        <!-- PRECIO -->
+                        <div>
+
+                            <label class="block font-semibold text-slate-600 mb-1">
+                                Precio
+                            </label>
+
+                            <input type="number"
+                                   name="Precio"
+                                   value="@Model.Precio"
+                                   min="0"
+                                   step="0.01"
+                                   required
+                                   class="w-full border border-slate-300 rounded-lg px-3 py-2
+                            focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+
+                        </div>
+
+
+                        <!-- STOCK MINIMO -->
+                        <div>
+
+                            <label class="block font-semibold text-slate-600 mb-1">
+                                Stock mínimo
+                            </label>
+
+                            <input type="number"
+                                   name="StockMin"
+                                   value="@Model.StockMin"
+                                   min="0"
+                                   required
+                                   class="w-full border border-slate-300 rounded-lg px-3 py-2
+                            focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+
+                        </div>
+
+
+                        <!-- ESTADO -->
+                        <div>
+
+                            <label class="block font-semibold text-slate-600 mb-1">
+                                Estado
+                            </label>
+
+                            <select name="Estado"
+                                    required
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2
+                                focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                                <option value="Activo"
+                                        selected="@(Model.Estado == "Activo")">
+                                    Activo
+                                </option>
+
+                                <option value="Inactivo"
+                                        selected="@(Model.Estado == "Inactivo")">
+                                    Inactivo
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- CATEGORIA -->
+                        <div>
+
+                            <label class="block font-semibold text-slate-600 mb-1">
+                                Categoría
+                            </label>
+
+                            <select name="IdCategoria"
+                                    required
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2
+                                focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                                @foreach (var item in (SelectList)ViewData["IdCategoria"])
+                                {
+                                    <option value="@item.Value"
+                                            selected="@(item.Value == Model.IdCategoria.ToString())">
+                                        @item.Text
+                                    </option>
+                                }
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- MARCA -->
+                        <div>
+
+                            <label class="block font-semibold text-slate-600 mb-1">
+                                Marca
+                            </label>
+
+                            <select name="IdMarca"
+                                    required
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2
+                                focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                                @foreach (var item in (SelectList)ViewData["IdMarca"])
+                                {
+                                    <option value="@item.Value"
+                                            selected="@(item.Value == Model.IdMarca.ToString())">
+                                        @item.Text
+                                    </option>
+                                }
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- BOTONES -->
+                        <div class="flex justify-end gap-3 pt-4">
+
+                            <a href="/Producto/Index"
+                               class="px-4 py-2 rounded-lg border border-slate-300
+                                text-slate-600 hover:bg-slate-100 transition">
+                                Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="bg-indigo-600 text-white px-5 py-2
+                                rounded-lg shadow hover:bg-indigo-700 transition">
+                                Guardar Cambios
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
             </div>
-            <div class="form-group">
-                <label asp-for="Precio" class="control-label"></label>
-                <input asp-for="Precio" class="form-control" />
-                <span asp-validation-for="Precio" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Stock" class="control-label"></label>
-                <input asp-for="Stock" class="form-control" />
-                <span asp-validation-for="Stock" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StockMin" class="control-label"></label>
-                <input asp-for="StockMin" class="form-control" />
-                <span asp-validation-for="StockMin" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Estado" class="control-label"></label>
-                <input asp-for="Estado" class="form-control" />
-                <span asp-validation-for="Estado" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdCategoria" class="control-label"></label>
-                <select asp-for="IdCategoria" class="form-control" asp-items="ViewBag.IdCategoria"></select>
-                <span asp-validation-for="IdCategoria" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdMarca" class="control-label"></label>
-                <select asp-for="IdMarca" class="form-control" asp-items="ViewBag.IdMarca"></select>
-                <span asp-validation-for="IdMarca" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+
+        </main>
+
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+</body>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+</html>

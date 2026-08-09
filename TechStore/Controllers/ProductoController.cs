@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using TechStore.Models;
 
 namespace TechStore.Controllers
@@ -18,14 +18,22 @@ namespace TechStore.Controllers
             _context = context;
         }
 
+        // =========================================================
         // GET: Producto
+        // =========================================================
         public async Task<IActionResult> Index()
         {
-            var techStoreContext = _context.Productos.Include(p => p.IdCategoriaNavigation).Include(p => p.IdMarcaNavigation);
-            return View(await techStoreContext.ToListAsync());
+            var productos = _context.Productos
+                .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.IdMarcaNavigation);
+
+            return View(await productos.ToListAsync());
         }
 
+
+        // =========================================================
         // GET: Producto/Details/5
+        // =========================================================
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,7 +44,8 @@ namespace TechStore.Controllers
             var producto = await _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
                 .Include(p => p.IdMarcaNavigation)
-                .FirstOrDefaultAsync(m => m.IdProducto == id);
+                .FirstOrDefaultAsync(p => p.IdProducto == id);
+
             if (producto == null)
             {
                 return NotFound();
@@ -45,33 +54,95 @@ namespace TechStore.Controllers
             return View(producto);
         }
 
+
+        // =========================================================
         // GET: Producto/Create
+        // =========================================================
         public IActionResult Create()
         {
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "IdCategoria");
-            ViewData["IdMarca"] = new SelectList(_context.Marcas, "IdMarca", "IdMarca");
+            CargarCategorias();
+            CargarMarcas();
+
             return View();
         }
 
+
+        // =========================================================
         // POST: Producto/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdProducto,Nombre,Descripcion,Precio,Stock,StockMin,Estado,IdCategoria,IdMarca")] Producto producto)
+        public async Task<IActionResult> Create(Producto producto)
         {
+            // Estos campos los genera la base de datos/procedimiento
+            ModelState.Remove(nameof(Producto.Estado));
+            ModelState.Remove(nameof(Producto.FechaRegistro));
+
+            // No necesitamos validar las propiedades de navegación
+            ModelState.Remove(nameof(Producto.IdCategoriaNavigation));
+            ModelState.Remove(nameof(Producto.IdMarcaNavigation));
+
             if (ModelState.IsValid)
             {
-                _context.Add(producto);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    var sql = @"
+                        EXEC NEW_PRODUCTO
+                            @p_NOMBRE,
+                            @p_DESCRIPCION,
+                            @p_PRECIO,
+                            @p_STOCK,
+                            @p_STOCK_MIN,
+                            @p_ID_CATEGORIA,
+                            @p_ID_MARCA";
+
+                    var parameters = new[]
+                    {
+                        new SqlParameter("@p_NOMBRE", producto.Nombre),
+
+                        new SqlParameter(
+                            "@p_DESCRIPCION",
+                            (object?)producto.Descripcion ?? DBNull.Value
+                        ),
+
+                        new SqlParameter("@p_PRECIO", producto.Precio),
+
+                        new SqlParameter("@p_STOCK", producto.Stock),
+
+                        new SqlParameter("@p_STOCK_MIN", producto.StockMin),
+
+                        new SqlParameter("@p_ID_CATEGORIA", producto.IdCategoria),
+
+                        new SqlParameter("@p_ID_MARCA", producto.IdMarca)
+                    };
+
+                    await _context.Database.ExecuteSqlRawAsync(
+                        sql,
+                        parameters
+                    );
+
+                    TempData["Success"] =
+                        "Producto creado correctamente.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] =
+                        "No se pudo crear el producto: " + ex.Message;
+                }
             }
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "IdCategoria", producto.IdCategoria);
-            ViewData["IdMarca"] = new SelectList(_context.Marcas, "IdMarca", "IdMarca", producto.IdMarca);
+
+            CargarCategorias(producto.IdCategoria);
+            CargarMarcas(producto.IdMarca);
+
             return View(producto);
         }
 
+
+        // =========================================================
         // GET: Producto/Edit/5
+        // =========================================================
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -79,54 +150,121 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var producto = await _context.Productos.FindAsync(id);
+            var producto = await _context.Productos
+                .FirstOrDefaultAsync(p => p.IdProducto == id);
+
             if (producto == null)
             {
                 return NotFound();
             }
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "IdCategoria", producto.IdCategoria);
-            ViewData["IdMarca"] = new SelectList(_context.Marcas, "IdMarca", "IdMarca", producto.IdMarca);
+
+            CargarCategorias(producto.IdCategoria);
+            CargarMarcas(producto.IdMarca);
+
             return View(producto);
         }
 
-        // POST: Producto/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+        // =========================================================
+        // POST: Producto/Edit
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,Nombre,Descripcion,Precio,Stock,StockMin,Estado,IdCategoria,IdMarca")] Producto producto)
+        public async Task<IActionResult> Edit(Producto producto)
         {
-            if (id != producto.IdProducto)
-            {
-                return NotFound();
-            }
+            // El stock NO se modifica mediante UPD_PRODUCTO.
+            // Se mantiene únicamente para mostrarlo en pantalla.
+            ModelState.Remove(nameof(Producto.Stock));
+
+            // Propiedades de navegación
+            ModelState.Remove(nameof(Producto.IdCategoriaNavigation));
+            ModelState.Remove(nameof(Producto.IdMarcaNavigation));
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(producto);
-                    await _context.SaveChangesAsync();
+                    var sql = @"
+                        EXEC UPD_PRODUCTO
+                            @p_ID_PRODUCTO,
+                            @p_NOMBRE,
+                            @p_DESCRIPCION,
+                            @p_PRECIO,
+                            @p_STOCK_MIN,
+                            @p_ESTADO,
+                            @p_ID_CATEGORIA,
+                            @p_ID_MARCA";
+
+                    var parameters = new[]
+                    {
+                        new SqlParameter(
+                            "@p_ID_PRODUCTO",
+                            producto.IdProducto
+                        ),
+
+                        new SqlParameter(
+                            "@p_NOMBRE",
+                            producto.Nombre
+                        ),
+
+                        new SqlParameter(
+                            "@p_DESCRIPCION",
+                            (object?)producto.Descripcion ?? DBNull.Value
+                        ),
+
+                        new SqlParameter(
+                            "@p_PRECIO",
+                            producto.Precio
+                        ),
+
+                        new SqlParameter(
+                            "@p_STOCK_MIN",
+                            producto.StockMin
+                        ),
+
+                        new SqlParameter(
+                            "@p_ESTADO",
+                            producto.Estado
+                        ),
+
+                        new SqlParameter(
+                            "@p_ID_CATEGORIA",
+                            producto.IdCategoria
+                        ),
+
+                        new SqlParameter(
+                            "@p_ID_MARCA",
+                            producto.IdMarca
+                        )
+                    };
+
+                    await _context.Database.ExecuteSqlRawAsync(
+                        sql,
+                        parameters
+                    );
+
+                    TempData["Success"] =
+                        "Producto actualizado correctamente.";
+
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception ex)
                 {
-                    if (!ProductoExists(producto.IdProducto))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    TempData["Error"] =
+                        "No se pudo actualizar el producto: " + ex.Message;
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["IdCategoria"] = new SelectList(_context.Categoria, "IdCategoria", "IdCategoria", producto.IdCategoria);
-            ViewData["IdMarca"] = new SelectList(_context.Marcas, "IdMarca", "IdMarca", producto.IdMarca);
+
+            CargarCategorias(producto.IdCategoria);
+            CargarMarcas(producto.IdMarca);
+
             return View(producto);
         }
 
+
+        // =========================================================
         // GET: Producto/Delete/5
+        // =========================================================
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -137,7 +275,8 @@ namespace TechStore.Controllers
             var producto = await _context.Productos
                 .Include(p => p.IdCategoriaNavigation)
                 .Include(p => p.IdMarcaNavigation)
-                .FirstOrDefaultAsync(m => m.IdProducto == id);
+                .FirstOrDefaultAsync(p => p.IdProducto == id);
+
             if (producto == null)
             {
                 return NotFound();
@@ -146,24 +285,84 @@ namespace TechStore.Controllers
             return View(producto);
         }
 
-        // POST: Producto/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var producto = await _context.Productos.FindAsync(id);
-            if (producto != null)
-            {
-                _context.Productos.Remove(producto);
-            }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+        // =========================================================
+        // POST: Producto/Delete
+        // =========================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int IdProducto)
+        {
+            try
+            {
+                var sql = @"
+                    EXEC DEL_PRODUCTO
+                        @p_ID_PRODUCTO";
+
+                var parameter = new SqlParameter(
+                    "@p_ID_PRODUCTO",
+                    IdProducto
+                );
+
+                await _context.Database.ExecuteSqlRawAsync(
+                    sql,
+                    parameter
+                );
+
+                TempData["Success"] =
+                    "Producto procesado correctamente.";
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "No se pudo eliminar el producto: " + ex.Message;
+
+                return RedirectToAction(nameof(Index));
+            }
         }
 
+
+        // =========================================================
+        // CARGAR CATEGORÍAS
+        // =========================================================
+        private void CargarCategorias(int? idSeleccionado = null)
+        {
+            ViewData["IdCategoria"] = new SelectList(
+                _context.Categoria
+                    .OrderBy(c => c.Nombre)
+                    .ToList(),
+                "IdCategoria",
+                "Nombre",
+                idSeleccionado
+            );
+        }
+
+
+        // =========================================================
+        // CARGAR MARCAS
+        // =========================================================
+        private void CargarMarcas(int? idSeleccionado = null)
+        {
+            ViewData["IdMarca"] = new SelectList(
+                _context.Marcas
+                    .OrderBy(m => m.Nombre)
+                    .ToList(),
+                "IdMarca",
+                "Nombre",
+                idSeleccionado
+            );
+        }
+
+
+        // =========================================================
+        // VERIFICAR SI EXISTE PRODUCTO
+        // =========================================================
         private bool ProductoExists(int id)
         {
-            return _context.Productos.Any(e => e.IdProducto == id);
+            return _context.Productos
+                .Any(e => e.IdProducto == id);
         }
     }
 }

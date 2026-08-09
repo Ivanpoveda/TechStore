@@ -19,13 +19,13 @@ public partial class Usuario
 
     public DateTime FechaRegistro { get; set; }
 
-    public string Estado { get; set; } = null!;
+    public string? Estado { get; set; }
 
     public int IdRol { get; set; }
 
     public virtual ICollection<Carrito> Carritos { get; set; } = new List<Carrito>();
 
-    public virtual Rol IdRolNavigation { get; set; } = null!;
+    public virtual Rol? IdRolNavigation { get; set; }
 
     public virtual ICollection<Ventum> Venta { get; set; } = new List<Ventum>();
 }

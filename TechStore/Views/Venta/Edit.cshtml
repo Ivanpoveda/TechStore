@@ -1,59 +1,60 @@
 @model TechStore.Models.Ventum
-
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Venta";
 }
 
-<h1>Edit</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - TechStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen">
+    <div class="flex flex-col md:flex-row min-h-screen">
 
-<h4>Ventum</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdVenta" />
-            <div class="form-group">
-                <label asp-for="Fecha" class="control-label"></label>
-                <input asp-for="Fecha" class="form-control" />
-                <span asp-validation-for="Fecha" class="text-danger"></span>
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">TS</div>
+                <span class="font-bold text-lg tracking-wide">TechStore Admin</span>
             </div>
-            <div class="form-group">
-                <label asp-for="Impuesto" class="control-label"></label>
-                <input asp-for="Impuesto" class="form-control" />
-                <span asp-validation-for="Impuesto" class="text-danger"></span>
+            <nav class="space-y-1">
+                <a href="/Admin/Dashboard" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Dashboard</a>
+                <a href="/Usuario/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Usuarios</a>
+                <a href="/Producto/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Productos</a>
+                <a href="/Venta/Index" class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium">Ventas</a>
+                <a href="/Garantia/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Garantías</a>
+                <a href="/Proveedor/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Proveedores</a>
+            </nav>
+        </aside>
+
+        <!-- CONTENIDO -->
+        <main class="flex-1 p-6 md:p-8">
+            <div class="max-w-lg mx-auto bg-white rounded-xl shadow p-6">
+                <h1 class="text-2xl font-bold mb-4">Editar estado de Venta #@Model.IdVenta</h1>
+
+                <form asp-action="Edit" method="post" class="space-y-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="IdVenta" value="@Model.IdVenta" />
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Estado</label>
+                        <select name="Estado" class="mt-1 block w-full border-gray-300 rounded">
+                            <option value="">-- Seleccione --</option>
+                            <option value="Pendiente" selected="@(Model.Estado == "Pendiente")">Pendiente</option>
+                            <option value="Pagado" selected="@(Model.Estado == "Pagado")">Pagado</option>
+                            <option value="Cancelado" selected="@(Model.Estado == "Cancelado")">Cancelado</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end gap-3">
+                        <a asp-action="Details" asp-route-id="@Model.IdVenta" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100">Cancelar</a>
+                        <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700">Guardar cambios</button>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label asp-for="Descuento" class="control-label"></label>
-                <input asp-for="Descuento" class="form-control" />
-                <span asp-validation-for="Descuento" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Total" class="control-label"></label>
-                <input asp-for="Total" class="form-control" />
-                <span asp-validation-for="Total" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Estado" class="control-label"></label>
-                <input asp-for="Estado" class="form-control" />
-                <span asp-validation-for="Estado" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdUsuario" class="control-label"></label>
-                <select asp-for="IdUsuario" class="form-control" asp-items="ViewBag.IdUsuario"></select>
-                <span asp-validation-for="IdUsuario" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </main>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+</body>
+</html>

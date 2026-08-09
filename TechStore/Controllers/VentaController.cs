@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TechStore.Models;
 
@@ -18,14 +18,22 @@ namespace TechStore.Controllers
             _context = context;
         }
 
+        // =========================================================
         // GET: Venta
+        // =========================================================
         public async Task<IActionResult> Index()
         {
-            var techStoreContext = _context.Venta.Include(v => v.IdUsuarioNavigation);
-            return View(await techStoreContext.ToListAsync());
+            var ventas = await _context.Venta
+                .Include(v => v.IdUsuarioNavigation)
+                .OrderByDescending(v => v.Fecha)
+                .ToListAsync();
+
+            return View(ventas);
         }
 
+        // =========================================================
         // GET: Venta/Details/5
+        // =========================================================
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,42 +41,102 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var ventum = await _context.Venta
+            var venta = await _context.Venta
                 .Include(v => v.IdUsuarioNavigation)
-                .FirstOrDefaultAsync(m => m.IdVenta == id);
-            if (ventum == null)
+                .Include(v => v.DetalleVenta)
+                    .ThenInclude(d => d.IdProductoNavigation)
+                .FirstOrDefaultAsync(v => v.IdVenta == id);
+
+            if (venta == null)
             {
                 return NotFound();
             }
 
-            return View(ventum);
+            return View(venta);
         }
 
+        // =========================================================
         // GET: Venta/Create
-        public IActionResult Create()
+        // =========================================================
+        public async Task<IActionResult> Create()
         {
-            ViewData["IdUsuario"] = new SelectList(_context.Usuarios, "IdUsuario", "IdUsuario");
+            await CargarUsuarios();
+
             return View();
         }
 
+        // =========================================================
         // POST: Venta/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdVenta,Fecha,Impuesto,Descuento,Total,Estado,IdUsuario")] Ventum ventum)
+        public async Task<IActionResult> Create(
+            int IdUsuario,
+            decimal? Impuesto,
+            decimal? Descuento)
         {
-            if (ModelState.IsValid)
+            if (IdUsuario <= 0)
             {
-                _context.Add(ventum);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError("IdUsuario", "Debe seleccionar un usuario.");
             }
-            ViewData["IdUsuario"] = new SelectList(_context.Usuarios, "IdUsuario", "IdUsuario", ventum.IdUsuario);
-            return View(ventum);
+
+            if (!ModelState.IsValid)
+            {
+                await CargarUsuarios(IdUsuario);
+                return View();
+            }
+
+            try
+            {
+                // Valores por defecto
+                decimal impuesto = Impuesto ?? 0;
+                decimal descuento = Descuento ?? 0;
+
+                // Parámetro OUTPUT para recibir el ID de la venta
+                var idVentaParameter = new SqlParameter
+                {
+                    ParameterName = "@p_ID_VENTA",
+                    SqlDbType = System.Data.SqlDbType.Int,
+                    Direction = System.Data.ParameterDirection.Output
+                };
+
+                var parameters = new[]
+                {
+                    new SqlParameter("@p_ID_USUARIO", IdUsuario),
+
+                    new SqlParameter("@p_IMPUESTO", impuesto),
+
+                    new SqlParameter("@p_DESCUENTO", descuento),
+
+                    idVentaParameter
+                };
+
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC NEW_VENTA @p_ID_USUARIO, @p_IMPUESTO, @p_DESCUENTO, @p_ID_VENTA OUTPUT",
+                    parameters
+                );
+
+                int idVenta = Convert.ToInt32(idVentaParameter.Value);
+
+                TempData["Success"] =
+                    $"Venta #{idVenta} creada correctamente. Ahora puedes agregar los productos.";
+
+                return RedirectToAction(nameof(Details), new { id = idVenta });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "No se pudo crear la venta: " + ex.Message;
+
+                await CargarUsuarios(IdUsuario);
+
+                return View();
+            }
         }
 
+        // =========================================================
         // GET: Venta/Edit/5
+        // =========================================================
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -76,52 +144,97 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var ventum = await _context.Venta.FindAsync(id);
-            if (ventum == null)
+            var venta = await _context.Venta
+                .Include(v => v.IdUsuarioNavigation)
+                .FirstOrDefaultAsync(v => v.IdVenta == id);
+
+            if (venta == null)
             {
                 return NotFound();
             }
-            ViewData["IdUsuario"] = new SelectList(_context.Usuarios, "IdUsuario", "IdUsuario", ventum.IdUsuario);
-            return View(ventum);
+
+            return View(venta);
         }
 
-        // POST: Venta/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // =========================================================
+        // POST: Venta/Edit
+        // Solo permite cambiar el estado
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdVenta,Fecha,Impuesto,Descuento,Total,Estado,IdUsuario")] Ventum ventum)
+        public async Task<IActionResult> Edit(
+            int IdVenta,
+            string Estado)
         {
-            if (id != ventum.IdVenta)
+            if (IdVenta <= 0)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(Estado))
             {
-                try
+                ModelState.AddModelError(
+                    "Estado",
+                    "Debe seleccionar un estado."
+                );
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var ventaError = await _context.Venta
+                    .Include(v => v.IdUsuarioNavigation)
+                    .FirstOrDefaultAsync(v => v.IdVenta == IdVenta);
+
+                if (ventaError == null)
                 {
-                    _context.Update(ventum);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+
+                return View(ventaError);
+            }
+
+            try
+            {
+                var parameters = new[]
                 {
-                    if (!VentumExists(ventum.IdVenta))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                    new SqlParameter("@p_ID_VENTA", IdVenta),
+
+                    new SqlParameter("@p_ESTADO", Estado)
+                };
+
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC UPD_ESTADO_VENTA @p_ID_VENTA, @p_ESTADO",
+                    parameters
+                );
+
+                TempData["Success"] =
+                    $"El estado de la venta #{IdVenta} fue actualizado correctamente.";
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdUsuario"] = new SelectList(_context.Usuarios, "IdUsuario", "IdUsuario", ventum.IdUsuario);
-            return View(ventum);
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "No se pudo actualizar el estado: " + ex.Message;
+
+                var venta = await _context.Venta
+                    .Include(v => v.IdUsuarioNavigation)
+                    .FirstOrDefaultAsync(v => v.IdVenta == IdVenta);
+
+                if (venta == null)
+                {
+                    return NotFound();
+                }
+
+                return View(venta);
+            }
         }
 
+        // =========================================================
         // GET: Venta/Delete/5
+        // =========================================================
+        // Por ahora mostramos una pantalla informativa.
+        // NO hacemos DELETE físico porque no existe DEL_VENTA.
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -129,35 +242,35 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var ventum = await _context.Venta
+            var venta = await _context.Venta
                 .Include(v => v.IdUsuarioNavigation)
-                .FirstOrDefaultAsync(m => m.IdVenta == id);
-            if (ventum == null)
+                .Include(v => v.DetalleVenta)
+                .FirstOrDefaultAsync(v => v.IdVenta == id);
+
+            if (venta == null)
             {
                 return NotFound();
             }
 
-            return View(ventum);
+            return View(venta);
         }
 
-        // POST: Venta/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        // =========================================================
+        // MÉTODO AUXILIAR
+        // =========================================================
+        private async Task CargarUsuarios(int? idUsuarioSeleccionado = null)
         {
-            var ventum = await _context.Venta.FindAsync(id);
-            if (ventum != null)
-            {
-                _context.Venta.Remove(ventum);
-            }
+            var usuarios = await _context.Usuarios
+                .OrderBy(u => u.Nombre)
+                .ThenBy(u => u.Apellidos)
+                .ToListAsync();
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool VentumExists(int id)
-        {
-            return _context.Venta.Any(e => e.IdVenta == id);
+            ViewData["IdUsuario"] = new SelectList(
+                usuarios,
+                "IdUsuario",
+                "Nombre",
+                idUsuarioSeleccionado
+            );
         }
     }
 }

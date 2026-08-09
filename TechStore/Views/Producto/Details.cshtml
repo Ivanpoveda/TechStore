@@ -1,66 +1,218 @@
 @model TechStore.Models.Producto
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles del Producto";
 }
 
-<h1>Details</h1>
+<!DOCTYPE html>
 
-<div>
-    <h4>Producto</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Precio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Precio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Stock)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Stock)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StockMin)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StockMin)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IdCategoriaNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IdCategoriaNavigation.IdCategoria)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IdMarcaNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IdMarcaNavigation.IdMarca)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdProducto">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TechStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+
+            <div class="flex items-center gap-3 mb-8">
+
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
+                    TS
+                </div>
+
+                <span class="font-bold text-lg tracking-wide">
+                    TechStore Admin
+                </span>
+
+            </div>
+
+            <nav class="space-y-1">
+
+                <a href="/Admin/Dashboard"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Dashboard
+                </a>
+
+                <a href="/Usuario/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Usuarios
+                </a>
+
+                <a href="/Producto/Index"
+                   class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium">
+                    Productos
+                </a>
+
+                <a href="/Venta/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Ventas
+                </a>
+
+                <a href="/Garantia/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Garantías
+                </a>
+
+                <a href="/Proveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Proveedores
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- CONTENIDO -->
+        <main class="flex-1 p-6 md:p-8">
+
+            <div class="max-w-2xl mx-auto">
+
+                <div class="bg-white rounded-xl shadow p-6">
+
+                    <h1 class="text-2xl font-bold text-slate-900 mb-6">
+                        Detalles del Producto
+                    </h1>
+
+                    <dl class="space-y-4">
+
+                        <div>
+                            <dt class="font-semibold text-slate-600">
+                                Nombre
+                            </dt>
+
+                            <dd class="text-slate-900">
+                                @Model.Nombre
+                            </dd>
+                        </div>
+
+
+                        <div>
+                            <dt class="font-semibold text-slate-600">
+                                Descripción
+                            </dt>
+
+                            <dd class="text-slate-900">
+                                @(Model.Descripcion ?? "Sin descripción")
+                            </dd>
+                        </div>
+
+
+                        <div>
+                            <dt class="font-semibold text-slate-600">
+                                Precio
+                            </dt>
+
+                            <dd class="text-slate-900 font-semibold">
+                                ₡@Model.Precio.ToString("N2")
+                            </dd>
+                        </div>
+
+
+                        <div>
+                            <dt class="font-semibold text-slate-600">
+                                Stock
+                            </dt>
+
+                            <dd class="text-slate-900">
+                                @Model.Stock unidades
+                            </dd>
+                        </div>
+
+
+                        <div>
+                            <dt class="font-semibold text-slate-600">
+                                Stock mínimo
+                            </dt>
+
+                            <dd class="text-slate-900">
+                                @Model.StockMin unidades
+                            </dd>
+                        </div>
+
+
+                        <div>
+                            <dt class="font-semibold text-slate-600">
+                                Categoría
+                            </dt>
+
+                            <dd class="text-slate-900">
+                                @Model.IdCategoriaNavigation?.Nombre
+                            </dd>
+                        </div>
+
+
+                        <div>
+                            <dt class="font-semibold text-slate-600">
+                                Marca
+                            </dt>
+
+                            <dd class="text-slate-900">
+                                @Model.IdMarcaNavigation?.Nombre
+                            </dd>
+                        </div>
+
+
+                        <div>
+                            <dt class="font-semibold text-slate-600">
+                                Estado
+                            </dt>
+
+                            <dd>
+
+                                @if (Model.Estado == "Activo")
+                                {
+                                    <span class="inline-flex px-3 py-1 rounded-full
+                                        text-sm bg-green-100 text-green-700">
+                                        Activo
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex px-3 py-1 rounded-full
+                                        text-sm bg-red-100 text-red-700">
+                                        @Model.Estado
+                                    </span>
+                                }
+
+                            </dd>
+
+                        </div>
+
+                    </dl>
+
+
+                    <div class="flex justify-end gap-3 mt-6">
+
+                        <a href="/Producto/Edit/@Model.IdProducto"
+                           class="bg-indigo-600 text-white px-4 py-2 rounded-lg
+                            shadow hover:bg-indigo-700 transition">
+                            Editar
+                        </a>
+
+                        <a href="/Producto/Index"
+                           class="px-4 py-2 rounded-lg border border-slate-300
+                            text-slate-600 hover:bg-slate-100 transition">
+                            Volver
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+</body>
+
+</html>

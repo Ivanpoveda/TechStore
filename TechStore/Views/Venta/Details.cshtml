@@ -1,54 +1,87 @@
 @model TechStore.Models.Ventum
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles de Venta";
 }
 
-<h1>Details</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - TechStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen">
+    <div class="flex flex-col md:flex-row min-h-screen">
 
-<div>
-    <h4>Ventum</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Fecha)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Fecha)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Impuesto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Impuesto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descuento)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descuento)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Total)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Total)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IdUsuarioNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IdUsuarioNavigation.IdUsuario)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdVenta">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">TS</div>
+                <span class="font-bold text-lg tracking-wide">TechStore Admin</span>
+            </div>
+            <nav class="space-y-1">
+                <a href="/Admin/Dashboard" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Dashboard</a>
+                <a href="/Usuario/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Usuarios</a>
+                <a href="/Producto/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Productos</a>
+                <a href="/Venta/Index" class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium">Ventas</a>
+                <a href="/Garantia/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Garantías</a>
+                <a href="/Proveedor/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Proveedores</a>
+            </nav>
+        </aside>
+
+        <!-- CONTENIDO -->
+        <main class="flex-1 p-6 md:p-8">
+            <div class="max-w-3xl mx-auto bg-white rounded-xl shadow p-6">
+                <h1 class="text-2xl font-bold mb-4">Venta #@Model.IdVenta</h1>
+
+                <div class="bg-slate-50 rounded-lg p-4 space-y-3 mb-6">
+                    <div><span class="font-semibold text-slate-600">Cliente:</span> <span class="text-slate-900">@Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellidos</span></div>
+                    <div><span class="font-semibold text-slate-600">Fecha:</span> <span class="text-slate-900">@Model.Fecha.ToString("yyyy-MM-dd HH:mm")</span></div>
+                    <div><span class="font-semibold text-slate-600">Estado:</span> <span class="text-slate-900">@Model.Estado</span></div>
+                </div>
+
+                <h2 class="text-lg font-medium mb-3">Productos</h2>
+                <table class="min-w-full divide-y divide-gray-200 mb-6">
+                    <thead class="bg-gray-50">
+                        <tr class="text-left text-sm text-gray-600">
+                            <th class="px-4 py-2">Producto</th>
+                            <th class="px-4 py-2">Cantidad</th>
+                            <th class="px-4 py-2">Precio</th>
+                            <th class="px-4 py-2">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @if (Model.DetalleVenta != null && Model.DetalleVenta.Any())
+                        {
+                            foreach (var d in Model.DetalleVenta)
+                            {
+                                <tr class="text-sm">
+                                    <td class="px-4 py-2">@d.IdProductoNavigation?.Nombre</td>
+                                    <td class="px-4 py-2">@d.Cantidad</td>
+                                    <td class="px-4 py-2">₡@d.Precio.GetValueOrDefault().ToString("N2")</td>
+                                    <td class="px-4 py-2">₡@d.Subtotal.GetValueOrDefault().ToString("N2")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">No hay productos agregados.</td></tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="text-right space-y-1 mb-6">
+                    <div><strong>Impuesto:</strong> ₡@Model.Impuesto.GetValueOrDefault().ToString("N2")</div>
+                    <div><strong>Descuento:</strong> ₡@Model.Descuento.GetValueOrDefault().ToString("N2")</div>
+                    <div class="text-xl font-semibold"><strong>TOTAL:</strong> ₡@Model.Total.GetValueOrDefault().ToString("N2")</div>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <a asp-action="AddProduct" asp-route-id="@Model.IdVenta" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Agregar producto</a>
+                    <a asp-action="Index" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100">Volver</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

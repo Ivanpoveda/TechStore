@@ -1,65 +1,73 @@
 @model IEnumerable<TechStore.Models.Ventum>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Ventas";
 }
 
-<h1>Index</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - TechStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen">
+    <div class="flex flex-col md:flex-row min-h-screen">
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Fecha)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Impuesto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Descuento)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Total)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Estado)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdUsuarioNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Fecha)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Impuesto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Descuento)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Total)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Estado)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdUsuarioNavigation.IdUsuario)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdVenta">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdVenta">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdVenta">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">TS</div>
+                <span class="font-bold text-lg tracking-wide">TechStore Admin</span>
+            </div>
+            <nav class="space-y-1">
+                <a href="/Admin/Dashboard" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Dashboard</a>
+                <a href="/Usuario/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Usuarios</a>
+                <a href="/Producto/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Productos</a>
+                <a href="/Venta/Index" class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium">Ventas</a>
+                <a href="/Garantia/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Garantías</a>
+                <a href="/Proveedor/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Proveedores</a>
+            </nav>
+        </aside>
+
+        <!-- CONTENIDO -->
+        <main class="flex-1 p-6 md:p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-bold">Ventas</h1>
+                <a asp-action="Create" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Nueva venta</a>
+            </div>
+
+            <div class="bg-white rounded-xl shadow overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr class="text-left text-sm text-gray-600">
+                            <th class="px-4 py-3">#</th>
+                            <th class="px-4 py-3">Cliente</th>
+                            <th class="px-4 py-3">Fecha</th>
+                            <th class="px-4 py-3">Estado</th>
+                            <th class="px-4 py-3 text-right">Total</th>
+                            <th class="px-4 py-3">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        @foreach (var v in Model)
+                        {
+                            <tr class="text-sm">
+                                <td class="px-4 py-3">@v.IdVenta</td>
+                                <td class="px-4 py-3">@v.IdUsuarioNavigation?.Nombre @v.IdUsuarioNavigation?.Apellidos</td>
+                                <td class="px-4 py-3">@v.Fecha.ToString("g")</td>
+                                <td class="px-4 py-3">@v.Estado</td>
+                                <td class="px-4 py-3 text-right">₡@v.Total.GetValueOrDefault().ToString("N2")</td>
+                                <td class="px-4 py-3 flex gap-2">
+                                    <a asp-action="Details" asp-route-id="@v.IdVenta" class="text-blue-600 hover:underline">Ver</a>
+                                    <a asp-action="Edit" asp-route-id="@v.IdVenta" class="text-yellow-600 hover:underline">Editar</a>
+                                    <a asp-action="Delete" asp-route-id="@v.IdVenta" class="text-red-600 hover:underline">Eliminar</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
