@@ -1,59 +1,285 @@
 @model TechStore.Models.Garantium
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Garantía";
 }
 
-<h1>Edit</h1>
+<meta charset="utf-8" />
 
-<h4>Garantium</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdGarantia" />
-            <div class="form-group">
-                <label asp-for="FechaSolicitud" class="control-label"></label>
-                <input asp-for="FechaSolicitud" class="form-control" />
-                <span asp-validation-for="FechaSolicitud" class="text-danger"></span>
+<title>Editar Garantía - TechStore</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-slate-100 flex flex-col md:flex-row">
+
+    <!-- SIDEBAR -->
+
+    <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+
+        <div class="flex items-center gap-3 mb-8">
+
+            <div class="w-8 h-8 bg-indigo-500 rounded-lg
+                flex items-center justify-center font-bold">
+                TS
             </div>
-            <div class="form-group">
-                <label asp-for="Motivo" class="control-label"></label>
-                <input asp-for="Motivo" class="form-control" />
-                <span asp-validation-for="Motivo" class="text-danger"></span>
+
+            <span class="font-bold text-lg">
+                TechStore Admin
+            </span>
+
+        </div>
+
+        <nav class="space-y-1">
+
+            <a href="/Admin/Dashboard"
+               class="block px-4 py-2.5 rounded-lg
+                text-slate-400 hover:bg-indigo-600 hover:text-white">
+                Dashboard
+            </a>
+
+            <a href="/Usuario/Index"
+               class="block px-4 py-2.5 rounded-lg
+                text-slate-400 hover:bg-indigo-600 hover:text-white">
+                Usuarios
+            </a>
+
+            <a href="/Producto/Index"
+               class="block px-4 py-2.5 rounded-lg
+                text-slate-400 hover:bg-indigo-600 hover:text-white">
+                Productos
+            </a>
+
+            <a href="/Venta/Index"
+               class="block px-4 py-2.5 rounded-lg
+                text-slate-400 hover:bg-indigo-600 hover:text-white">
+                Ventas
+            </a>
+
+            <a href="/Garantia/Index"
+               class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white">
+                Garantías
+            </a>
+
+            <a href="/Proveedor/Index"
+               class="block px-4 py-2.5 rounded-lg
+                text-slate-400 hover:bg-indigo-600 hover:text-white">
+                Proveedores
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- CONTENIDO -->
+
+    <main class="flex-1 p-6">
+
+        <div class="max-w-2xl mx-auto">
+
+            <div class="bg-white rounded-xl shadow p-6">
+
+                <h1 class="text-2xl font-bold text-slate-900">
+                    Editar Garantía #@Model.IdGarantia
+                </h1>
+
+                <p class="text-slate-500 mt-1 mb-6">
+                    Actualiza la información y el estado de la garantía.
+                </p>
+
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="mb-5 bg-red-50 border border-red-200
+                        text-red-700 px-4 py-3 rounded-lg">
+
+                        @TempData["Error"]
+
+                    </div>
+                }
+
+
+                <form asp-action="Edit"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           name="IdGarantia"
+                           value="@Model.IdGarantia" />
+
+
+                    <!-- PRODUCTO -->
+
+                    <div class="mb-5">
+
+                        <label class="block font-semibold text-slate-700 mb-2">
+                            Producto
+                        </label>
+
+                        <input type="text"
+                               value="@Model.IdDetalleVentaNavigation?.IdProductoNavigation?.Nombre"
+                               disabled
+                               class="w-full bg-slate-100
+                        border border-slate-300
+                        rounded-lg px-3 py-2.5" />
+
+                    </div>
+
+
+                    <!-- MOTIVO -->
+
+                    <div class="mb-5">
+
+                        <label class="block font-semibold text-slate-700 mb-2">
+                            Motivo
+                        </label>
+
+                        <input type="text"
+                               name="Motivo"
+                               value="@Model.Motivo"
+                               maxlength="200"
+                               required
+                               class="w-full border border-slate-300
+                        rounded-lg px-3 py-2.5
+                        focus:ring-2 focus:ring-indigo-500
+                        focus:outline-none" />
+
+                    </div>
+
+
+                    <!-- DESCRIPCIÓN -->
+
+                    <div class="mb-5">
+
+                        <label class="block font-semibold text-slate-700 mb-2">
+                            Descripción
+                        </label>
+
+                        <textarea name="Descripcion"
+                                  rows="5"
+                                  maxlength="500"
+                                  required
+                                  class="w-full border border-slate-300
+                        rounded-lg px-3 py-2.5
+                        focus:ring-2 focus:ring-indigo-500
+                        focus:outline-none">@Model.Descripcion</textarea>
+
+                    </div>
+
+
+                    <!-- ESTADO -->
+
+                    <div class="mb-5">
+
+                        <label class="block font-semibold text-slate-700 mb-2">
+                            Estado
+                        </label>
+
+                        <select name="Estado"
+                                required
+                                class="w-full border border-slate-300
+                            rounded-lg px-3 py-2.5
+                            focus:ring-2 focus:ring-indigo-500
+                            focus:outline-none">
+
+                            @if (Model.Estado == "En proceso")
+                            {
+                                <option value="En proceso" selected>
+                                    En proceso
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="En proceso">
+                                    En proceso
+                                </option>
+                            }
+
+                            @if (Model.Estado == "Aprobada")
+                            {
+                                <option value="Aprobada" selected>
+                                    Aprobada
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="Aprobada">
+                                    Aprobada
+                                </option>
+                            }
+
+                            @if (Model.Estado == "Rechazada")
+                            {
+                                <option value="Rechazada" selected>
+                                    Rechazada
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="Rechazada">
+                                    Rechazada
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- FECHA RESOLUCIÓN -->
+
+                    <div class="mb-6">
+
+                        <label class="block font-semibold text-slate-700 mb-2">
+                            Fecha de resolución
+                        </label>
+
+                        <input type="datetime-local"
+                               name="FechaResolucion"
+                               value="@(Model.FechaResolucion?.ToString("yyyy-MM-ddTHH:mm"))"
+                               class="w-full border border-slate-300
+                        rounded-lg px-3 py-2.5
+                        focus:ring-2 focus:ring-indigo-500
+                        focus:outline-none" />
+
+                        <p class="text-xs text-slate-500 mt-1">
+                            Se asignará automáticamente al aprobar o rechazar.
+                        </p>
+
+                    </div>
+
+
+                    <!-- BOTONES -->
+
+                    <div class="flex justify-end gap-3">
+
+                        <a href="/Garantia/Details/@Model.IdGarantia"
+                           class="px-5 py-2.5 rounded-lg
+                            border border-slate-300
+                            text-slate-600 hover:bg-slate-100">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="bg-indigo-600 text-white
+                            px-5 py-2.5 rounded-lg shadow
+                            hover:bg-indigo-700">
+
+                            Guardar Cambios
+
+                        </button>
+
+                    </div>
+
+                </form>
+
             </div>
-            <div class="form-group">
-                <label asp-for="Descripcion" class="control-label"></label>
-                <input asp-for="Descripcion" class="form-control" />
-                <span asp-validation-for="Descripcion" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Estado" class="control-label"></label>
-                <input asp-for="Estado" class="form-control" />
-                <span asp-validation-for="Estado" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaResolucion" class="control-label"></label>
-                <input asp-for="FechaResolucion" class="form-control" />
-                <span asp-validation-for="FechaResolucion" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdDetalleVenta" class="control-label"></label>
-                <select asp-for="IdDetalleVenta" class="form-control" asp-items="ViewBag.IdDetalleVenta"></select>
-                <span asp-validation-for="IdDetalleVenta" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+
+        </div>
+
+    </main>
+
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

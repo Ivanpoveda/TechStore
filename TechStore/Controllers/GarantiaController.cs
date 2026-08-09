@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TechStore.Models;
 
@@ -18,14 +16,26 @@ namespace TechStore.Controllers
             _context = context;
         }
 
-        // GET: Garantia
+        // =========================================================
+        // INDEX
+        // =========================================================
         public async Task<IActionResult> Index()
         {
-            var techStoreContext = _context.Garantia.Include(g => g.IdDetalleVentaNavigation);
-            return View(await techStoreContext.ToListAsync());
+            var garantias = await _context.Garantia
+                .Include(g => g.IdDetalleVentaNavigation)
+                    .ThenInclude(d => d.IdProductoNavigation)
+                .Include(g => g.IdDetalleVentaNavigation)
+                    .ThenInclude(d => d.IdVentaNavigation)
+                        .ThenInclude(v => v.IdUsuarioNavigation)
+                .OrderByDescending(g => g.IdGarantia)
+                .ToListAsync();
+
+            return View(garantias);
         }
 
-        // GET: Garantia/Details/5
+        // =========================================================
+        // DETAILS
+        // =========================================================
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,42 +43,185 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var garantium = await _context.Garantia
+            var garantia = await _context.Garantia
                 .Include(g => g.IdDetalleVentaNavigation)
-                .FirstOrDefaultAsync(m => m.IdGarantia == id);
-            if (garantium == null)
+                    .ThenInclude(d => d.IdProductoNavigation)
+                .Include(g => g.IdDetalleVentaNavigation)
+                    .ThenInclude(d => d.IdVentaNavigation)
+                        .ThenInclude(v => v.IdUsuarioNavigation)
+                .FirstOrDefaultAsync(g =>
+                    g.IdGarantia == id);
+
+            if (garantia == null)
             {
                 return NotFound();
             }
 
-            return View(garantium);
+            return View(garantia);
         }
 
-        // GET: Garantia/Create
-        public IActionResult Create()
+        // =========================================================
+        // CREATE - GET
+        // =========================================================
+        [HttpGet]
+        public async Task<IActionResult> Create(int? idDetalleVenta)
         {
-            ViewData["IdDetalleVenta"] = new SelectList(_context.DetalleVenta, "IdDetalleVenta", "IdDetalleVenta");
-            return View();
+            await CargarDetallesVenta(idDetalleVenta);
+
+            var modelo = new Garantium
+            {
+                FechaSolicitud = DateTime.Now,
+                Estado = "En proceso"
+            };
+
+            if (idDetalleVenta.HasValue)
+            {
+                var detalle = await _context.DetalleVenta
+                    .Include(d => d.IdProductoNavigation)
+                    .Include(d => d.IdVentaNavigation)
+                    .FirstOrDefaultAsync(d =>
+                        d.IdDetalleVenta == idDetalleVenta.Value);
+
+                if (detalle == null)
+                {
+                    return NotFound();
+                }
+
+                modelo.IdDetalleVenta = idDetalleVenta.Value;
+            }
+
+            return View(modelo);
         }
 
-        // POST: Garantia/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // =========================================================
+        // CREATE - POST
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdGarantia,FechaSolicitud,Motivo,Descripcion,Estado,FechaResolucion,IdDetalleVenta")] Garantium garantium)
+        public async Task<IActionResult> Create(
+            string Motivo,
+            string Descripcion,
+            int IdDetalleVenta)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(garantium);
+                // =================================================
+                // VALIDAR DETALLE
+                // =================================================
+
+                var detalle = await _context.DetalleVenta
+                    .Include(d => d.IdProductoNavigation)
+                    .Include(d => d.IdVentaNavigation)
+                    .FirstOrDefaultAsync(d =>
+                        d.IdDetalleVenta == IdDetalleVenta);
+
+                if (detalle == null)
+                {
+                    TempData["Error"] =
+                        "El detalle de venta seleccionado no existe.";
+
+                    await CargarDetallesVenta(IdDetalleVenta);
+
+                    return View(new Garantium
+                    {
+                        Motivo = Motivo,
+                        Descripcion = Descripcion,
+                        IdDetalleVenta = IdDetalleVenta,
+                        FechaSolicitud = DateTime.Now,
+                        Estado = "En proceso"
+                    });
+                }
+
+                // =================================================
+                // VALIDAR CAMPOS
+                // =================================================
+
+                if (string.IsNullOrWhiteSpace(Motivo))
+                {
+                    TempData["Error"] =
+                        "Debe indicar el motivo de la garantía.";
+
+                    await CargarDetallesVenta(IdDetalleVenta);
+
+                    return View(new Garantium
+                    {
+                        Motivo = Motivo,
+                        Descripcion = Descripcion,
+                        IdDetalleVenta = IdDetalleVenta,
+                        FechaSolicitud = DateTime.Now,
+                        Estado = "En proceso"
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(Descripcion))
+                {
+                    TempData["Error"] =
+                        "Debe proporcionar una descripción del problema.";
+
+                    await CargarDetallesVenta(IdDetalleVenta);
+
+                    return View(new Garantium
+                    {
+                        Motivo = Motivo,
+                        Descripcion = Descripcion,
+                        IdDetalleVenta = IdDetalleVenta,
+                        FechaSolicitud = DateTime.Now,
+                        Estado = "En proceso"
+                    });
+                }
+
+                // =================================================
+                // CREAR GARANTÍA
+                // =================================================
+
+                var garantia = new Garantium
+                {
+                    FechaSolicitud = DateTime.Now,
+
+                    Motivo = Motivo.Trim(),
+
+                    Descripcion = Descripcion.Trim(),
+
+                    // Estado permitido por SQL Server
+                    Estado = "En proceso",
+
+                    FechaResolucion = null,
+
+                    IdDetalleVenta = IdDetalleVenta
+                };
+
+                _context.Garantia.Add(garantia);
+
                 await _context.SaveChangesAsync();
+
+                TempData["Success"] =
+                    "La garantía fue registrada correctamente.";
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdDetalleVenta"] = new SelectList(_context.DetalleVenta, "IdDetalleVenta", "IdDetalleVenta", garantium.IdDetalleVenta);
-            return View(garantium);
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "No se pudo registrar la garantía: " +
+                    ObtenerMensajeError(ex);
+
+                await CargarDetallesVenta(IdDetalleVenta);
+
+                return View(new Garantium
+                {
+                    Motivo = Motivo,
+                    Descripcion = Descripcion,
+                    IdDetalleVenta = IdDetalleVenta,
+                    FechaSolicitud = DateTime.Now,
+                    Estado = "En proceso"
+                });
+            }
         }
 
-        // GET: Garantia/Edit/5
+        // =========================================================
+        // EDIT - GET
+        // =========================================================
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -76,52 +229,127 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var garantium = await _context.Garantia.FindAsync(id);
-            if (garantium == null)
+            var garantia = await _context.Garantia
+                .Include(g => g.IdDetalleVentaNavigation)
+                    .ThenInclude(d => d.IdProductoNavigation)
+                .Include(g => g.IdDetalleVentaNavigation)
+                    .ThenInclude(d => d.IdVentaNavigation)
+                .FirstOrDefaultAsync(g =>
+                    g.IdGarantia == id);
+
+            if (garantia == null)
             {
                 return NotFound();
             }
-            ViewData["IdDetalleVenta"] = new SelectList(_context.DetalleVenta, "IdDetalleVenta", "IdDetalleVenta", garantium.IdDetalleVenta);
-            return View(garantium);
+
+            return View(garantia);
         }
 
-        // POST: Garantia/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // =========================================================
+        // EDIT - POST
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdGarantia,FechaSolicitud,Motivo,Descripcion,Estado,FechaResolucion,IdDetalleVenta")] Garantium garantium)
+        public async Task<IActionResult> Edit(
+            int IdGarantia,
+            string Motivo,
+            string Descripcion,
+            string Estado,
+            DateTime? FechaResolucion)
         {
-            if (id != garantium.IdGarantia)
+            try
             {
-                return NotFound();
-            }
+                var garantia = await _context.Garantia
+                    .FirstOrDefaultAsync(g =>
+                        g.IdGarantia == IdGarantia);
 
-            if (ModelState.IsValid)
-            {
-                try
+                if (garantia == null)
                 {
-                    _context.Update(garantium);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+
+                // =================================================
+                // VALIDAR ESTADO
+                // =================================================
+
+                if (Estado != "En proceso" &&
+                    Estado != "Aprobada" &&
+                    Estado != "Rechazada")
                 {
-                    if (!GarantiumExists(garantium.IdGarantia))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    TempData["Error"] =
+                        "El estado seleccionado no es válido.";
+
+                    return RedirectToAction(
+                        nameof(Edit),
+                        new { id = IdGarantia });
                 }
-                return RedirectToAction(nameof(Index));
+
+                // =================================================
+                // ACTUALIZAR DATOS
+                // =================================================
+
+                garantia.Motivo =
+                    Motivo?.Trim();
+
+                garantia.Descripcion =
+                    Descripcion?.Trim();
+
+                garantia.Estado =
+                    Estado;
+
+                // =================================================
+                // FECHA DE RESOLUCIÓN
+                // =================================================
+
+                if (Estado == "En proceso")
+                {
+                    garantia.FechaResolucion = null;
+                }
+                else
+                {
+                    garantia.FechaResolucion =
+                        FechaResolucion ?? DateTime.Now;
+                }
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] =
+                    "La garantía fue actualizada correctamente.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = IdGarantia });
             }
-            ViewData["IdDetalleVenta"] = new SelectList(_context.DetalleVenta, "IdDetalleVenta", "IdDetalleVenta", garantium.IdDetalleVenta);
-            return View(garantium);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!GarantiumExists(IdGarantia))
+                {
+                    return NotFound();
+                }
+
+                TempData["Error"] =
+                    "La garantía fue modificada por otro usuario.";
+
+                return RedirectToAction(
+                    nameof(Edit),
+                    new { id = IdGarantia });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "No se pudo actualizar la garantía: " +
+                    ObtenerMensajeError(ex);
+
+                return RedirectToAction(
+                    nameof(Edit),
+                    new { id = IdGarantia });
+            }
         }
 
-        // GET: Garantia/Delete/5
+        // =========================================================
+        // DELETE - GET
+        // =========================================================
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -129,35 +357,102 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var garantium = await _context.Garantia
+            var garantia = await _context.Garantia
                 .Include(g => g.IdDetalleVentaNavigation)
-                .FirstOrDefaultAsync(m => m.IdGarantia == id);
-            if (garantium == null)
+                    .ThenInclude(d => d.IdProductoNavigation)
+                .Include(g => g.IdDetalleVentaNavigation)
+                    .ThenInclude(d => d.IdVentaNavigation)
+                        .ThenInclude(v => v.IdUsuarioNavigation)
+                .FirstOrDefaultAsync(g =>
+                    g.IdGarantia == id);
+
+            if (garantia == null)
             {
                 return NotFound();
             }
 
-            return View(garantium);
+            return View(garantia);
         }
 
-        // POST: Garantia/Delete/5
-        [HttpPost, ActionName("Delete")]
+        // =========================================================
+        // DELETE - POST
+        // =========================================================
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var garantium = await _context.Garantia.FindAsync(id);
-            if (garantium != null)
+            try
             {
-                _context.Garantia.Remove(garantium);
-            }
+                var garantia = await _context.Garantia
+                    .FirstOrDefaultAsync(g =>
+                        g.IdGarantia == id);
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                if (garantia == null)
+                {
+                    TempData["Error"] =
+                        "La garantía no existe.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                _context.Garantia.Remove(garantia);
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] =
+                    "La garantía fue eliminada correctamente.";
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "No se pudo eliminar la garantía: " +
+                    ObtenerMensajeError(ex);
+
+                return RedirectToAction(nameof(Index));
+            }
         }
 
+        // =========================================================
+        // CARGAR DETALLES DE VENTA
+        // =========================================================
+        private async Task CargarDetallesVenta(
+            int? idSeleccionado = null)
+        {
+            var detalles = await _context.DetalleVenta
+                .Include(d => d.IdProductoNavigation)
+                .Include(d => d.IdVentaNavigation)
+                    .ThenInclude(v => v.IdUsuarioNavigation)
+                .OrderByDescending(d => d.IdDetalleVenta)
+                .ToListAsync();
+
+            ViewBag.DetallesVenta = detalles;
+
+            ViewBag.DetalleSeleccionado =
+                idSeleccionado;
+        }
+
+        // =========================================================
+        // VERIFICAR EXISTENCIA
+        // =========================================================
         private bool GarantiumExists(int id)
         {
-            return _context.Garantia.Any(e => e.IdGarantia == id);
+            return _context.Garantia
+                .Any(e => e.IdGarantia == id);
+        }
+
+        // =========================================================
+        // OBTENER MENSAJE REAL DEL ERROR
+        // =========================================================
+        private string ObtenerMensajeError(Exception ex)
+        {
+            if (ex.InnerException != null)
+            {
+                return ex.InnerException.Message;
+            }
+
+            return ex.Message;
         }
     }
 }

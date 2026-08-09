@@ -1,0 +1,341 @@
+﻿@{
+    ViewData["Title"] = "Agregar Producto";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - TechStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+    <div class="min-h-screen bg-slate-100 flex flex-col md:flex-row">
+
+        <!-- ===================================================== -->
+        <!-- SIDEBAR -->
+        <!-- ===================================================== -->
+
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 flex flex-col justify-between shrink-0">
+
+            <div>
+
+                <!-- Logo -->
+                <div class="flex items-center gap-3 mb-8">
+
+                    <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
+                        TS
+                    </div>
+
+                    <span class="font-bold text-lg tracking-wide">
+                        TechStore Admin
+                    </span>
+
+                </div>
+
+
+                <!-- Navegación -->
+                <nav class="space-y-1">
+
+                    <a href="/Admin/Dashboard"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                        Dashboard
+                    </a>
+
+                    <a href="/Usuario/Index"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                        Usuarios
+                    </a>
+
+                    <a href="/Producto/Index"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                        Productos
+                    </a>
+
+                    <a href="/Venta/Index"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        bg-indigo-600 text-white font-medium
+                        hover:bg-indigo-700 hover:scale-105">
+                        Ventas
+                    </a>
+
+                    <a href="/Garantia/Index"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                        Garantías
+                    </a>
+
+                    <a href="/Proveedor/Index"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                        Proveedores
+                    </a>
+
+                </nav>
+
+            </div>
+
+
+            <!-- Usuario -->
+            <div class="pt-4 border-t border-slate-800 flex items-center justify-between mt-6">
+
+                <div class="text-xs">
+
+                    <p class="font-semibold text-white">
+                        Administrador
+                    </p>
+
+                    <p class="text-slate-400">
+                        admin@techstore.com
+                    </p>
+
+                </div>
+
+                <a href="/Account/Login"
+                   class="text-xs text-rose-400 hover:underline hover:text-rose-300 transition">
+                    Salir
+                </a>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- ===================================================== -->
+        <!-- CONTENIDO -->
+        <!-- ===================================================== -->
+
+        <main class="flex-1 p-6">
+
+            <div class="max-w-2xl mx-auto">
+
+                <div class="bg-white rounded-xl shadow p-6">
+
+
+                    <!-- Encabezado -->
+
+                    <div class="mb-6">
+
+                        <h1 class="text-2xl font-bold text-slate-900">
+                            Agregar Producto
+                        </h1>
+
+                        <p class="text-slate-500 mt-1">
+                            Agrega un producto a la venta
+                            <strong>#@ViewData["IdVenta"]</strong>
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- Error -->
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="mb-5 bg-red-50 border border-red-200
+                            text-red-700 px-4 py-3 rounded-lg">
+
+                            @TempData["Error"]
+
+                        </div>
+                    }
+
+
+
+                    <!-- Validaciones -->
+
+                    <div asp-validation-summary="All"
+                         class="mb-5 text-red-600 text-sm">
+                    </div>
+
+
+
+                    <!-- ================================================= -->
+                    <!-- FORMULARIO -->
+                    <!-- ================================================= -->
+
+                    <form asp-action="AgregarProducto"
+                          method="post"
+                          class="space-y-5">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <!-- ID VENTA -->
+
+                        <input type="hidden"
+                               name="IdVenta"
+                               value="@ViewData["IdVenta"]" />
+
+
+
+                        <!-- PRODUCTO -->
+
+                        <div>
+
+                            <label for="IdProducto"
+                                   class="block text-sm font-semibold text-slate-700 mb-2">
+
+                                Producto
+
+                            </label>
+
+
+                            <select id="IdProducto"
+                                    name="IdProducto"
+                                    class="w-full border border-slate-300
+                                rounded-lg px-3 py-2.5
+                                text-slate-700
+                                focus:outline-none
+                                focus:ring-2 focus:ring-indigo-500
+                                focus:border-indigo-500"
+                                    required>
+
+                                <option value="">
+                                    -- Seleccione un producto --
+                                </option>
+
+                                @if (ViewData["IdProducto"] is SelectList productos)
+                                {
+                                    foreach (var producto in productos)
+                                    {
+                                        <option value="@producto.Value">
+
+                                            @producto.Text
+
+                                        </option>
+                                    }
+                                }
+
+                            </select>
+
+                        </div>
+
+
+
+                        <!-- CANTIDAD -->
+
+                        <div>
+
+                            <label for="Cantidad"
+                                   class="block text-sm font-semibold text-slate-700 mb-2">
+
+                                Cantidad
+
+                            </label>
+
+
+                            <input type="number"
+                                   id="Cantidad"
+                                   name="Cantidad"
+                                   value="1"
+                                   min="1"
+                                   step="1"
+                                   class="w-full border border-slate-300
+                            rounded-lg px-3 py-2.5
+                            text-slate-700
+                            focus:outline-none
+                            focus:ring-2 focus:ring-indigo-500
+                            focus:border-indigo-500"
+                                   required />
+
+                            <p class="text-xs text-slate-500 mt-1">
+                                La cantidad no puede superar el stock disponible.
+                            </p>
+
+                        </div>
+
+
+
+                        <!-- ================================================= -->
+                        <!-- INFORMACIÓN -->
+                        <!-- ================================================= -->
+
+                        <div class="bg-indigo-50 border border-indigo-100
+                            rounded-lg p-4">
+
+                            <h3 class="font-semibold text-indigo-900 mb-2">
+                                Información
+                            </h3>
+
+                            <ul class="text-sm text-indigo-800 space-y-1">
+
+                                <li>
+                                    • El precio se obtiene automáticamente del producto.
+                                </li>
+
+                                <li>
+                                    • El subtotal será calculado por SQL Server.
+                                </li>
+
+                                <li>
+                                    • El total de la venta se actualizará automáticamente.
+                                </li>
+
+                                <li>
+                                    • El stock será actualizado después de agregar el producto.
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+
+
+                        <!-- ================================================= -->
+                        <!-- BOTONES -->
+                        <!-- ================================================= -->
+
+                        <div class="flex justify-end gap-3
+                            pt-4 border-t border-slate-200">
+
+                            <a href="/Venta/Details/@ViewData["IdVenta"]"
+                               class="px-4 py-2.5 rounded-lg
+                                border border-slate-300
+                                text-slate-600
+                                hover:bg-slate-100
+                                transition">
+
+                                Cancelar
+
+                            </a>
+
+
+                            <button type="submit"
+                                    class="bg-indigo-600 text-white
+                                px-5 py-2.5 rounded-lg
+                                shadow hover:bg-indigo-700
+                                transition">
+
+                                Agregar Producto
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    @section Scripts {
+
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+
+    }
+
+</body>
+</html>

@@ -1,59 +1,284 @@
 @model IEnumerable<TechStore.Models.DetalleVentum>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Detalles de Venta";
 }
 
-<h1>Index</h1>
+<!DOCTYPE html>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Cantidad)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PrecioUnitario)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Subtotal)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdProductoNavigation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdVentaNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cantidad)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PrecioUnitario)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Subtotal)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdProductoNavigation.IdProducto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdVentaNavigation.IdVenta)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdDetalleVenta">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdDetalleVenta">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdDetalleVenta">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<html lang="es">
+
+<head>
+
+    ```
+    <meta charset="utf-8" />
+
+    <title>
+        @ViewData["Title"] - TechStore
+    </title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    ```
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <div class="min-h-screen flex flex-col md:flex-row">
+
+        ```
+        <!-- SIDEBAR -->
+
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+
+            <div class="flex items-center gap-3 mb-8">
+
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
+                    TS
+                </div>
+
+                <span class="font-bold text-lg">
+                    TechStore Admin
+                </span>
+
+            </div>
+
+            <nav class="space-y-1">
+
+                <a href="/Admin/Dashboard"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Dashboard
+                </a>
+
+                <a href="/Usuario/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Usuarios
+                </a>
+
+                <a href="/Producto/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Productos
+                </a>
+
+                <a href="/Venta/Index"
+                   class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white">
+                    Ventas
+                </a>
+
+                <a href="/Garantia/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Garantías
+                </a>
+
+                <a href="/Proveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Proveedores
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- CONTENIDO -->
+
+        <main class="flex-1 p-6">
+
+            <div class="max-w-7xl mx-auto">
+
+                <div class="bg-white rounded-xl shadow p-6">
+
+                    <div class="flex justify-between items-center mb-6">
+
+                        <div>
+
+                            <h1 class="text-2xl font-bold text-slate-900">
+                                Detalles de Venta
+                            </h1>
+
+                            <p class="text-slate-500 mt-1">
+                                Productos registrados en las ventas
+                            </p>
+
+                        </div>
+
+                        <a href="/Venta/Index"
+                           class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition">
+                            Volver a Ventas
+                        </a>
+
+                    </div>
+
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="mb-5 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                            @TempData["Success"]
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="mb-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+
+                    @if (Model.Any())
+                    {
+
+                        <div class="overflow-x-auto">
+
+                            <table class="w-full">
+
+                                <thead>
+
+                                    <tr class="border-b border-slate-200">
+
+                                        <th class="text-left py-3 px-4 text-slate-600">
+                                            #
+                                        </th>
+
+                                        <th class="text-left py-3 px-4 text-slate-600">
+                                            Venta
+                                        </th>
+
+                                        <th class="text-left py-3 px-4 text-slate-600">
+                                            Cliente
+                                        </th>
+
+                                        <th class="text-left py-3 px-4 text-slate-600">
+                                            Producto
+                                        </th>
+
+                                        <th class="text-center py-3 px-4 text-slate-600">
+                                            Cantidad
+                                        </th>
+
+                                        <th class="text-right py-3 px-4 text-slate-600">
+                                            Precio
+                                        </th>
+
+                                        <th class="text-right py-3 px-4 text-slate-600">
+                                            Subtotal
+                                        </th>
+
+                                        <th class="text-center py-3 px-4 text-slate-600">
+                                            Acciones
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var detalle in Model)
+                                    {
+
+                                        <tr class="border-b border-slate-100 hover:bg-slate-50">
+
+                                            <td class="py-4 px-4 font-semibold">
+                                                @detalle.IdDetalleVenta
+                                            </td>
+
+                                            <td class="py-4 px-4">
+                                                #@detalle.IdVenta
+                                            </td>
+
+                                            <td class="py-4 px-4">
+
+                                                @detalle.IdVentaNavigation?.IdUsuarioNavigation?.Nombre
+                                                @detalle.IdVentaNavigation?.IdUsuarioNavigation?.Apellidos
+
+                                            </td>
+
+                                            <td class="py-4 px-4 font-semibold">
+                                                @detalle.IdProductoNavigation?.Nombre
+                                            </td>
+
+                                            <td class="py-4 px-4 text-center">
+                                                @detalle.Cantidad
+                                            </td>
+
+                                            <td class="py-4 px-4 text-right">
+                                                ₡@detalle.PrecioUnitario.ToString("N2")
+                                            </td>
+
+                                            <td class="py-4 px-4 text-right font-bold">
+                                                ₡@detalle.Subtotal.ToString("N2")
+                                            </td>
+
+                                            <td class="py-4 px-4">
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <a href="/DetalleVenta/Details/@detalle.IdDetalleVenta"
+                                                       class="px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+                                                        Ver
+                                                    </a>
+
+                                                    @if (detalle.IdVentaNavigation?.Estado != "Cancelada" &&
+                                                         detalle.IdVentaNavigation?.Estado != "Completada")
+                                                    {
+                                                        <a href="/DetalleVenta/Edit/@detalle.IdDetalleVenta"
+                                                           class="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700">
+                                                            Editar
+                                                        </a>
+
+                                                        <a href="/DetalleVenta/Delete/@detalle.IdDetalleVenta"
+                                                           class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700">
+                                                            Eliminar
+                                                        </a>
+                                                    }
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    }
+                    else
+                    {
+
+                        <div class="text-center py-12">
+
+                            <div class="text-5xl mb-4">
+                                📦
+                            </div>
+
+                            <h2 class="text-xl font-semibold text-slate-800">
+                                No hay detalles registrados
+                            </h2>
+
+                            <p class="text-slate-500 mt-2">
+                                Todavía no existen productos asociados a ventas.
+                            </p>
+
+                        </div>
+
+                    }
+
+                </div>
+
+            </div>
+
+        </main>
+        ```
+
+    </div>
+
+</body>
+
+</html>
+

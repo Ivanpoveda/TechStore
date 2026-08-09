@@ -1,89 +1,211 @@
 @model TechStore.Models.Ventum
 
 @{
-    ViewData["Title"] = "Eliminar Venta";
+    ViewData["Title"] = "Cancelar Venta";
 }
 
 <!DOCTYPE html>
+
 <html lang="es">
+
 <head>
+
+
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TechStore</title>
+
+    <title>
+        @ViewData["Title"] - TechStore
+    </title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+
 </head>
+
 <body class="bg-slate-100 min-h-screen">
 
-    <div class="flex flex-col md:flex-row min-h-screen">
+    <div class="min-h-screen flex flex-col md:flex-row">
 
         <!-- SIDEBAR -->
+
         <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+
             <div class="flex items-center gap-3 mb-8">
+
                 <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
                     TS
                 </div>
-                <span class="font-bold text-lg tracking-wide">TechStore Admin</span>
+
+                <span class="font-bold text-lg">
+                    TechStore Admin
+                </span>
+
             </div>
 
             <nav class="space-y-1">
-                <a href="/Admin/Dashboard" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">Dashboard</a>
-                <a href="/Usuario/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">Usuarios</a>
-                <a href="/Producto/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">Productos</a>
-                <a href="/Venta/Index" class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium">Ventas</a>
-                <a href="/Garantia/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">Garantías</a>
-                <a href="/Proveedor/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">Proveedores</a>
+
+                <a href="/Admin/Dashboard"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Dashboard
+                </a>
+
+                <a href="/Usuario/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Usuarios
+                </a>
+
+                <a href="/Producto/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Productos
+                </a>
+
+                <a href="/Venta/Index"
+                   class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white">
+                    Ventas
+                </a>
+
+                <a href="/Garantia/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Garantías
+                </a>
+
+                <a href="/Proveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Proveedores
+                </a>
+
             </nav>
+
         </aside>
 
+
         <!-- CONTENIDO -->
-        <main class="flex-1 p-6 md:p-8">
-            <div class="max-w-lg mx-auto">
+
+        <main class="flex-1 p-6">
+
+            <div class="max-w-2xl mx-auto">
+
                 <div class="bg-white rounded-xl shadow p-6">
 
                     <div class="text-center mb-6">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl">!</div>
-                        <h1 class="text-2xl font-bold text-slate-900">Eliminar Venta</h1>
-                        <p class="text-slate-500 mt-2">¿Estás seguro de que deseas eliminar esta venta?</p>
+
+                        <div class="text-5xl mb-4">
+                            ⚠️
+                        </div>
+
+                        <h1 class="text-2xl font-bold text-slate-900">
+                            Cancelar Venta #@Model.IdVenta
+                        </h1>
+
+                        <p class="text-slate-500 mt-2">
+                            Esta acción devolverá los productos al inventario.
+                        </p>
+
                     </div>
 
-                    <!-- INFORMACION -->
-                    <div class="bg-slate-50 rounded-lg p-4 space-y-3 mb-6">
-                        <div>
-                            <span class="font-semibold text-slate-600">Venta #:</span>
-                            <span class="text-slate-900">@Model.IdVenta</span>
+
+                    <div class="bg-slate-50 rounded-lg p-5 mb-6">
+
+                        <div class="flex justify-between py-2">
+
+                            <span class="text-slate-500">
+                                Cliente
+                            </span>
+
+                            <span class="font-semibold">
+                                @Model.IdUsuarioNavigation?.Nombre
+                                @Model.IdUsuarioNavigation?.Apellidos
+                            </span>
+
                         </div>
-                        <div>
-                            <span class="font-semibold text-slate-600">Cliente:</span>
-                            <span class="text-slate-900">@Model.IdUsuarioNavigation?.Nombre @Model.IdUsuarioNavigation?.Apellidos</span>
+
+                        <div class="flex justify-between py-2">
+
+                            <span class="text-slate-500">
+                                Fecha
+                            </span>
+
+                            <span>
+                                @Model.Fecha.ToString("dd-MM-yyyy HH:mm")
+                            </span>
+
                         </div>
-                        <div>
-                            <span class="font-semibold text-slate-600">Fecha:</span>
-                            <span class="text-slate-900">@Model.Fecha.ToString("yyyy-MM-dd HH:mm")</span>
+
+                        <div class="flex justify-between py-2">
+
+                            <span class="text-slate-500">
+                                Total
+                            </span>
+
+                            <span class="font-bold">
+                                ₡@((Model.Total ?? 0).ToString("N2"))
+                            </span>
+
                         </div>
-                        <div>
-                            <span class="font-semibold text-slate-600">Estado:</span>
-                            <span class="text-slate-900">@Model.Estado</span>
+
+                        <div class="flex justify-between py-2">
+
+                            <span class="text-slate-500">
+                                Estado actual
+                            </span>
+
+                            <span class="px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-700">
+                                @Model.Estado
+                            </span>
+
                         </div>
-                        <div>
-                            <span class="font-semibold text-slate-600">Total:</span>
-                            <span class="text-slate-900">₡@Model.Total.ToString("N2")</span>
-                        </div>
+
                     </div>
 
-                    <!-- FORMULARIO -->
-                    <form action="/Venta/Delete" method="post">
+
+                    <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-4 rounded-lg mb-6">
+
+                        <p class="font-semibold mb-1">
+                            ¿Qué ocurrirá?
+                        </p>
+
+                        <p class="text-sm">
+                            La venta pasará a estado
+                            <strong>Cancelada</strong>.
+                            Los productos vendidos serán devueltos al stock
+                            automáticamente y se registrará el movimiento en el
+                            historial de inventario.
+                        </p>
+
+                    </div>
+
+
+                    <form action="/Venta/DeleteConfirmed"
+                          method="post">
+
                         @Html.AntiForgeryToken()
-                        <input type="hidden" name="IdVenta" value="@Model.IdVenta" />
 
-                        <div class="flex justify-end gap-3">
-                            <a href="/Venta/Index" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition">Cancelar</a>
-                            <button type="submit" class="bg-red-600 text-white px-5 py-2 rounded-lg shadow hover:bg-red-700 transition">Confirmar Eliminación</button>
-                        </div>
+                        <input type="hidden"
+                               name="IdVenta"
+                               value="@Model.IdVenta" />
+
+                        <button type="submit"
+                                class="bg-red-600 text-white px-5 py-2.5 rounded-lg shadow hover:bg-red-700 transition">
+                            Cancelar Venta
+                        </button>
+
+                        <a href="/Venta/Index"
+                           class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition">
+                            Volver
+                        </a>
+
                     </form>
 
                 </div>
+
             </div>
+
         </main>
+        ```
+
     </div>
+
 </body>
+
 </html>
+

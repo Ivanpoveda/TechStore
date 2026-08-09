@@ -1,54 +1,247 @@
 @model TechStore.Models.Garantium
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalle de Garantía";
 }
 
-<h1>Details</h1>
+<meta charset="utf-8" />
 
-<div>
-    <h4>Garantium</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaSolicitud)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaSolicitud)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Motivo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Motivo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaResolucion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaResolucion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IdDetalleVentaNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IdDetalleVentaNavigation.IdDetalleVenta)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdGarantia">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<title>Detalle de Garantía - TechStore</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-slate-100 flex flex-col md:flex-row">
+
+    <!-- SIDEBAR -->
+
+    <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+
+        <div class="flex items-center gap-3 mb-8">
+
+            <div class="w-8 h-8 bg-indigo-500 rounded-lg
+                flex items-center justify-center font-bold">
+                TS
+            </div>
+
+            <span class="font-bold text-lg">
+                TechStore Admin
+            </span>
+
+        </div>
+
+        <nav class="space-y-1">
+
+            <a href="/Admin/Dashboard"
+               class="block px-4 py-2.5 rounded-lg
+                text-slate-400 hover:bg-indigo-600 hover:text-white">
+                Dashboard
+            </a>
+
+            <a href="/Usuario/Index"
+               class="block px-4 py-2.5 rounded-lg
+                text-slate-400 hover:bg-indigo-600 hover:text-white">
+                Usuarios
+            </a>
+
+            <a href="/Producto/Index"
+               class="block px-4 py-2.5 rounded-lg
+                text-slate-400 hover:bg-indigo-600 hover:text-white">
+                Productos
+            </a>
+
+            <a href="/Venta/Index"
+               class="block px-4 py-2.5 rounded-lg
+                text-slate-400 hover:bg-indigo-600 hover:text-white">
+                Ventas
+            </a>
+
+            <a href="/Garantia/Index"
+               class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white">
+                Garantías
+            </a>
+
+            <a href="/Proveedor/Index"
+               class="block px-4 py-2.5 rounded-lg
+                text-slate-400 hover:bg-indigo-600 hover:text-white">
+                Proveedores
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- CONTENIDO -->
+
+    <main class="flex-1 p-6">
+
+        <div class="max-w-3xl mx-auto">
+
+            <div class="bg-white rounded-xl shadow p-6">
+
+                <div class="flex justify-between items-start mb-6">
+
+                    <div>
+
+                        <h1 class="text-2xl font-bold text-slate-900">
+                            Garantía #@Model.IdGarantia
+                        </h1>
+
+                        <p class="text-slate-500 mt-1">
+                            Información de la solicitud.
+                        </p>
+
+                    </div>
+
+                    @if (Model.Estado == "En proceso")
+                    {
+                        <span class="px-3 py-1 rounded-full
+                            text-sm font-semibold
+                            bg-yellow-100 text-yellow-700">
+                            En proceso
+                        </span>
+                    }
+                    else if (Model.Estado == "Aprobada")
+                    {
+                        <span class="px-3 py-1 rounded-full
+                            text-sm font-semibold
+                            bg-green-100 text-green-700">
+                            Aprobada
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="px-3 py-1 rounded-full
+                            text-sm font-semibold
+                            bg-red-100 text-red-700">
+                            Rechazada
+                        </span>
+                    }
+
+                </div>
+
+
+                <div class="grid md:grid-cols-2 gap-5">
+
+                    <div class="bg-slate-50 rounded-lg p-4">
+
+                        <p class="text-sm text-slate-500">
+                            Producto
+                        </p>
+
+                        <p class="font-semibold text-slate-900 mt-1">
+
+                            @Model.IdDetalleVentaNavigation
+                            ?.IdProductoNavigation
+                            ?.Nombre
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="bg-slate-50 rounded-lg p-4">
+
+                        <p class="text-sm text-slate-500">
+                            Venta
+                        </p>
+
+                        <p class="font-semibold text-slate-900 mt-1">
+
+                            #@Model.IdDetalleVenta
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="bg-slate-50 rounded-lg p-4">
+
+                        <p class="text-sm text-slate-500">
+                            Fecha de solicitud
+                        </p>
+
+                        <p class="font-semibold text-slate-900 mt-1">
+
+                            @Model.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="bg-slate-50 rounded-lg p-4">
+
+                        <p class="text-sm text-slate-500">
+                            Fecha de resolución
+                        </p>
+
+                        <p class="font-semibold text-slate-900 mt-1">
+
+                            @(Model.FechaResolucion.HasValue
+                                ? Model.FechaResolucion.Value.ToString("dd/MM/yyyy HH:mm")
+                                : "Pendiente")
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-5">
+
+                    <p class="text-sm text-slate-500 mb-1">
+                        Motivo
+                    </p>
+
+                    <div class="bg-slate-50 rounded-lg p-4">
+                        @Model.Motivo
+                    </div>
+
+                </div>
+
+
+                <div class="mt-5">
+
+                    <p class="text-sm text-slate-500 mb-1">
+                        Descripción
+                    </p>
+
+                    <div class="bg-slate-50 rounded-lg p-4 min-h-[120px]">
+                        @Model.Descripcion
+                    </div>
+
+                </div>
+
+
+                <div class="flex justify-end gap-3 mt-6 pt-5
+                    border-t border-slate-200">
+
+                    <a href="/Garantia/Index"
+                       class="px-5 py-2.5 rounded-lg
+                        border border-slate-300
+                        text-slate-600 hover:bg-slate-100">
+
+                        Volver
+
+                    </a>
+
+                    <a href="/Garantia/Edit/@Model.IdGarantia"
+                       class="px-5 py-2.5 rounded-lg
+                        bg-indigo-600 text-white
+                        hover:bg-indigo-700">
+
+                        Editar
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
 </div>

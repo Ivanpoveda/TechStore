@@ -1,54 +1,217 @@
 @model TechStore.Models.DetalleVentum
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Detalle";
 }
 
-<h1>Edit</h1>
+<!DOCTYPE html>
 
-<h4>DetalleVentum</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdDetalleVenta" />
-            <div class="form-group">
-                <label asp-for="Cantidad" class="control-label"></label>
-                <input asp-for="Cantidad" class="form-control" />
-                <span asp-validation-for="Cantidad" class="text-danger"></span>
+<html lang="es">
+
+<head>
+
+    ```
+    <meta charset="utf-8" />
+
+    <title>
+        @ViewData["Title"] - TechStore
+    </title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    ```
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <div class="min-h-screen flex flex-col md:flex-row">
+
+        ```
+        <!-- SIDEBAR -->
+
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+
+            <div class="flex items-center gap-3 mb-8">
+
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
+                    TS
+                </div>
+
+                <span class="font-bold text-lg">
+                    TechStore Admin
+                </span>
+
             </div>
-            <div class="form-group">
-                <label asp-for="PrecioUnitario" class="control-label"></label>
-                <input asp-for="PrecioUnitario" class="form-control" />
-                <span asp-validation-for="PrecioUnitario" class="text-danger"></span>
+
+            <nav class="space-y-1">
+
+                <a href="/Admin/Dashboard"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Dashboard
+                </a>
+
+                <a href="/Usuario/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Usuarios
+                </a>
+
+                <a href="/Producto/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Productos
+                </a>
+
+                <a href="/Venta/Index"
+                   class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white">
+                    Ventas
+                </a>
+
+                <a href="/Garantia/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Garantías
+                </a>
+
+                <a href="/Proveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                    Proveedores
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+        <main class="flex-1 p-6">
+
+            <div class="max-w-2xl mx-auto">
+
+                <div class="bg-white rounded-xl shadow p-6">
+
+                    <h1 class="text-2xl font-bold text-slate-900">
+                        Editar Detalle
+                    </h1>
+
+                    <p class="text-slate-500 mt-1 mb-6">
+                        Modifica el producto o la cantidad.
+                    </p>
+
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="mb-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+
+                    <form action="/DetalleVenta/Edit"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <input type="hidden"
+                               name="IdDetalleVenta"
+                               value="@Model.IdDetalleVenta" />
+
+                        <input type="hidden"
+                               name="IdVenta"
+                               value="@Model.IdVenta" />
+
+
+                        <!-- VENTA -->
+
+                        <div class="mb-5">
+
+                            <label class="block font-semibold text-slate-700 mb-2">
+                                Venta
+                            </label>
+
+                            <input type="text"
+                                   value="Venta #@Model.IdVenta"
+                                   disabled
+                                   class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2.5 text-slate-600" />
+
+                        </div>
+
+
+                        <!-- PRODUCTO -->
+
+                        <div class="mb-5">
+
+                            <label class="block font-semibold text-slate-700 mb-2">
+                                Producto
+                            </label>
+
+                            <select name="IdProducto"
+                                    required
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+
+                                @foreach (var producto in
+                                    (IEnumerable<SelectListItem>)ViewData["IdProducto"])
+                                {
+                                    <option value="@producto.Value"
+                                            selected="@producto.Selected">
+                                        @producto.Text
+                                    </option>
+                                }
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- CANTIDAD -->
+
+                        <div class="mb-5">
+
+                            <label class="block font-semibold text-slate-700 mb-2">
+                                Cantidad
+                            </label>
+
+                            <input type="number"
+                                   name="Cantidad"
+                                   value="@Model.Cantidad"
+                                   min="1"
+                                   required
+                                   class="w-full border border-slate-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+
+                        </div>
+
+
+                        <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6 text-sm">
+
+                            Al guardar, el sistema ajustará automáticamente el
+                            stock del producto anterior y del nuevo producto,
+                            además de actualizar el subtotal y total de la venta.
+
+                        </div>
+
+
+                        <div class="flex justify-end gap-3">
+
+                            <a href="/Venta/Details/@Model.IdVenta"
+                               class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition">
+                                Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg shadow hover:bg-indigo-700 transition">
+                                Guardar cambios
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
             </div>
-            <div class="form-group">
-                <label asp-for="Subtotal" class="control-label"></label>
-                <input asp-for="Subtotal" class="form-control" />
-                <span asp-validation-for="Subtotal" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdVenta" class="control-label"></label>
-                <select asp-for="IdVenta" class="form-control" asp-items="ViewBag.IdVenta"></select>
-                <span asp-validation-for="IdVenta" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdProducto" class="control-label"></label>
-                <select asp-for="IdProducto" class="form-control" asp-items="ViewBag.IdProducto"></select>
-                <span asp-validation-for="IdProducto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+
+        </main>
+        ```
+
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+</body>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+</html>

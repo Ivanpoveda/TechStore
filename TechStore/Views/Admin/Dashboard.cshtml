@@ -78,7 +78,9 @@
         <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                 <p class="text-xs font-bold text-slate-400 uppercase">Ingresos Totales</p>
-                <p class="text-3xl font-extrabold text-slate-900 mt-2">@string.Format("{0:C}", Model.IngresosTotales)</p>
+                <p class="text-3xl font-extrabold text-slate-900 mt-2">
+                    ₡@Model.IngresosTotales.ToString("N2")
+                </p>
             </div>
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                 <p class="text-xs font-bold text-slate-400 uppercase">Usuarios Activos</p>
@@ -184,7 +186,7 @@
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return '$' + context.formattedValue;
+                            return '₡' + context.formattedValue;
                         }
                     }
                 }

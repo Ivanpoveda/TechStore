@@ -42,26 +42,125 @@ namespace TechStore.Controllers
             return View(proveedor);
         }
 
-        // GET: Proveedor/Create
+        // =========================================================
+        // CREATE - GET
+        // =========================================================
+        [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            return View(new Proveedor());
         }
 
-        // POST: Proveedor/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+        // =========================================================
+        // CREATE - POST
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdProveedor,Nombre,Empresa,Telefono,Correo,SitioWeb")] Proveedor proveedor)
+        public async Task<IActionResult> Create(
+            string Nombre,
+            string? Empresa,
+            string? Telefono,
+            string? Correo,
+            string? SitioWeb)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(proveedor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // =============================================
+                // VALIDAR NOMBRE
+                // =============================================
+                if (string.IsNullOrWhiteSpace(Nombre))
+                {
+                    TempData["Error"] =
+                        "El nombre del proveedor es obligatorio.";
+
+                    return View(new Proveedor
+                    {
+                        Nombre = Nombre,
+                        Empresa = Empresa,
+                        Telefono = Telefono,
+                        Correo = Correo,
+                        SitioWeb = SitioWeb
+                    });
+                }
+
+                // =============================================
+                // CREAR PROVEEDOR
+                // =============================================
+                var proveedor = new Proveedor
+                {
+                    Nombre = Nombre.Trim(),
+                    Empresa = string.IsNullOrWhiteSpace(Empresa)
+                        ? null
+                        : Empresa.Trim(),
+
+                    Telefono = string.IsNullOrWhiteSpace(Telefono)
+                        ? null
+                        : Telefono.Trim(),
+
+                    Correo = string.IsNullOrWhiteSpace(Correo)
+                        ? null
+                        : Correo.Trim(),
+
+                    SitioWeb = string.IsNullOrWhiteSpace(SitioWeb)
+                        ? null
+                        : SitioWeb.Trim()
+                };
+
+                // =============================================
+                // INSERTAR
+                // =============================================
+                _context.Proveedors.Add(proveedor);
+
+                int filas = await _context.SaveChangesAsync();
+
+                // =============================================
+                // CONFIRMAR
+                // =============================================
+                if (filas > 0)
+                {
+                    TempData["Success"] =
+                        $"El proveedor '{proveedor.Nombre}' fue registrado correctamente.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                TempData["Error"] =
+                    "No se pudo registrar el proveedor.";
+
+                return View(proveedor);
             }
-            return View(proveedor);
+            catch (DbUpdateException ex)
+            {
+                string mensaje =
+                    ex.InnerException?.Message ?? ex.Message;
+
+                TempData["Error"] =
+                    "No se pudo registrar el proveedor: " + mensaje;
+
+                return View(new Proveedor
+                {
+                    Nombre = Nombre,
+                    Empresa = Empresa,
+                    Telefono = Telefono,
+                    Correo = Correo,
+                    SitioWeb = SitioWeb
+                });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "Ocurrió un error: " + ex.Message;
+
+                return View(new Proveedor
+                {
+                    Nombre = Nombre,
+                    Empresa = Empresa,
+                    Telefono = Telefono,
+                    Correo = Correo,
+                    SitioWeb = SitioWeb
+                });
+            }
         }
 
         // GET: Proveedor/Edit/5

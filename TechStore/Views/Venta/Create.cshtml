@@ -1,68 +1,235 @@
 @model TechStore.Models.Ventum
+
 @{
-    ViewData["Title"] = "Crear Venta";
+    ViewData["Title"] = "Nueva Venta";
+    var usuarios = ViewBag.Usuarios as List<TechStore.Models.Usuario>;
+    int? usuarioSeleccionado = ViewBag.UsuarioSeleccionado;
 }
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
     <meta charset="utf-8" />
-    <title>@ViewData["Title"] - TechStore</title>
+
+    <title>
+        @ViewData["Title"] - TechStore
+    </title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
+
+
 <body class="bg-slate-100 min-h-screen">
-    <div class="flex flex-col md:flex-row min-h-screen">
+
+    <div class="min-h-screen bg-slate-100 flex flex-col md:flex-row">
 
         <!-- SIDEBAR -->
-        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">TS</div>
-                <span class="font-bold text-lg tracking-wide">TechStore Admin</span>
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 flex flex-col justify-between shrink-0">
+
+            <div>
+
+                <div class="flex items-center gap-3 mb-8">
+
+                    <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
+                        TS
+                    </div>
+
+                    <span class="font-bold text-lg">
+                        TechStore Admin
+                    </span>
+
+                </div>
+
+                <nav class="space-y-1">
+
+                    <a href="/Admin/Dashboard"
+                       class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                        Dashboard
+                    </a>
+
+                    <a href="/Usuario/Index"
+                       class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                        Usuarios
+                    </a>
+
+                    <a href="/Producto/Index"
+                       class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                        Productos
+                    </a>
+
+                    <a href="/Venta/Index"
+                       class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white">
+                        Ventas
+                    </a>
+
+                    <a href="/Garantia/Index"
+                       class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                        Garantías
+                    </a>
+
+                    <a href="/Proveedor/Index"
+                       class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
+                        Proveedores
+                    </a>
+
+                </nav>
+
             </div>
-            <nav class="space-y-1">
-                <a href="/Admin/Dashboard" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Dashboard</a>
-                <a href="/Usuario/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Usuarios</a>
-                <a href="/Producto/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Productos</a>
-                <a href="/Venta/Index" class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium">Ventas</a>
-                <a href="/Garantia/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Garantías</a>
-                <a href="/Proveedor/Index" class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white">Proveedores</a>
-            </nav>
+
         </aside>
 
+
         <!-- CONTENIDO -->
-        <main class="flex-1 p-6 md:p-8">
-            <div class="max-w-lg mx-auto bg-white rounded-xl shadow p-6">
-                <h1 class="text-2xl font-bold mb-4">Crear nueva venta</h1>
 
-                <form asp-action="Create" method="post" class="space-y-4">
-                    @Html.AntiForgeryToken()
+        <main class="flex-1 p-6">
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Cliente</label>
-                        <select asp-for="IdUsuario" asp-items="(SelectList)ViewData[" IdUsuario"]" class="mt-1 block w-full border-gray-300 rounded">
-                            <option value="">-- Seleccione --</option>
-                        </select>
-                        <span asp-validation-for="IdUsuario" class="text-red-600 text-sm"></span>
-                    </div>
+            <div class="max-w-2xl mx-auto">
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Impuesto</label>
-                            <input name="Impuesto" type="number" step="0.01" class="mt-1 block w-full border-gray-300 rounded" />
+                <div class="bg-white rounded-xl shadow p-6">
+
+                    <h1 class="text-2xl font-bold text-slate-900 mb-2">
+                        Nueva Venta
+                    </h1>
+
+                    <p class="text-slate-500 mb-6">
+                        Registra una nueva venta en TechStore.
+                    </p>
+
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="mb-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                            @TempData["Error"]
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Descuento</label>
-                            <input name="Descuento" type="number" step="0.01" class="mt-1 block w-full border-gray-300 rounded" />
-                        </div>
-                    </div>
+                    }
 
-                    <div class="flex justify-end gap-3">
-                        <a asp-action="Index" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100">Cancelar</a>
-                        <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700">Crear venta</button>
-                    </div>
-                </form>
+
+                    <form action="/Venta/Create" method="post">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <!-- CLIENTE -->
+
+                        <div class="mb-5">
+
+                            <label class="block font-semibold text-slate-700 mb-2">
+                                Cliente
+                            </label>
+
+                            <select name="IdUsuario"
+                                    required
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+
+                                <option value="">
+                                    -- Seleccione un cliente --
+                                </option>
+
+                                @if (usuarios != null)
+                                {
+                                    foreach (var usuario in usuarios)
+                                    {
+                                        if (usuarioSeleccionado == usuario.IdUsuario)
+                                        {
+                                            <option value="@usuario.IdUsuario" selected>
+                                                @usuario.Nombre @usuario.Apellidos - @usuario.Correo
+                                            </option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@usuario.IdUsuario">
+                                                @usuario.Nombre @usuario.Apellidos - @usuario.Correo
+                                            </option>
+                                        }
+                                    }
+                                }
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- IMPUESTO -->
+
+                        <div class="mb-5">
+
+                            <label class="block font-semibold text-slate-700 mb-2">
+                                Impuesto
+                            </label>
+
+                            <div class="relative">
+
+                                <span class="absolute left-3 top-2.5 text-slate-500">
+                                    ₡
+                                </span>
+
+                                <input type="number"
+                                       name="Impuesto"
+                                       value="0"
+                                       min="0"
+                                       step="0.01"
+                                       class="w-full border border-slate-300 rounded-lg pl-8 pr-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DESCUENTO -->
+
+                        <div class="mb-6">
+
+                            <label class="block font-semibold text-slate-700 mb-2">
+                                Descuento
+                            </label>
+
+                            <div class="relative">
+
+                                <span class="absolute left-3 top-2.5 text-slate-500">
+                                    ₡
+                                </span>
+
+                                <input type="number"
+                                       name="Descuento"
+                                       value="0"
+                                       min="0"
+                                       step="0.01"
+                                       class="w-full border border-slate-300 rounded-lg pl-8 pr-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- BOTONES -->
+
+                        <div class="flex justify-end gap-3">
+
+                            <a href="/Venta/Index"
+                               class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition">
+                                Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg shadow hover:bg-indigo-700 transition">
+                                Crear Venta
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
             </div>
+
         </main>
+
     </div>
+
 </body>
+
 </html>
