@@ -1,0 +1,392 @@
+﻿@model TechStore.Models.Producto
+
+@{
+    ViewData["Title"] = "Detalle del producto";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - TechStore
+    </title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+
+    <!-- ===================================================== -->
+    <!-- NAVBAR -->
+    <!-- ===================================================== -->
+
+    <nav class="bg-slate-900 text-white shadow-lg">
+
+        <div class="max-w-7xl mx-auto px-6 py-4">
+
+            <div class="flex flex-col md:flex-row
+                md:items-center md:justify-between gap-4">
+
+
+                <!-- LOGO -->
+
+                <a href="/Cliente/Catalogo"
+                   class="flex items-center gap-3">
+
+                    <div class="w-9 h-9 bg-indigo-500 rounded-lg
+                        flex items-center justify-center font-bold">
+
+                        TS
+
+                    </div>
+
+                    <span class="font-bold text-xl">
+
+                        TechStore
+
+                    </span>
+
+                </a>
+
+
+                <!-- NAVEGACIÓN -->
+
+                <div class="flex flex-wrap items-center gap-2">
+
+                    <a href="/Cliente/Catalogo"
+                       class="px-4 py-2 rounded-lg
+                        text-slate-300
+                        hover:bg-slate-800
+                        hover:text-white transition">
+
+                        Productos
+
+                    </a>
+
+
+                    <a href="/Carrito/Index"
+                       class="px-4 py-2 rounded-lg
+                        text-slate-300
+                        hover:bg-slate-800
+                        hover:text-white transition">
+
+                        🛒 Carrito
+
+                    </a>
+
+
+                    <a href="/Venta/Index"
+                       class="px-4 py-2 rounded-lg
+                        text-slate-300
+                        hover:bg-slate-800
+                        hover:text-white transition">
+
+                        Mis compras
+
+                    </a>
+
+
+                    <a href="/Garantia/Index"
+                       class="px-4 py-2 rounded-lg
+                        text-slate-300
+                        hover:bg-slate-800
+                        hover:text-white transition">
+
+                        Garantías
+
+                    </a>
+
+
+                    <form action="/Account/Logout"
+                          method="post"
+                          class="inline">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="px-4 py-2 rounded-lg
+                            text-rose-400
+                            hover:bg-rose-500
+                            hover:text-white transition">
+
+                            Salir
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+    <!-- ===================================================== -->
+    <!-- CONTENIDO -->
+    <!-- ===================================================== -->
+
+    <main class="max-w-6xl mx-auto px-6 py-10">
+
+
+        <!-- VOLVER -->
+
+        <div class="mb-6">
+
+            <a href="/Cliente/Catalogo"
+               class="text-indigo-600 hover:text-indigo-800
+                font-medium">
+
+                ← Volver al catálogo
+
+            </a>
+
+        </div>
+
+
+        <!-- PRODUCTO -->
+
+        <div class="bg-white rounded-2xl shadow-lg
+            overflow-hidden">
+
+
+            <div class="grid grid-cols-1 md:grid-cols-2">
+
+
+                <!-- ================================================= -->
+                <!-- IMAGEN -->
+                <!-- ================================================= -->
+
+                <div class="bg-slate-100
+                    min-h-[450px]
+                    flex items-center justify-center">
+
+                    <span class="text-9xl">
+
+                        🖥️
+
+                    </span>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- INFORMACIÓN -->
+                <!-- ================================================= -->
+
+                <div class="p-8">
+
+
+                    <!-- CATEGORÍA -->
+
+                    <p class="text-sm font-semibold
+                        text-indigo-600 uppercase mb-2">
+
+                        @(Model.IdCategoriaNavigation?.Nombre
+                            ?? "Sin categoría")
+
+                    </p>
+
+
+                    <!-- NOMBRE -->
+
+                    <h1 class="text-3xl font-extrabold
+                        text-slate-900">
+
+                        @Model.Nombre
+
+                    </h1>
+
+
+                    <!-- MARCA -->
+
+                    <p class="text-slate-500 mt-2">
+
+                        Marca:
+
+                        <span class="font-semibold text-slate-700">
+
+                            @(Model.IdMarcaNavigation?.Nombre
+                                ?? "Sin marca")
+
+                        </span>
+
+                    </p>
+
+
+                    <!-- PRECIO -->
+
+                    <div class="mt-6">
+
+                        <p class="text-4xl font-extrabold
+                            text-slate-900">
+
+                            ₡@Model.Precio.ToString("N2")
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- DESCRIPCIÓN -->
+
+                    <div class="mt-8">
+
+                        <h2 class="text-lg font-bold
+                            text-slate-900 mb-2">
+
+                            Descripción
+
+                        </h2>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Descripcion))
+                        {
+
+                            <p class="text-slate-600 leading-relaxed">
+
+                                @Model.Descripcion
+
+                            </p>
+
+                        }
+                        else
+                        {
+
+                            <p class="text-slate-400">
+
+                                Este producto no tiene
+                                una descripción registrada.
+
+                            </p>
+
+                        }
+
+                    </div>
+
+
+                    <!-- STOCK -->
+
+                    <div class="mt-8">
+
+                        <h2 class="text-lg font-bold
+                            text-slate-900 mb-2">
+
+                            Disponibilidad
+
+                        </h2>
+
+
+                        @if (Model.Stock > 0)
+                        {
+
+                            <span class="inline-flex
+                                px-3 py-1.5
+                                rounded-full
+                                text-sm font-semibold
+                                bg-green-100
+                                text-green-700">
+
+                                ✓ Stock disponible:
+                                @Model.Stock unidades
+
+                            </span>
+
+                        }
+                        else
+                        {
+
+                            <span class="inline-flex
+                                px-3 py-1.5
+                                rounded-full
+                                text-sm font-semibold
+                                bg-red-100
+                                text-red-700">
+
+                                ✕ Producto agotado
+
+                            </span>
+
+                        }
+
+                    </div>
+
+
+                    <!-- ACCIONES -->
+
+                    <div class="mt-8
+                        flex flex-col sm:flex-row
+                        gap-3">
+
+
+                        <a href="/Cliente/Catalogo"
+                           class="px-6 py-3
+                            rounded-lg
+                            border border-slate-300
+                            text-slate-700
+                            text-center
+                            hover:bg-slate-100 transition">
+
+                            Volver al catálogo
+
+                        </a>
+
+
+                        @if (Model.Stock > 0)
+                        {
+
+                            <a href="/Carrito/Agregar/@Model.IdProducto"
+                               class="px-6 py-3
+                                rounded-lg
+                                bg-indigo-600
+                                text-white
+                                text-center
+                                font-semibold
+                                shadow
+                                hover:bg-indigo-700 transition">
+
+                                🛒 Agregar al carrito
+
+                            </a>
+
+                        }
+                        else
+                        {
+
+                            <button type="button"
+                                    disabled
+                                    class="px-6 py-3
+                                rounded-lg
+                                bg-slate-300
+                                text-slate-500
+                                cursor-not-allowed">
+
+                                Producto agotado
+
+                            </button>
+
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>

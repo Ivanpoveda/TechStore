@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using TechStore.Models;
 
 namespace TechStore.Models;
 
 public partial class Producto
 {
-    public static object FechaRegistro { get; internal set; }
     public int IdProducto { get; set; }
 
     public string Nombre { get; set; } = null!;
@@ -35,4 +33,9 @@ public partial class Producto
     public virtual Categorium IdCategoriaNavigation { get; set; } = null!;
 
     public virtual Marca IdMarcaNavigation { get; set; } = null!;
+
+    internal static object FechaRegistro()
+    {
+        throw new NotImplementedException();
+    }
 }

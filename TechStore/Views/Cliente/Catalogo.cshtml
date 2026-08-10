@@ -1,7 +1,371 @@
-﻿@{
-    ViewData["Title"] = "Catálogo Cliente";
+﻿@model IEnumerable<TechStore.Models.Producto>
+
+@{
+    ViewData["Title"] = "Catálogo";
 }
 
-<h2>Bienvenido al catálogo</h2>
-<p>Aquí podrás ver los productos disponibles.</p>
-<a href="/Carrito/Index">Ir al carrito</a>
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <!-- ===================================================== -->
+    <!-- NAVBAR -->
+    <!-- ===================================================== -->
+
+    <nav class="bg-slate-900 text-white shadow-lg">
+
+        <div class="max-w-7xl mx-auto px-6 py-4">
+
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                <!-- LOGO -->
+
+                <a href="/Cliente/Catalogo"
+                   class="flex items-center gap-3">
+
+                    <div class="w-9 h-9 bg-indigo-500 rounded-lg
+                        flex items-center justify-center font-bold">
+                        TS
+                    </div>
+
+                    <span class="font-bold text-xl">
+                        TechStore
+                    </span>
+
+                </a>
+
+
+                <!-- NAVEGACIÓN -->
+
+                <div class="flex flex-wrap items-center gap-2">
+
+                    <a href="/Cliente/Catalogo"
+                       class="px-4 py-2 rounded-lg bg-indigo-600 text-white">
+                        Productos
+                    </a>
+
+                    <a href="/Carrito/Index"
+                       class="px-4 py-2 rounded-lg text-slate-300
+                        hover:bg-slate-800 hover:text-white transition">
+                        🛒 Carrito
+                    </a>
+
+                    <a href="/Venta/Index"
+                       class="px-4 py-2 rounded-lg text-slate-300
+                        hover:bg-slate-800 hover:text-white transition">
+                        Mis compras
+                    </a>
+
+                    <a href="/Garantia/Index"
+                       class="px-4 py-2 rounded-lg text-slate-300
+                        hover:bg-slate-800 hover:text-white transition">
+                        Garantías
+                    </a>
+
+                    <form action="/Account/Logout"
+                          method="post"
+                          class="inline">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="px-4 py-2 rounded-lg text-rose-400
+                            hover:bg-rose-500 hover:text-white transition">
+
+                            Salir
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+    <!-- ===================================================== -->
+    <!-- CONTENIDO -->
+    <!-- ===================================================== -->
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+
+        <!-- ================================================= -->
+        <!-- ENCABEZADO -->
+        <!-- ================================================= -->
+
+        <div class="mb-8">
+
+            <h1 class="text-3xl font-extrabold text-slate-900">
+                Productos
+            </h1>
+
+            <p class="text-slate-500 mt-2">
+                Encuentra el hardware que necesitas para tu equipo.
+            </p>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- CANTIDAD -->
+        <!-- ================================================= -->
+
+        <div class="flex items-center justify-between mb-5">
+
+            <div>
+
+                <h2 class="text-xl font-bold text-slate-900">
+                    Productos disponibles
+                </h2>
+
+                <p class="text-sm text-slate-500 mt-1">
+
+                    @if (Model != null)
+                    {
+                        @Model.Count() <text> producto(s) disponible(s)</text>
+                    }
+                    else
+                    {
+                        <text> 0 productos disponibles</text>
+                    }
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PRODUCTOS -->
+        <!-- ================================================= -->
+        @if (Model != null && Model.Any())
+        {
+
+            <div class="grid grid-cols-1 sm:grid-cols-2
+                lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+
+                @foreach (var producto in Model)
+                {
+
+                    <!-- ================================================= -->
+                    <!-- TARJETA -->
+                    <!-- ================================================= -->
+
+                    <div class="bg-white rounded-xl shadow
+                        hover:shadow-xl transition
+                        overflow-hidden flex flex-col">
+
+
+                        <!-- IMAGEN TEMPORAL -->
+
+                        <div class="h-44 bg-slate-100
+                            flex items-center justify-center">
+
+                            <span class="text-6xl">
+                                🖥️
+                            </span>
+
+                        </div>
+
+
+                        <!-- INFORMACIÓN -->
+
+                        <div class="p-5 flex flex-col flex-1">
+
+
+                            <!-- CATEGORÍA -->
+
+                            <p class="text-xs font-semibold
+                                text-indigo-600 uppercase">
+
+                                @(producto.IdCategoriaNavigation?.Nombre
+                                    ?? "Sin categoría")
+
+                            </p>
+
+
+                            <!-- NOMBRE -->
+
+                            <h3 class="text-lg font-bold
+                                text-slate-900 mt-1">
+
+                                @producto.Nombre
+
+                            </h3>
+
+
+                            <!-- MARCA -->
+
+                            <p class="text-sm text-slate-500 mt-1">
+
+                                @(producto.IdMarcaNavigation?.Nombre
+                                    ?? "Sin marca")
+
+                            </p>
+
+
+                            <!-- DESCRIPCIÓN -->
+                            @if (!string.IsNullOrWhiteSpace(producto.Descripcion))
+                            {
+
+                                <p class="text-sm text-slate-500
+                                    mt-3 mb-4 line-clamp-3">
+
+                                    @producto.Descripcion
+
+                                </p>
+
+                            }
+
+
+                            <!-- PRECIO -->
+
+                            <div class="mb-4">
+
+                                <p class="text-2xl font-extrabold
+                                    text-slate-900">
+
+                                    ₡@producto.Precio.ToString("N2")
+
+                                </p>
+
+                            </div>
+
+
+                            <!-- STOCK -->
+
+                            <div class="mb-5">
+
+                                @if (producto.Stock > 0)
+                                {
+
+                                    <span class="inline-flex items-center
+                                        px-2.5 py-1 rounded-full
+                                        text-xs font-semibold
+                                        bg-green-100 text-green-700">
+
+                                        Stock disponible:
+                                        @producto.Stock
+
+                                    </span>
+
+                                }
+                                else
+                                {
+
+                                    <span class="inline-flex items-center
+                                        px-2.5 py-1 rounded-full
+                                        text-xs font-semibold
+                                        bg-red-100 text-red-700">
+
+                                        Agotado
+
+                                    </span>
+
+                                }
+
+                            </div>
+
+
+                            <!-- BOTÓN -->
+
+                            <div class="mt-auto">
+
+                                @if (producto.Stock > 0)
+                                {
+
+                                    <a href="/Cliente/DetalleProducto/@producto.IdProducto"
+                                       class="block w-full text-center
+                                        bg-indigo-600 text-white
+                                        px-4 py-2.5 rounded-lg
+                                        hover:bg-indigo-700 transition">
+
+                                        Ver producto
+
+                                    </a>
+
+                                }
+                                else
+                                {
+
+                                    <button type="button"
+                                            disabled
+                                            class="block w-full
+                                        bg-slate-300 text-slate-500
+                                        px-4 py-2.5 rounded-lg
+                                        cursor-not-allowed">
+
+                                        Producto agotado
+
+                                    </button>
+
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                }
+
+            </div>
+
+        }
+        else
+        {
+
+            <!-- ================================================= -->
+            <!-- SIN PRODUCTOS -->
+            <!-- ================================================= -->
+
+            <div class="bg-white rounded-xl shadow
+                p-10 text-center">
+
+                <div class="text-5xl mb-4">
+                    📦
+                </div>
+
+                <h3 class="text-xl font-bold text-slate-800">
+
+                    No hay productos disponibles
+
+                </h3>
+
+                <p class="text-slate-500 mt-2">
+
+                    Actualmente no existen productos activos
+                    para mostrar.
+
+                </p>
+
+            </div>
+
+        }
+
+    </main>
+
+</body>
+
+</html>
