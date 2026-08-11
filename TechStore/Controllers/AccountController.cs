@@ -27,16 +27,19 @@ namespace TechStore.Controllers
         }
 
         // POST: /Account/Login
+
+// POST: /Account/Login
         [HttpPost]
         public async Task<IActionResult> Login(string correo, string contrasenia)
         {
             string hashContrasenia = HashPassword(contrasenia);
 
-            var usuario = _context.Usuarios
+            var usuario = await _context.Usuarios
                 .Include(u => u.IdRolNavigation)
-                .FirstOrDefault(u =>
+                .FirstOrDefaultAsync(u =>
                     u.Correo == correo &&
-                    u.Contrasenia == hashContrasenia);
+                    u.Contrasenia == hashContrasenia &&
+                    u.Estado == "Activo");
 
             if (usuario == null)
             {
@@ -44,17 +47,46 @@ namespace TechStore.Controllers
                 return View();
             }
 
-            var claims = new List<Claim>
+            // =====================================================
+            // OBTENER NOMBRE DEL ROL
+            // =====================================================
+
+            string nombreRol = usuario.IdRolNavigation?.Nombre ?? "";
+
+            // =====================================================
+            // VALIDAR ROL
+            // =====================================================
+
+            if (string.IsNullOrWhiteSpace(nombreRol))
             {
-                new Claim(ClaimTypes.Name, usuario.Nombre),
-                new Claim(ClaimTypes.Email, usuario.Correo),
+                ViewBag.Error = "El usuario no tiene un rol asignado.";
+                return View();
+            }
+
+            // =====================================================
+            // CREAR CLAIMS
+            // =====================================================
+
+            var claims = new List<Claim>
+                {
                 new Claim(
-                    ClaimTypes.Role,
-                    usuario.IdRolNavigation?.Nombre ?? ""
+                    ClaimTypes.Name,
+                    usuario.Nombre
                 ),
+
+                new Claim(
+                    ClaimTypes.Email,
+                    usuario.Correo
+                ),
+
                 new Claim(
                     ClaimTypes.NameIdentifier,
                     usuario.IdUsuario.ToString()
+                ),
+
+                new Claim(
+                    ClaimTypes.Role,
+                    nombreRol
                 )
             };
 
@@ -65,25 +97,40 @@ namespace TechStore.Controllers
 
             var principal = new ClaimsPrincipal(identity);
 
+            // =====================================================
+            // CREAR COOKIE DE AUTENTICACIÓN
+            // =====================================================
+
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 principal
             );
 
+            // =====================================================
+            // REDIRECCIÓN SEGÚN ROL
+            // =====================================================
+
             if (usuario.IdRol == 1)
             {
-                return RedirectToAction("Dashboard", "Admin");
+                return RedirectToAction(
+                    "Dashboard",
+                    "Admin"
+                );
             }
-            else if (usuario.IdRol == 2)
-            {
-                return RedirectToAction("Catalogo", "Cliente");
-            }
-            else
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
-        }
 
+            if (usuario.IdRol == 2)
+            {
+                return RedirectToAction(
+                    "Catalogo",
+                    "Cliente"
+                );
+            }
+
+            return RedirectToAction(
+                "AccessDenied",
+                "Account"
+            );
+        }
 
         // GET: /Account/Register
         [HttpGet]

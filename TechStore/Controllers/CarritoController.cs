@@ -36,7 +36,9 @@ namespace TechStore.Controllers
 
             return userId;
         }
-
+        // ===================================================== // CATÁLOGO DEL CLIENTE // =====================================================
+        [HttpGet] public async Task<IActionResult> Catalogo() { var productos = await _context.Productos .Include(p => p.IdCategoriaNavigation) .Include(p => p.IdMarcaNavigation) .Where(p => p.Estado == "Activo") .OrderBy(p => p.Nombre) .ToListAsync(); return View("Catalogo", productos); } // ===================================================== // DETALLE DEL PRODUCTO // ===================================================== [HttpGet] public async Task<IActionResult> DetalleProducto(int id) { var producto = await _context.Productos .Include(p => p.IdCategoriaNavigation) .Include(p => p.IdMarcaNavigation) .FirstOrDefaultAsync(p => p.IdProducto == id && p.Estado == "Activo"); if (producto == null) { return NotFound(); } return View("DetalleProducto", producto); } // ===================================================== // MIS COMPRAS // ===================================================== [HttpGet] public async Task<IActionResult> MisCompras() { var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier); if (string.IsNullOrEmpty(userIdClaim)) { return Unauthorized(); } if (!int.TryParse(userIdClaim, out int userId)) { return Unauthorized(); } var ventas = await _context.Venta .Include(v => v.DetalleVenta) .ThenInclude(d => d.IdProductoNavigation) .Where(v => v.IdUsuario == userId) .OrderByDescending(v => v.Fecha) .ToListAsync(); return View("MisCompras", ventas); } // ===================================================== // DETALLE DE MI COMPRA // ===================================================== [HttpGet] public async Task<IActionResult> DetalleCompra(int id) { var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier); if (string.IsNullOrEmpty(userIdClaim)) { return Unauthorized(); } if (!int.TryParse(userIdClaim, out int userId)) { return Unauthorized(); } var venta = await _context.Venta .Include(v => v.DetalleVenta) .ThenInclude(d => d.IdProductoNavigation) .FirstOrDefaultAsync(v => v.IdVenta == id && v.IdUsuario == userId); if (venta == null) { return NotFound(); } return View("DetalleCompra", venta);
+        
 
         // =====================================================
         // MOSTRAR CARRITO
@@ -430,7 +432,7 @@ namespace TechStore.Controllers
                     Descuento = 0,
                     Impuesto = 0,
                     Total = total,
-                    Estado = "Pendiente"
+                    Estado = "Completada"
                 };
 
                 _context.Venta.Add(venta);
@@ -522,12 +524,9 @@ namespace TechStore.Controllers
 
                 await transaction.CommitAsync();
 
-                TempData["Success"] =
-                    "Compra realizada correctamente.";
+                TempData["Success"] = "Compra realizada correctamente.";
 
-                return RedirectToAction(
-                    "MisCompras",
-                    "Cliente");
+                return Redirect("/Cliente/MisCompras");
             }
             catch (Exception ex)
             {
@@ -536,7 +535,7 @@ namespace TechStore.Controllers
                 TempData["Error"] =
                     "ERROR REAL: " + ex.Message;
 
-                return RedirectToAction("Index");
+                return RedirectToAction("Catalogo", "Cliente");
             }
         }
     }

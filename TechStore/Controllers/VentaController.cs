@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using TechStore.Models;
 
 namespace TechStore.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     public class VentaController : Controller
     {
         private readonly TechStoreContext _context;
