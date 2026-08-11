@@ -1,0 +1,99 @@
+﻿@model IEnumerable<TechStore.Models.Ventum>
+
+@{
+    ViewData["Title"] = "Mis compras";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Mis compras</h2>
+            <p class="text-muted mb-0">
+                Consulta el historial de tus compras.
+            </p>
+        </div>
+
+        <a asp-controller="Cliente"
+           asp-action="Catalogo"
+           class="btn btn-primary">
+            Seguir comprando
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Aún no tienes compras registradas.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Venta</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Productos</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var venta in Model)
+                    {
+                        <tr>
+                            <td>
+                                #@venta.IdVenta
+                            </td>
+
+                            <td>
+                                @venta.Fecha.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+
+                            <td>
+                                ₡@venta.Total.ToString("N2")
+                            </td>
+
+                            <td>
+                                @if (venta.Estado == "Pendiente")
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Pendiente
+                                    </span>
+                                }
+                                else if (venta.Estado == "Completada")
+                                {
+                                    <span class="badge bg-success">
+                                        Completada
+                                    </span>
+                                }
+                                else if (venta.Estado == "Cancelada")
+                                {
+                                    <span class="badge bg-danger">
+                                        Cancelada
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        @venta.Estado
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                @(venta.DetalleVenta?.Count ?? 0)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    }
+
+</div>

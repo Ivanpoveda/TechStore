@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TechStore.Models;
 
 namespace TechStore.Controllers
@@ -12,6 +13,7 @@ namespace TechStore.Controllers
         {
             _context = context;
         }
+
 
         // =====================================================
         // CATÁLOGO DEL CLIENTE
@@ -49,6 +51,32 @@ namespace TechStore.Controllers
             }
 
             return View("DetalleProducto", producto);
+        }
+
+
+        // =====================================================
+        // MIS COMPRAS
+        // =====================================================
+        [HttpGet]
+        public async Task<IActionResult> MisCompras()
+        {
+            var userIdClaim =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized();
+
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
+
+            var ventas = await _context.Venta
+                .Include(v => v.DetalleVenta)
+                    .ThenInclude(d => d.IdProductoNavigation)
+                .Where(v => v.IdUsuario == userId)
+                .OrderByDescending(v => v.Fecha)
+                .ToListAsync();
+
+            return View("MisCompras", ventas);
         }
     }
 }

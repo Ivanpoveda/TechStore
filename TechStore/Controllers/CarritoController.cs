@@ -1,7 +1,12 @@
+using Humanizer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using TechStore.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TechStore.Controllers
 {
@@ -14,17 +19,114 @@ namespace TechStore.Controllers
             _context = context;
         }
 
-        // Mostrar carrito activo del usuario logueado
+
+        // =====================================================
+        // OBTENER ID DEL USUARIO LOGUEADO
+        // =====================================================
+        private int? ObtenerUsuarioId()
+        {
+            var userIdClaim =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                return null;
+
+            if (!int.TryParse(userIdClaim, out int userId))
+                return null;
+
+            return userId;
+        }
+
+
+        // =====================================================
+        // MOSTRAR CARRITO
+        // =====================================================
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
-            var userId = int.Parse(userIdClaim);
+            var userId = ObtenerUsuarioId();
+
+            if (!userId.HasValue)
+                return Unauthorized();
 
             var carrito = await _context.Carritos
                 .Include(c => c.DetalleCarritos)
-                .ThenInclude(dc => dc.IdProductoNavigation)
-                .FirstOrDefaultAsync(c => c.IdUsuario == userId && c.Estado == "Activo");
+                    .ThenInclude(dc => dc.IdProductoNavigation)
+                .FirstOrDefaultAsync(c =>
+                    c.IdUsuario == userId.Value &&
+                    c.Estado == "Activo");
+
+            // Si no existe carrito activo, crearlo
+            if (carrito == null)
+            {
+                carrito = new Carrito
+                {
+                    FechaCreacion = DateTime.Now,
+                    Estado = "Activo",
+                    IdUsuario = userId.Value
+                };
+
+                _context.Carritos.Add(carrito);
+
+                await _context.SaveChangesAsync();
+            }
+
+            return View(carrito);
+        }
+
+
+        // =====================================================
+        // AGREGAR PRODUCTO AL CARRITO
+        // =====================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AgregarProducto(
+            int productoId,
+            int cantidad)
+        {
+            var userId = ObtenerUsuarioId();
+
+            if (!userId.HasValue)
+                return Unauthorized();
+
+            if (cantidad <= 0)
+            {
+                TempData["Error"] =
+                    "La cantidad debe ser mayor que cero.";
+
+                return RedirectToAction("Catalogo", "Cliente");
+            }
+
+            // =================================================
+            // BUSCAR PRODUCTO
+            // =================================================
+
+            var producto = await _context.Productos
+                .FirstOrDefaultAsync(p =>
+                    p.IdProducto == productoId &&
+                    p.Estado == "Activo");
+
+            if (producto == null)
+            {
+                TempData["Error"] =
+                    "El producto no existe o no está disponible.";
+
+                return RedirectToAction("Catalogo", "Cliente");
+            }
+
+            // =================================================
+            // BUSCAR CARRITO ACTIVO
+            // =================================================
+
+            var carrito = await _context.Carritos
+                .Include(c => c.DetalleCarritos)
+                .FirstOrDefaultAsync(c =>
+                    c.IdUsuario == userId.Value &&
+                    c.Estado == "Activo");
+
+            // =================================================
+            // CREAR CARRITO SI NO EXISTE
+            // =================================================
 
             if (carrito == null)
             {
@@ -32,35 +134,54 @@ namespace TechStore.Controllers
                 {
                     FechaCreacion = DateTime.Now,
                     Estado = "Activo",
-                    IdUsuario = userId
+                    IdUsuario = userId.Value
                 };
+
                 _context.Carritos.Add(carrito);
+
                 await _context.SaveChangesAsync();
             }
 
-            return View(carrito);
-        }
+            // =================================================
+            // BUSCAR SI EL PRODUCTO YA ESTÁ EN EL CARRITO
+            // =================================================
 
-        // Agregar producto al carrito
-        [HttpPost]
-        public async Task<IActionResult> AgregarProducto(int productoId, int cantidad)
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
-            var userId = int.Parse(userIdClaim);
+            var detalle = carrito.DetalleCarritos
+                .FirstOrDefault(dc =>
+                    dc.IdProducto == productoId);
 
-            var carrito = await _context.Carritos
-                .Include(c => c.DetalleCarritos)
-                .FirstOrDefaultAsync(c => c.IdUsuario == userId && c.Estado == "Activo");
+            int cantidadFinal;
 
-            var producto = await _context.Productos.FindAsync(productoId);
-            if (producto == null || producto.Stock < cantidad)
+            if (detalle == null)
             {
-                TempData["Error"] = "Stock insuficiente";
-                return RedirectToAction("Index");
+                cantidadFinal = cantidad;
+            }
+            else
+            {
+                cantidadFinal =
+                    detalle.Cantidad + cantidad;
             }
 
-            var detalle = carrito.DetalleCarritos.FirstOrDefault(dc => dc.IdProducto == productoId);
+            // =================================================
+            // VALIDAR STOCK
+            // =================================================
+
+            if (cantidadFinal > producto.Stock)
+            {
+                TempData["Error"] =
+                    $"No hay suficiente stock. " +
+                    $"Stock disponible: {producto.Stock}.";
+
+                return RedirectToAction(
+                    "DetalleProducto",
+                    "Cliente",
+                    new { id = productoId });
+            }
+
+            // =================================================
+            // AGREGAR O ACTUALIZAR
+            // =================================================
+
             if (detalle == null)
             {
                 detalle = new DetalleCarrito
@@ -69,90 +190,354 @@ namespace TechStore.Controllers
                     IdProducto = productoId,
                     Cantidad = cantidad
                 };
-                carrito.DetalleCarritos.Add(detalle);
+
+                _context.DetalleCarritos.Add(detalle);
             }
             else
             {
-                detalle.Cantidad += cantidad;
+                detalle.Cantidad = cantidadFinal;
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
 
-        // Quitar producto del carrito
-        [HttpPost]
-        public async Task<IActionResult> QuitarProducto(int productoId)
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
-            var userId = int.Parse(userIdClaim);
-
-            var carrito = await _context.Carritos
-                .Include(c => c.DetalleCarritos)
-                .FirstOrDefaultAsync(c => c.IdUsuario == userId && c.Estado == "Activo");
-
-            var detalle = carrito?.DetalleCarritos.FirstOrDefault(dc => dc.IdProducto == productoId);
-            if (detalle != null)
-            {
-                _context.DetalleCarritos.Remove(detalle);
-                await _context.SaveChangesAsync();
-            }
+            TempData["Success"] =
+                "Producto agregado al carrito.";
 
             return RedirectToAction("Index");
         }
 
-        // Confirmar compra
+
+        // =====================================================
+        // QUITAR PRODUCTO
+        // =====================================================
         [HttpPost]
-        public async Task<IActionResult> ConfirmarCompra()
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> QuitarProducto(
+            int productoId)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
-            var userId = int.Parse(userIdClaim);
+            var userId = ObtenerUsuarioId();
+
+            if (!userId.HasValue)
+                return Unauthorized();
 
             var carrito = await _context.Carritos
                 .Include(c => c.DetalleCarritos)
-                .ThenInclude(dc => dc.IdProductoNavigation)
-                .FirstOrDefaultAsync(c => c.IdUsuario == userId && c.Estado == "Activo");
+                .FirstOrDefaultAsync(c =>
+                    c.IdUsuario == userId.Value &&
+                    c.Estado == "Activo");
 
-            if (carrito == null || !carrito.DetalleCarritos.Any())
+            if (carrito == null)
             {
-                TempData["Error"] = "El carrito está vacío";
                 return RedirectToAction("Index");
             }
 
-            // Crear venta
-            var venta = new Ventum
-            {
-                IdUsuario = userId,
-                Fecha = DateTime.Now, // Usa la propiedad real de tu modelo Ventum
-                Total = carrito.DetalleCarritos.Sum(dc => dc.Cantidad * dc.IdProductoNavigation.Precio)
-            };
-            _context.Venta.Add(venta);
-            await _context.SaveChangesAsync();
+            var detalle = carrito.DetalleCarritos
+                .FirstOrDefault(dc =>
+                    dc.IdProducto == productoId);
 
-            // Crear detalle de venta y actualizar stock
-            foreach (var item in carrito.DetalleCarritos)
+            if (detalle != null)
             {
-                var detalleVenta = new DetalleVentum
-                {
-                    IdVenta = venta.IdVenta,
-                    IdProducto = item.IdProducto,
-                    Cantidad = item.Cantidad,
-                    PrecioUnitario = item.IdProductoNavigation.Precio
-                };
-                _context.DetalleVenta.Add(detalleVenta);
+                _context.DetalleCarritos.Remove(detalle);
 
-                item.IdProductoNavigation.Stock -= item.Cantidad;
+                await _context.SaveChangesAsync();
             }
 
-            carrito.Estado = "Finalizado";
+            TempData["Success"] =
+                "Producto eliminado del carrito.";
+
+            return RedirectToAction("Index");
+        }
+
+
+        // =====================================================
+        // ACTUALIZAR CANTIDAD
+        // =====================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActualizarCantidad(
+            int productoId,
+            int cantidad)
+        {
+            var userId = ObtenerUsuarioId();
+
+            if (!userId.HasValue)
+                return Unauthorized();
+
+            if (cantidad <= 0)
+            {
+                return await QuitarProducto(productoId);
+            }
+
+            var carrito = await _context.Carritos
+                .Include(c => c.DetalleCarritos)
+                .FirstOrDefaultAsync(c =>
+                    c.IdUsuario == userId.Value &&
+                    c.Estado == "Activo");
+
+            if (carrito == null)
+            {
+                TempData["Error"] =
+                    "No se encontró el carrito.";
+
+                return RedirectToAction("Index");
+            }
+
+            var detalle = carrito.DetalleCarritos
+                .FirstOrDefault(dc =>
+                    dc.IdProducto == productoId);
+
+            if (detalle == null)
+            {
+                TempData["Error"] =
+                    "El producto no está en el carrito.";
+
+                return RedirectToAction("Index");
+            }
+
+            var producto = await _context.Productos
+                .FirstOrDefaultAsync(p =>
+                    p.IdProducto == productoId);
+
+            if (producto == null)
+            {
+                TempData["Error"] =
+                    "El producto no existe.";
+
+                return RedirectToAction("Index");
+            }
+
+            if (cantidad > producto.Stock)
+            {
+                TempData["Error"] =
+                    $"Stock disponible: {producto.Stock}.";
+
+                return RedirectToAction("Index");
+            }
+
+            detalle.Cantidad = cantidad;
+
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Compra realizada con éxito";
-            return RedirectToAction("Index", "Venta");
+            TempData["Success"] =
+                "Cantidad actualizada.";
+
+            return RedirectToAction("Index");
+        }
+
+
+        // =====================================================
+        // CONFIRMAR COMPRA
+        // =====================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmarCompra()
+        {
+            var userId = ObtenerUsuarioId();
+
+            if (!userId.HasValue)
+                return Unauthorized();
+
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // =================================================
+                // 1. BUSCAR CARRITO
+                // =================================================
+
+                var carrito = await _context.Carritos
+                    .Include(c => c.DetalleCarritos)
+                        .ThenInclude(dc => dc.IdProductoNavigation)
+                    .FirstOrDefaultAsync(c =>
+                        c.IdUsuario == userId.Value &&
+                        c.Estado == "Activo");
+
+                if (carrito == null)
+                {
+                    TempData["Error"] =
+                        "PRUEBA 1: No se encontró el carrito.";
+
+                    await transaction.RollbackAsync();
+
+                    return RedirectToAction("Index");
+                }
+
+                if (!carrito.DetalleCarritos.Any())
+                {
+                    TempData["Error"] =
+                        "PRUEBA 1: El carrito está vacío.";
+
+                    await transaction.RollbackAsync();
+
+                    return RedirectToAction("Index");
+                }
+
+
+                // =================================================
+                // 2. VALIDAR STOCK
+                // =================================================
+
+                foreach (var item in carrito.DetalleCarritos)
+                {
+                    var producto =
+                        item.IdProductoNavigation;
+
+                    if (producto == null)
+                    {
+                        throw new Exception(
+                            "PRUEBA 2: Producto no encontrado. ID: "
+                            + item.IdProducto);
+                    }
+
+                    if (item.Cantidad <= 0)
+                    {
+                        throw new Exception(
+                            "PRUEBA 2: Cantidad inválida.");
+                    }
+
+                    if (producto.Stock < item.Cantidad)
+                    {
+                        TempData["Error"] =
+                            "PRUEBA 2: Stock insuficiente para "
+                            + producto.Nombre;
+
+                        await transaction.RollbackAsync();
+
+                        return RedirectToAction("Index");
+                    }
+                }
+
+
+                // =================================================
+                // 3. CALCULAR TOTAL
+                // =================================================
+
+                decimal total =
+                    carrito.DetalleCarritos.Sum(item =>
+                        item.Cantidad *
+                        item.IdProductoNavigation.Precio);
+
+
+                // =================================================
+                // 4. CREAR VENTA
+                // =================================================
+
+                var venta = new Ventum
+                {
+                    IdUsuario = userId.Value,
+                    Fecha = DateTime.Now,
+                    Descuento = 0,
+                    Impuesto = 0,
+                    Total = total,
+                    Estado = "Pendiente"
+                };
+
+                _context.Venta.Add(venta);
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    throw new Exception(
+                        "PRUEBA 4: ERROR AL GUARDAR LA VENTA. "
+                        + ex.Message);
+                }
+
+
+                // =================================================
+                // 5. CREAR DETALLES DE VENTA
+                // =================================================
+
+                foreach (var item in carrito.DetalleCarritos)
+                {
+                    var producto =
+                        item.IdProductoNavigation;
+
+                    var detalleVenta =
+                        new DetalleVentum
+                        {
+                            IdVenta = venta.IdVenta,
+                            IdProducto = item.IdProducto,
+                            Cantidad = item.Cantidad,
+                            PrecioUnitario = producto.Precio,
+                            Subtotal =
+                                item.Cantidad *
+                                producto.Precio
+                        };
+
+                    _context.DetalleVenta.Add(detalleVenta);
+                }
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    throw new Exception(
+                        "PRUEBA 5: ERROR AL GUARDAR DETALLE_VENTA. "
+                        + ex.Message);
+                }
+
+
+                // =================================================
+                // 6. EL STOCK SE ACTUALIZA EN EL TRIGGER
+                // =================================================
+                //
+                // TRIG_STOCK_VENTA:
+                // - valida stock
+                // - descuenta stock
+                // - registra historial
+                //
+                // NO SE HACE UPDATE DE PRODUCTO AQUÍ.
+
+
+                // =================================================
+                // 7. FACTURAR CARRITO
+                // =================================================
+
+                var filasCarrito =
+                    await _context.Database
+                        .ExecuteSqlInterpolatedAsync($@"
+                            UPDATE CARRITO
+                            SET ESTADO = {"Facturado"}
+                            WHERE ID_CARRITO = {carrito.IdCarrito}
+                            AND ID_USUARIO = {userId.Value}
+                            AND ESTADO = {"Activo"}
+                        ");
+
+                if (filasCarrito == 0)
+                {
+                    throw new Exception(
+                        "PRUEBA 7: No se pudo cambiar el carrito a Facturado.");
+                }
+
+
+                // =================================================
+                // 8. CONFIRMAR TRANSACCIÓN
+                // =================================================
+
+                await transaction.CommitAsync();
+
+                TempData["Success"] =
+                    "Compra realizada correctamente.";
+
+                return RedirectToAction(
+                    "MisCompras",
+                    "Cliente");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+
+                TempData["Error"] =
+                    "ERROR REAL: " + ex.Message;
+
+                return RedirectToAction("Index");
+            }
         }
     }
 }
-
-

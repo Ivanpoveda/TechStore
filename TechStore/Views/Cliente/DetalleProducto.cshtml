@@ -324,10 +324,9 @@
 
                     <!-- ACCIONES -->
 
-                    <div class="mt-8
-                        flex flex-col sm:flex-row
-                        gap-3">
+                    <div class="mt-8 flex flex-col sm:flex-row gap-3">
 
+                        <!-- VOLVER AL CATÁLOGO -->
 
                         <a href="/Cliente/Catalogo"
                            class="px-6 py-3
@@ -342,27 +341,76 @@
                         </a>
 
 
+                        <!-- AGREGAR AL CARRITO -->
                         @if (Model.Stock > 0)
                         {
+                            <form action="/Carrito/AgregarProducto"
+                                  method="post"
+                                  class="flex flex-col sm:flex-row gap-3">
 
-                            <a href="/Carrito/Agregar/@Model.IdProducto"
-                               class="px-6 py-3
-                                rounded-lg
-                                bg-indigo-600
-                                text-white
-                                text-center
-                                font-semibold
-                                shadow
-                                hover:bg-indigo-700 transition">
+                                @Html.AntiForgeryToken()
 
-                                🛒 Agregar al carrito
+                                <!-- ID DEL PRODUCTO -->
 
-                            </a>
+                                <input type="hidden"
+                                       name="productoId"
+                                       value="@Model.IdProducto" />
 
+
+                                <!-- CANTIDAD -->
+
+                                <div class="flex items-center
+                                    border border-slate-300
+                                    rounded-lg
+                                    overflow-hidden">
+
+                                    <label for="cantidad"
+                                           class="px-3 text-sm
+                                        text-slate-600
+                                        bg-slate-50">
+
+                                        Cantidad
+
+                                    </label>
+
+                                    <input type="number"
+                                           id="cantidad"
+                                           name="cantidad"
+                                           value="1"
+                                           min="1"
+                                           max="@Model.Stock"
+                                           required
+                                           class="w-20 px-3 py-3
+                                    border-l border-slate-300
+                                    text-center
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-indigo-500" />
+
+                                </div>
+
+
+                                <!-- BOTÓN -->
+
+                                <button type="submit"
+                                        class="px-6 py-3
+                                    rounded-lg
+                                    bg-indigo-600
+                                    text-white
+                                    text-center
+                                    font-semibold
+                                    shadow
+                                    hover:bg-indigo-700
+                                    transition">
+
+                                    🛒 Agregar al carrito
+
+                                </button>
+
+                            </form>
                         }
                         else
                         {
-
                             <button type="button"
                                     disabled
                                     class="px-6 py-3
@@ -374,7 +422,6 @@
                                 Producto agotado
 
                             </button>
-
                         }
 
                     </div>
