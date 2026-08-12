@@ -1,0 +1,251 @@
+﻿@model IEnumerable<TechStore.Models.DetalleVentum>
+
+@{
+    ViewData["Title"] = "Solicitar garantía";
+}
+
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Solicitar garantía - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <!-- HEADER -->
+
+    <header class="bg-slate-900 text-white">
+
+        <div class="max-w-7xl mx-auto px-6 py-4">
+
+            <div class="flex justify-between items-center">
+
+                <div>
+
+                    <h1 class="text-xl font-bold">
+                        TechStore
+                    </h1>
+
+                    <p class="text-sm text-slate-400">
+                        Solicitud de garantía
+                    </p>
+
+                </div>
+
+                <div class="flex gap-2">
+
+                    <a href="/Cliente/Catalogo"
+                       class="px-4 py-2 bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                        Catálogo
+                    </a>
+
+                    <a href="/GarantiaCliente/Index"
+                       class="px-4 py-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition">
+                        Mis garantías
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- CONTENIDO -->
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+        <div class="mb-8">
+
+            <h2 class="text-3xl font-bold text-slate-900">
+                Solicitar garantía
+            </h2>
+
+            <p class="text-slate-500 mt-1">
+                Selecciona uno de tus productos comprados
+                para solicitar una garantía.
+            </p>
+
+        </div>
+
+
+        <!-- MENSAJES -->
+        @if (TempData["Error"] != null)
+        {
+            <div class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
+
+                @TempData["Error"]
+
+            </div>
+        }
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700">
+
+                @TempData["Success"]
+
+            </div>
+        }
+
+
+        <!-- SIN PRODUCTOS -->
+        @if (Model == null || !Model.Any())
+        {
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
+
+                <div class="text-6xl mb-4">
+                    📦
+                </div>
+
+                <h3 class="text-xl font-bold text-slate-800">
+                    No hay productos disponibles
+                </h3>
+
+                <p class="text-slate-500 mt-2">
+                    Todos tus productos ya tienen una solicitud
+                    de garantía o todavía no has realizado compras.
+                </p>
+
+                <a href="/GarantiaCliente/Index"
+                   class="inline-block mt-6 px-5 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+
+                    Volver a garantías
+
+                </a>
+
+            </div>
+
+        }
+        else
+        {
+
+            <!-- PRODUCTOS -->
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                @foreach (var detalle in Model)
+                {
+
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+
+                        <div class="p-6">
+
+                            <!-- ICONO -->
+
+                            <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl mb-4">
+                                📦
+                            </div>
+
+
+                            <!-- PRODUCTO -->
+
+                            <h3 class="text-lg font-bold text-slate-900">
+
+                                @if (detalle.IdProductoNavigation != null)
+                                {
+                                    @detalle.IdProductoNavigation.Nombre
+                                }
+                                else
+                                {
+                                    <span class="text-slate-400">
+                                        Producto no disponible
+                                    </span>
+                                }
+
+                            </h3>
+
+
+                            <!-- INFORMACIÓN -->
+
+                            <div class="mt-4 space-y-2 text-sm">
+
+                                <p class="text-slate-500">
+
+                                    Venta:
+
+                                    <span class="font-semibold text-slate-700">
+                                        #@detalle.IdVenta
+                                    </span>
+
+                                </p>
+
+
+                                <p class="text-slate-500">
+
+                                    Cantidad:
+
+                                    <span class="font-semibold text-slate-700">
+                                        @detalle.Cantidad
+                                    </span>
+
+                                </p>
+
+
+                                <p class="text-slate-500">
+
+                                    Precio unitario:
+
+                                    <span class="font-semibold text-slate-700">
+                                        ₡@detalle.PrecioUnitario.ToString("N2")
+                                    </span>
+
+                                </p>
+
+
+                                <p class="text-slate-500">
+
+                                    Subtotal:
+
+                                    <span class="font-semibold text-slate-700">
+                                        ₡@detalle.Subtotal.ToString("N2")
+                                    </span>
+
+                                </p>
+
+                            </div>
+
+
+                            <!-- BOTÓN -->
+
+                            <div class="mt-6">
+
+                                <a href="/GarantiaCliente/Solicitar/@detalle.IdDetalleVenta"
+                                   class="block text-center w-full px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition">
+
+                                    Solicitar garantía
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                }
+
+            </div>
+
+        }
+
+    </main>
+
+</body>
+
+</html>

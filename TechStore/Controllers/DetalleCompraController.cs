@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,152 +14,526 @@ namespace TechStore.Controllers
             _context = context;
         }
 
-        // GET: DetalleCompra
+        // =========================================================
+        // INDEX
+        // =========================================================
         public async Task<IActionResult> Index()
         {
-            var techStoreContext = _context.DetalleCompras.Include(d => d.IdCompraNavigation).Include(d => d.IdProductoNavigation);
-            return View(await techStoreContext.ToListAsync());
+            var detalles = await _context.DetalleCompras
+                .Include(d => d.IdCompraNavigation)
+                    .ThenInclude(c => c.IdProveedorNavigation)
+
+                .Include(d => d.IdProductoNavigation)
+
+                .OrderByDescending(d => d.IdDetalleCompra)
+                .ToListAsync();
+
+            return View(detalles);
         }
 
-        // GET: DetalleCompra/Details/5
+
+        // =========================================================
+        // DETAILS
+        // =========================================================
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var detalleCompra = await _context.DetalleCompras
+
                 .Include(d => d.IdCompraNavigation)
+                    .ThenInclude(c => c.IdProveedorNavigation)
+
                 .Include(d => d.IdProductoNavigation)
-                .FirstOrDefaultAsync(m => m.IdDetalleCompra == id);
+
+                .FirstOrDefaultAsync(d =>
+                    d.IdDetalleCompra == id);
+
             if (detalleCompra == null)
-            {
                 return NotFound();
-            }
 
             return View(detalleCompra);
         }
 
-        // GET: DetalleCompra/Create
-        public IActionResult Create()
+
+        // =========================================================
+        // CREATE - GET
+        // =========================================================
+        [HttpGet]
+        public async Task<IActionResult> Create(int? idCompra)
         {
-            ViewData["IdCompra"] = new SelectList(_context.CompraProveedors, "IdCompra", "IdCompra");
-            ViewData["IdProducto"] = new SelectList(_context.Productos, "IdProducto", "IdProducto");
-            return View();
+            var productos = await _context.Productos
+                .OrderBy(p => p.Nombre)
+                .ToListAsync();
+
+            ViewData["IdProducto"] = new SelectList(
+                productos,
+                "IdProducto",
+                "Nombre"
+            );
+
+            var compras = await _context.CompraProveedors
+                .Include(c => c.IdProveedorNavigation)
+                .Where(c => c.Estado != "Recibida")
+                .OrderByDescending(c => c.IdCompra)
+                .ToListAsync();
+
+            ViewData["IdCompra"] = new SelectList(
+                compras,
+                "IdCompra",
+                "IdCompra"
+            );
+
+            var detalle = new DetalleCompra();
+
+            if (idCompra.HasValue)
+                detalle.IdCompra = idCompra.Value;
+
+            return View(detalle);
         }
 
-        // POST: DetalleCompra/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+        // =========================================================
+        // CREATE - POST
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdDetalleCompra,Cantidad,PrecioCompra,Subtotal,IdCompra,IdProducto")] DetalleCompra detalleCompra)
+        public async Task<IActionResult> Create(
+            int IdCompra,
+            int IdProducto,
+            int Cantidad,
+            decimal PrecioCompra)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(detalleCompra);
+                // -------------------------------------------------
+                // VALIDAR COMPRA
+                // -------------------------------------------------
+                var compra = await _context.CompraProveedors
+                    .FirstOrDefaultAsync(c =>
+                        c.IdCompra == IdCompra);
+
+                if (compra == null)
+                {
+                    TempData["Error"] =
+                        "La compra seleccionada no existe.";
+
+                    return RedirectToAction(
+                        "Details",
+                        "CompraProveedor",
+                        new { id = IdCompra });
+                }
+
+
+                // -------------------------------------------------
+                // VALIDAR PRODUCTO
+                // -------------------------------------------------
+                var producto = await _context.Productos
+                    .FirstOrDefaultAsync(p =>
+                        p.IdProducto == IdProducto);
+
+                if (producto == null)
+                {
+                    TempData["Error"] =
+                        "El producto seleccionado no existe.";
+
+                    return RedirectToAction(
+                        "Details",
+                        "CompraProveedor",
+                        new { id = IdCompra });
+                }
+
+
+                // -------------------------------------------------
+                // VALIDAR CANTIDAD
+                // -------------------------------------------------
+                if (Cantidad <= 0)
+                {
+                    TempData["Error"] =
+                        "La cantidad debe ser mayor que cero.";
+
+                    return RedirectToAction(
+                        "Details",
+                        "CompraProveedor",
+                        new { id = IdCompra });
+                }
+
+
+                // -------------------------------------------------
+                // VALIDAR PRECIO
+                // -------------------------------------------------
+                if (PrecioCompra <= 0)
+                {
+                    TempData["Error"] =
+                        "El precio de compra debe ser mayor que cero.";
+
+                    return RedirectToAction(
+                        "Details",
+                        "CompraProveedor",
+                        new { id = IdCompra });
+                }
+
+
+                // -------------------------------------------------
+                // CALCULAR SUBTOTAL
+                // -------------------------------------------------
+                decimal subtotal =
+                    Cantidad * PrecioCompra;
+
+
+                // -------------------------------------------------
+                // CREAR DETALLE
+                // -------------------------------------------------
+                var detalle = new DetalleCompra
+                {
+                    Cantidad = Cantidad,
+                    PrecioCompra = PrecioCompra,
+                    Subtotal = subtotal,
+                    IdCompra = IdCompra,
+                    IdProducto = IdProducto
+                };
+
+
+                _context.DetalleCompras.Add(detalle);
+
+
+                // -------------------------------------------------
+                // ACTUALIZAR TOTAL DE LA COMPRA
+                // -------------------------------------------------
+                compra.Total =
+                    (compra.Total ?? 0) + subtotal;
+
+
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+
+                TempData["Success"] =
+                    $"Producto '{producto.Nombre}' agregado correctamente a la compra.";
+
+
+                return RedirectToAction(
+                    "Details",
+                    "CompraProveedor",
+                    new { id = IdCompra });
             }
-            ViewData["IdCompra"] = new SelectList(_context.CompraProveedors, "IdCompra", "IdCompra", detalleCompra.IdCompra);
-            ViewData["IdProducto"] = new SelectList(_context.Productos, "IdProducto", "IdProducto", detalleCompra.IdProducto);
-            return View(detalleCompra);
+            catch (DbUpdateException ex)
+            {
+                TempData["Error"] =
+                    "No se pudo registrar el detalle: " +
+                    (ex.InnerException?.Message ?? ex.Message);
+
+                return RedirectToAction(
+                    "Details",
+                    "CompraProveedor",
+                    new { id = IdCompra });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "Ocurrió un error: " + ex.Message;
+
+                return RedirectToAction(
+                    "Details",
+                    "CompraProveedor",
+                    new { id = IdCompra });
+            }
         }
 
-        // GET: DetalleCompra/Edit/5
+
+        // =========================================================
+        // EDIT - GET
+        // =========================================================
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var detalleCompra = await _context.DetalleCompras.FindAsync(id);
-            if (detalleCompra == null)
-            {
+            var detalle = await _context.DetalleCompras
+                .Include(d => d.IdCompraNavigation)
+                    .ThenInclude(c => c.IdProveedorNavigation)
+
+                .Include(d => d.IdProductoNavigation)
+
+                .FirstOrDefaultAsync(d =>
+                    d.IdDetalleCompra == id);
+
+            if (detalle == null)
                 return NotFound();
-            }
-            ViewData["IdCompra"] = new SelectList(_context.CompraProveedors, "IdCompra", "IdCompra", detalleCompra.IdCompra);
-            ViewData["IdProducto"] = new SelectList(_context.Productos, "IdProducto", "IdProducto", detalleCompra.IdProducto);
-            return View(detalleCompra);
+
+
+            // -----------------------------------------------------
+            // PRODUCTOS
+            // -----------------------------------------------------
+            ViewData["IdProducto"] = new SelectList(
+                await _context.Productos
+                    .OrderBy(p => p.Nombre)
+                    .ToListAsync(),
+                "IdProducto",
+                "Nombre",
+                detalle.IdProducto
+            );
+
+
+            return View(detalle);
         }
 
-        // POST: DetalleCompra/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+        // =========================================================
+        // EDIT - POST
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdDetalleCompra,Cantidad,PrecioCompra,Subtotal,IdCompra,IdProducto")] DetalleCompra detalleCompra)
+        public async Task<IActionResult> Edit(
+            int id,
+            int Cantidad,
+            decimal PrecioCompra,
+            int IdProducto)
         {
-            if (id != detalleCompra.IdDetalleCompra)
-            {
+            if (id <= 0)
                 return NotFound();
-            }
 
-            if (ModelState.IsValid)
+
+            var detalle = await _context.DetalleCompras
+                .FirstOrDefaultAsync(d =>
+                    d.IdDetalleCompra == id);
+
+            if (detalle == null)
+                return NotFound();
+
+
+            try
             {
-                try
+                // -------------------------------------------------
+                // VALIDACIONES
+                // -------------------------------------------------
+                if (Cantidad <= 0)
                 {
-                    _context.Update(detalleCompra);
-                    await _context.SaveChangesAsync();
+                    TempData["Error"] =
+                        "La cantidad debe ser mayor que cero.";
+
+                    return RedirectToAction(
+                        nameof(Edit),
+                        new { id });
                 }
-                catch (DbUpdateConcurrencyException)
+
+
+                if (PrecioCompra <= 0)
                 {
-                    if (!DetalleCompraExists(detalleCompra.IdDetalleCompra))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    TempData["Error"] =
+                        "El precio debe ser mayor que cero.";
+
+                    return RedirectToAction(
+                        nameof(Edit),
+                        new { id });
                 }
-                return RedirectToAction(nameof(Index));
+
+
+                var producto = await _context.Productos
+                    .FirstOrDefaultAsync(p =>
+                        p.IdProducto == IdProducto);
+
+                if (producto == null)
+                {
+                    TempData["Error"] =
+                        "El producto seleccionado no existe.";
+
+                    return RedirectToAction(
+                        nameof(Edit),
+                        new { id });
+                }
+
+
+                // -------------------------------------------------
+                // OBTENER COMPRA
+                // -------------------------------------------------
+                var compra = await _context.CompraProveedors
+                    .FirstOrDefaultAsync(c =>
+                        c.IdCompra == detalle.IdCompra);
+
+                if (compra == null)
+                    return NotFound();
+
+
+                // -------------------------------------------------
+                // RESTAR SUBTOTAL ANTERIOR
+                // -------------------------------------------------
+                decimal subtotalAnterior =
+                    detalle.Subtotal;
+
+                compra.Total =
+                    (compra.Total ?? 0) - subtotalAnterior;
+
+
+                // -------------------------------------------------
+                // NUEVOS VALORES
+                // -------------------------------------------------
+                decimal nuevoSubtotal =
+                    Cantidad * PrecioCompra;
+
+
+                detalle.Cantidad = Cantidad;
+                detalle.PrecioCompra = PrecioCompra;
+                detalle.Subtotal = nuevoSubtotal;
+                detalle.IdProducto = IdProducto;
+
+
+                // -------------------------------------------------
+                // SUMAR NUEVO SUBTOTAL
+                // -------------------------------------------------
+                compra.Total =
+                    (compra.Total ?? 0) + nuevoSubtotal;
+
+
+                await _context.SaveChangesAsync();
+
+
+                TempData["Success"] =
+                    "El detalle de la compra fue actualizado correctamente.";
+
+
+                return RedirectToAction(
+                    "Details",
+                    "CompraProveedor",
+                    new { id = detalle.IdCompra });
             }
-            ViewData["IdCompra"] = new SelectList(_context.CompraProveedors, "IdCompra", "IdCompra", detalleCompra.IdCompra);
-            ViewData["IdProducto"] = new SelectList(_context.Productos, "IdProducto", "IdProducto", detalleCompra.IdProducto);
-            return View(detalleCompra);
+            catch (DbUpdateException ex)
+            {
+                TempData["Error"] =
+                    "No se pudo actualizar el detalle: " +
+                    (ex.InnerException?.Message ?? ex.Message);
+
+                return RedirectToAction(
+                    nameof(Edit),
+                    new { id });
+            }
         }
 
-        // GET: DetalleCompra/Delete/5
+
+        // =========================================================
+        // DELETE - GET
+        // =========================================================
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var detalleCompra = await _context.DetalleCompras
+
+            var detalle = await _context.DetalleCompras
+
                 .Include(d => d.IdCompraNavigation)
-                .Include(d => d.IdProductoNavigation)
-                .FirstOrDefaultAsync(m => m.IdDetalleCompra == id);
-            if (detalleCompra == null)
-            {
-                return NotFound();
-            }
+                    .ThenInclude(c => c.IdProveedorNavigation)
 
-            return View(detalleCompra);
+                .Include(d => d.IdProductoNavigation)
+
+                .FirstOrDefaultAsync(d =>
+                    d.IdDetalleCompra == id);
+
+
+            if (detalle == null)
+                return NotFound();
+
+
+            return View(detalle);
         }
 
-        // POST: DetalleCompra/Delete/5
-        [HttpPost, ActionName("Delete")]
+
+        // =========================================================
+        // DELETE - POST
+        // =========================================================
+        [HttpPost]
+        [ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var detalleCompra = await _context.DetalleCompras.FindAsync(id);
-            if (detalleCompra != null)
+            try
             {
-                _context.DetalleCompras.Remove(detalleCompra);
-            }
+                var detalle = await _context.DetalleCompras
+                    .FirstOrDefaultAsync(d =>
+                        d.IdDetalleCompra == id);
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                if (detalle == null)
+                    return NotFound();
+
+
+                int idCompra =
+                    detalle.IdCompra;
+
+
+                // -------------------------------------------------
+                // OBTENER COMPRA
+                // -------------------------------------------------
+                var compra = await _context.CompraProveedors
+                    .FirstOrDefaultAsync(c =>
+                        c.IdCompra == idCompra);
+
+
+                if (compra != null)
+                {
+                    // ---------------------------------------------
+                    // RESTAR EL SUBTOTAL
+                    // ---------------------------------------------
+                    compra.Total =
+                        (compra.Total ?? 0) -
+                        detalle.Subtotal;
+
+
+                    if (compra.Total < 0)
+                        compra.Total = 0;
+                }
+
+
+                _context.DetalleCompras.Remove(detalle);
+
+                await _context.SaveChangesAsync();
+
+
+                TempData["Success"] =
+                    "El producto fue eliminado de la compra.";
+
+
+                return RedirectToAction(
+                    "Details",
+                    "CompraProveedor",
+                    new { id = idCompra });
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData["Error"] =
+                    "No se pudo eliminar el detalle: " +
+                    (ex.InnerException?.Message ?? ex.Message);
+
+                return RedirectToAction(
+                    "Index",
+                    "CompraProveedor");
+            }
         }
 
-        private bool DetalleCompraExists(int id)
+
+        // =========================================================
+        // VER DETALLES DE UNA COMPRA
+        // =========================================================
+        [HttpGet]
+        public async Task<IActionResult> PorCompra(int id)
         {
-            return _context.DetalleCompras.Any(e => e.IdDetalleCompra == id);
+            var compra = await _context.CompraProveedors
+
+                .Include(c => c.IdProveedorNavigation)
+
+                .Include(c => c.DetalleCompras)
+                    .ThenInclude(d => d.IdProductoNavigation)
+
+                .FirstOrDefaultAsync(c =>
+                    c.IdCompra == id);
+
+
+            if (compra == null)
+                return NotFound();
+
+
+            return View(compra);
         }
     }
 }

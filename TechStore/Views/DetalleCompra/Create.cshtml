@@ -1,51 +1,209 @@
 @model TechStore.Models.DetalleCompra
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Agregar producto";
+    var compra = ViewBag.Compra as TechStore.Models.CompraProveedor;
 }
 
-<h1>Create</h1>
+<!DOCTYPE html>
+<html lang="es">
 
-<h4>DetalleCompra</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Cantidad" class="control-label"></label>
-                <input asp-for="Cantidad" class="form-control" />
-                <span asp-validation-for="Cantidad" class="text-danger"></span>
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Agregar producto - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <div class="min-h-screen flex items-center justify-center p-6">
+
+        <div class="w-full max-w-2xl">
+
+            <a href="/CompraProveedor/Details/@(compra?.IdCompra)"
+               class="text-sm text-indigo-600
+                hover:text-indigo-800">
+
+                ← Volver a la compra
+
+            </a>
+
+
+            <h1 class="text-3xl font-bold
+                text-slate-900 mt-3">
+
+                Agregar producto
+
+            </h1>
+
+            @if (compra != null)
+            {
+                <p class="text-slate-500 mt-1">
+
+                    Compra #@compra.IdCompra —
+                    @compra.IdProveedorNavigation?.Nombre
+
+                </p>
+            }
+
+
+            <div class="bg-white rounded-xl
+                shadow-sm
+                border border-slate-200
+                p-6 mt-6">
+
+                <form asp-action="Create"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+
+                    <input type="hidden"
+                           asp-for="IdCompra"
+                           value="@compra?.IdCompra" />
+
+
+                    <!-- PRODUCTO -->
+
+                    <div class="mb-6">
+
+                        <label for="IdProducto"
+                               class="block text-sm font-semibold text-slate-700 mb-2">
+                            Producto
+                        </label>
+
+                        <select id="IdProducto"
+                                name="IdProducto"
+                                class="w-full px-4 py-3 border border-slate-300 rounded-lg
+                            focus:ring-2 focus:ring-indigo-500 outline-none">
+
+                            <option value="">Seleccione un producto</option>
+
+                            @if (ViewBag.IdProducto != null)
+                            {
+                                foreach (var producto in ViewBag.IdProducto)
+                                {
+                                    <option value="@producto.Value">
+                                        @producto.Text
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- CANTIDAD -->
+
+                    <div class="mb-6">
+
+                        <label asp-for="Cantidad"
+                               class="block text-sm
+                            font-semibold
+                            text-slate-700 mb-2">
+
+                            Cantidad
+
+                        </label>
+
+                        <input asp-for="Cantidad"
+                               type="number"
+                               min="1"
+                               required
+                               class="w-full px-4 py-3
+                        border border-slate-300
+                        rounded-lg
+                        focus:ring-2
+                        focus:ring-indigo-500
+                        outline-none" />
+
+                    </div>
+
+
+                    <!-- PRECIO -->
+
+                    <div class="mb-6">
+
+                        <label asp-for="PrecioCompra"
+                               class="block text-sm
+                            font-semibold
+                            text-slate-700 mb-2">
+
+                            Precio de compra por unidad
+
+                        </label>
+
+                        <div class="relative">
+
+                            <span class="absolute left-4
+                                top-3 text-slate-500">
+
+                                ₡
+
+                            </span>
+
+                            <input asp-for="PrecioCompra"
+                                   type="number"
+                                   step="0.01"
+                                   min="0.01"
+                                   required
+                                   class="w-full pl-9 pr-4 py-3
+                            border border-slate-300
+                            rounded-lg
+                            focus:ring-2
+                            focus:ring-indigo-500
+                            outline-none" />
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- BOTONES -->
+
+                    <div class="flex justify-end gap-3">
+
+                        <a href="/CompraProveedor/Details/@(compra?.IdCompra)"
+                           class="px-5 py-3
+                            rounded-lg
+                            border border-slate-300
+                            text-slate-700
+                            hover:bg-slate-100">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="px-5 py-3
+                            rounded-lg
+                            bg-indigo-600
+                            text-white
+                            font-medium
+                            hover:bg-indigo-700">
+
+                            Agregar producto
+
+                        </button>
+
+                    </div>
+
+                </form>
+
             </div>
-            <div class="form-group">
-                <label asp-for="PrecioCompra" class="control-label"></label>
-                <input asp-for="PrecioCompra" class="form-control" />
-                <span asp-validation-for="PrecioCompra" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Subtotal" class="control-label"></label>
-                <input asp-for="Subtotal" class="form-control" />
-                <span asp-validation-for="Subtotal" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdCompra" class="control-label"></label>
-                <select asp-for="IdCompra" class ="form-control" asp-items="ViewBag.IdCompra"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdProducto" class="control-label"></label>
-                <select asp-for="IdProducto" class ="form-control" asp-items="ViewBag.IdProducto"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+
+        </div>
+
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+</body>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+</html>

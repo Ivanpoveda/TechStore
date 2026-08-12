@@ -1,59 +1,411 @@
 @model IEnumerable<TechStore.Models.DetalleCompra>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Detalles de compras";
 }
 
-<h1>Index</h1>
+<!DOCTYPE html>
+<html lang="es">
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Cantidad)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PrecioCompra)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Subtotal)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdCompraNavigation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdProductoNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cantidad)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PrecioCompra)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Subtotal)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdCompraNavigation.IdCompra)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdProductoNavigation.IdProducto)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdDetalleCompra">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdDetalleCompra">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdDetalleCompra">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Detalles de compras - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <div class="min-h-screen bg-slate-100 flex flex-col md:flex-row">
+
+        <!-- SIDEBAR -->
+
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+
+            <div class="flex items-center gap-3 mb-8">
+
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg
+                    flex items-center justify-center font-bold">
+
+                    TS
+
+                </div>
+
+                <span class="font-bold text-lg">
+                    TechStore Admin
+                </span>
+
+            </div>
+
+
+            <nav class="space-y-1">
+
+                <a href="/Admin/Dashboard"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400 hover:bg-indigo-600
+                    hover:text-white transition">
+
+                    Dashboard
+
+                </a>
+
+                <a href="/Producto/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400 hover:bg-indigo-600
+                    hover:text-white transition">
+
+                    Productos
+
+                </a>
+
+                <a href="/Venta/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400 hover:bg-indigo-600
+                    hover:text-white transition">
+
+                    Ventas
+
+                </a>
+
+                <a href="/Proveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400 hover:bg-indigo-600
+                    hover:text-white transition">
+
+                    Proveedores
+
+                </a>
+
+                <a href="/CompraProveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    bg-indigo-600 text-white">
+
+                    Compras a proveedores
+
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- CONTENIDO -->
+
+        <main class="flex-1 p-6">
+
+            <div class="max-w-7xl mx-auto">
+
+
+                <!-- ENCABEZADO -->
+
+                <div class="flex flex-col md:flex-row
+                    md:items-center md:justify-between
+                    mb-6">
+
+                    <div>
+
+                        <h1 class="text-2xl font-bold text-slate-900">
+
+                            Detalles de compras
+
+                        </h1>
+
+                        <p class="text-slate-500 mt-1">
+
+                            Productos incluidos en las compras
+                            realizadas a proveedores.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="flex gap-2 mt-4 md:mt-0">
+
+                        <a href="/CompraProveedor/Index"
+                           class="px-4 py-2.5 rounded-lg
+                            bg-slate-200 text-slate-700
+                            hover:bg-slate-300 transition">
+
+                            Compras
+
+                        </a>
+
+                        <a href="/DetalleCompra/Create"
+                           class="px-5 py-2.5 rounded-lg
+                            bg-indigo-600 text-white
+                            hover:bg-indigo-700 transition">
+
+                            + Nuevo detalle
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MENSAJES -->
+                @if (TempData["Success"] != null)
+                {
+                    <div class="mb-5 bg-green-50 border
+                        border-green-200 text-green-700
+                        px-4 py-3 rounded-lg">
+
+                        @TempData["Success"]
+
+                    </div>
+                }
+
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="mb-5 bg-red-50 border
+                        border-red-200 text-red-700
+                        px-4 py-3 rounded-lg">
+
+                        @TempData["Error"]
+
+                    </div>
+                }
+
+
+                <!-- TABLA -->
+
+                <div class="bg-white rounded-xl shadow
+                    overflow-hidden">
+
+                    <div class="overflow-x-auto">
+
+                        <table class="w-full text-sm text-left">
+
+                            <thead class="bg-slate-50
+                                border-b border-slate-200">
+
+                                <tr>
+
+                                    <th class="px-5 py-4
+                                        font-semibold text-slate-700">
+
+                                        ID
+
+                                    </th>
+
+                                    <th class="px-5 py-4
+                                        font-semibold text-slate-700">
+
+                                        Compra
+
+                                    </th>
+
+                                    <th class="px-5 py-4
+                                        font-semibold text-slate-700">
+
+                                        Producto
+
+                                    </th>
+
+                                    <th class="px-5 py-4
+                                        font-semibold text-slate-700">
+
+                                        Cantidad
+
+                                    </th>
+
+                                    <th class="px-5 py-4
+                                        font-semibold text-slate-700">
+
+                                        Precio compra
+
+                                    </th>
+
+                                    <th class="px-5 py-4
+                                        font-semibold text-slate-700">
+
+                                        Subtotal
+
+                                    </th>
+
+                                    <th class="px-5 py-4
+                                        font-semibold text-slate-700 text-center">
+
+                                        Acciones
+
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody class="divide-y divide-slate-100">
+
+                                @if (Model != null && Model.Any())
+                                {
+
+                                    foreach (var detalle in Model)
+                                    {
+
+                                        <tr class="hover:bg-slate-50 transition">
+
+                                            <td class="px-5 py-4
+                                                font-semibold
+                                                text-slate-900">
+
+                                                #@detalle.IdDetalleCompra
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4">
+
+                                                <span class="font-medium
+                                                    text-slate-700">
+
+                                                    Compra #@detalle.IdCompra
+
+                                                </span>
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4">
+
+                                                <span class="font-medium
+                                                    text-slate-900">
+
+                                                    @(detalle.IdProductoNavigation?.Nombre
+                                                        ?? "Producto no disponible")
+
+                                                </span>
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4
+                                                text-slate-700">
+
+                                                @detalle.Cantidad
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4
+                                                text-slate-700">
+
+                                                ₡@detalle.PrecioCompra.ToString("N2")
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4
+                                                font-semibold
+                                                text-slate-900">
+
+                                                ₡@detalle.Subtotal.ToString("N2")
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4">
+
+                                                <div class="flex justify-center
+                                                    gap-2">
+
+                                                    <a href="/DetalleCompra/Details/@detalle.IdDetalleCompra"
+                                                       class="px-3 py-1.5 rounded-lg
+                                                        bg-slate-100
+                                                        text-slate-700
+                                                        hover:bg-slate-200">
+
+                                                        Ver
+
+                                                    </a>
+
+                                                    <a href="/DetalleCompra/Edit/@detalle.IdDetalleCompra"
+                                                       class="px-3 py-1.5 rounded-lg
+                                                        bg-indigo-50
+                                                        text-indigo-600
+                                                        hover:bg-indigo-100">
+
+                                                        Editar
+
+                                                    </a>
+
+                                                    <a href="/DetalleCompra/Delete/@detalle.IdDetalleCompra"
+                                                       class="px-3 py-1.5 rounded-lg
+                                                        bg-red-50
+                                                        text-red-600
+                                                        hover:bg-red-100">
+
+                                                        Eliminar
+
+                                                    </a>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    }
+
+                                }
+                                else
+                                {
+
+                                    <tr>
+
+                                        <td colspan="7"
+                                            class="px-5 py-12
+                                            text-center">
+
+                                            <div class="text-5xl mb-3">
+                                                📦
+                                            </div>
+
+                                            <p class="text-lg
+                                                font-semibold
+                                                text-slate-500">
+
+                                                No hay detalles de compras
+
+                                            </p>
+
+                                            <p class="text-sm
+                                                text-slate-400 mt-1">
+
+                                                Todavía no se han registrado
+                                                productos comprados a proveedores.
+
+                                            </p>
+
+                                        </td>
+
+                                    </tr>
+
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>

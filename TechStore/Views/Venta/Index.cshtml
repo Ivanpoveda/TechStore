@@ -11,15 +11,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 min-h-screen">
-    <div class="min-h-screen bg-slate-100 flex flex-col md:flex-row">
-
+    <div class="flex flex-col md:flex-row min-h-screen">
         <!-- SIDEBAR -->
         <aside class="w-full md:w-64 bg-slate-900 text-white p-5 flex flex-col justify-between shrink-0">
 
             <div>
 
                 <div class="flex items-center gap-3 mb-8">
-
                     <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
                         TS
                     </div>
@@ -27,38 +25,43 @@
                     <span class="font-bold text-lg tracking-wide">
                         TechStore Admin
                     </span>
-
                 </div>
 
                 <nav class="space-y-1">
 
                     <a href="/Admin/Dashboard"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
                         Dashboard
                     </a>
 
                     <a href="/Usuario/Index"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
                         Usuarios
                     </a>
 
                     <a href="/Producto/Index"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
                         Productos
                     </a>
 
                     <a href="/Venta/Index"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition bg-indigo-600 text-white font-medium hover:bg-indigo-700 hover:scale-105">
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        bg-indigo-600 text-white font-medium">
                         Ventas
                     </a>
 
                     <a href="/Garantia/Index"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
                         Garantías
                     </a>
 
                     <a href="/Proveedor/Index"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
                         Proveedores
                     </a>
 
@@ -66,24 +69,32 @@
 
             </div>
 
-            <div class="pt-4 border-t border-slate-800 flex items-center justify-between mt-6">
+            <div class="border-t border-slate-700 pt-4 mt-6">
 
-                <div class="text-xs">
+                <form action="/Account/Logout"
+                      method="post">
 
-                    <p class="font-semibold text-white">
-                        Administrador
-                    </p>
+                    @Html.AntiForgeryToken()
 
-                    <p class="text-slate-400">
-                        admin@techstore.com
-                    </p>
+                    <button type="submit"
+                            class="w-full flex items-center gap-3
+                        px-4 py-2.5 rounded-lg
+                        text-slate-400
+                        hover:bg-red-600
+                        hover:text-white
+                        transition">
 
-                </div>
+                        <span class="text-lg">
+                            ⇥
+                        </span>
 
-                <a href="/Account/Login"
-                   class="text-xs text-rose-400 hover:underline hover:text-rose-300 transition">
-                    Salir
-                </a>
+                        <span>
+                            Cerrar sesión
+                        </span>
+
+                    </button>
+
+                </form>
 
             </div>
 

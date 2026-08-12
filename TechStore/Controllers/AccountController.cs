@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
-using TechStore.Models;
 using System.Security.Cryptography;
 using System.Text;
+using TechStore.Models;
 
 namespace TechStore.Controllers
 {
@@ -19,56 +20,125 @@ namespace TechStore.Controllers
             _context = context;
         }
 
-        // GET: /Account/Login
+        // =====================================================
+        // LOGIN - GET
+        // =====================================================
+
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: /Account/Login
 
-// POST: /Account/Login
+        // =====================================================
+        // LOGIN - POST
+        // =====================================================
+
         [HttpPost]
-        public async Task<IActionResult> Login(string correo, string contrasenia)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(
+            string correo,
+            string contrasenia)
         {
-            string hashContrasenia = HashPassword(contrasenia);
-
             var usuario = await _context.Usuarios
                 .Include(u => u.IdRolNavigation)
                 .FirstOrDefaultAsync(u =>
                     u.Correo == correo &&
-                    u.Contrasenia == hashContrasenia &&
                     u.Estado == "Activo");
 
             if (usuario == null)
             {
-                ViewBag.Error = "Correo o contraseña incorrectos";
+                ViewBag.Error =
+                    "Correo o contraseña incorrectos.";
+
                 return View();
             }
 
-            // =====================================================
-            // OBTENER NOMBRE DEL ROL
-            // =====================================================
 
-            string nombreRol = usuario.IdRolNavigation?.Nombre ?? "";
+            // =================================================
+            // VALIDAR CONTRASEÑA
+            // =================================================
 
-            // =====================================================
-            // VALIDAR ROL
-            // =====================================================
+            bool contraseñaCorrecta = false;
+
+
+            // -------------------------------------------------
+            // 1. INTENTAR SHA-256
+            // -------------------------------------------------
+
+            string hashSha256 =
+                HashPassword(contrasenia);
+
+            if (usuario.Contrasenia == hashSha256)
+            {
+                contraseñaCorrecta = true;
+            }
+
+
+            // -------------------------------------------------
+            // 2. INTENTAR ASP.NET IDENTITY
+            // -------------------------------------------------
+
+            if (!contraseñaCorrecta &&
+                usuario.Contrasenia.StartsWith("AQAAAA"))
+            {
+                var passwordHasher =
+                    new PasswordHasher<Usuario>();
+
+                var resultado =
+                    passwordHasher.VerifyHashedPassword(
+                        usuario,
+                        usuario.Contrasenia,
+                        contrasenia
+                    );
+
+                if (resultado ==
+                    PasswordVerificationResult.Success ||
+                    resultado ==
+                    PasswordVerificationResult.SuccessRehashNeeded)
+                {
+                    contraseñaCorrecta = true;
+                }
+            }
+
+
+            // =================================================
+            // CONTRASEÑA INCORRECTA
+            // =================================================
+
+            if (!contraseñaCorrecta)
+            {
+                ViewBag.Error =
+                    "Correo o contraseña incorrectos.";
+
+                return View();
+            }
+
+
+            // =================================================
+            // OBTENER ROL
+            // =================================================
+
+            string nombreRol =
+                usuario.IdRolNavigation?.Nombre ?? "";
+
 
             if (string.IsNullOrWhiteSpace(nombreRol))
             {
-                ViewBag.Error = "El usuario no tiene un rol asignado.";
+                ViewBag.Error =
+                    "El usuario no tiene un rol asignado.";
+
                 return View();
             }
 
-            // =====================================================
+
+            // =================================================
             // CREAR CLAIMS
-            // =====================================================
+            // =================================================
 
             var claims = new List<Claim>
-                {
+            {
                 new Claim(
                     ClaimTypes.Name,
                     usuario.Nombre
@@ -90,25 +160,30 @@ namespace TechStore.Controllers
                 )
             };
 
+
             var identity = new ClaimsIdentity(
                 claims,
                 CookieAuthenticationDefaults.AuthenticationScheme
             );
 
-            var principal = new ClaimsPrincipal(identity);
 
-            // =====================================================
-            // CREAR COOKIE DE AUTENTICACIÓN
-            // =====================================================
+            var principal =
+                new ClaimsPrincipal(identity);
+
+
+            // =================================================
+            // CREAR COOKIE
+            // =================================================
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 principal
             );
 
-            // =====================================================
-            // REDIRECCIÓN SEGÚN ROL
-            // =====================================================
+
+            // =================================================
+            // REDIRECCIÓN POR ROL
+            // =================================================
 
             if (usuario.IdRol == 1)
             {
@@ -118,6 +193,7 @@ namespace TechStore.Controllers
                 );
             }
 
+
             if (usuario.IdRol == 2)
             {
                 return RedirectToAction(
@@ -126,13 +202,18 @@ namespace TechStore.Controllers
                 );
             }
 
+
             return RedirectToAction(
                 "AccessDenied",
                 "Account"
             );
         }
 
-        // GET: /Account/Register
+
+        // =====================================================
+        // REGISTER - GET
+        // =====================================================
+
         [HttpGet]
         public IActionResult Register()
         {
@@ -140,78 +221,147 @@ namespace TechStore.Controllers
         }
 
 
-        // POST: /Account/Register
+        // =====================================================
+        // REGISTER - POST
+        // =====================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(Usuario nuevoUsuario)
+        public async Task<IActionResult> Register(
+            Usuario nuevoUsuario)
         {
-            string hashContrasenia =
-                HashPassword(nuevoUsuario.Contrasenia);
-
-            var sql = @"INSERT INTO USUARIO (NOMBRE, APELLIDOS, CORREO, CONTRASENIA, TELEFONO, FECHA_REGISTRO, ESTADO, ID_ROL)
-VALUES (@Nombre, @Apellidos, @Correo, @Contrasenia, @Telefono, @FechaRegistro, @Estado, @IdRol);";
-
-
-
-            var parameters = new[]
+            if (!ModelState.IsValid)
             {
-                new SqlParameter("@Nombre", nuevoUsuario.Nombre),
+                return View(nuevoUsuario);
+            }
 
-                new SqlParameter("@Apellidos", nuevoUsuario.Apellidos),
-
-                new SqlParameter("@Correo", nuevoUsuario.Correo),
-
-                new SqlParameter("@Contrasenia", hashContrasenia),
-
-                new SqlParameter(
-                    "@Telefono",
-                    (object?)nuevoUsuario.Telefono ?? DBNull.Value
-                ),
-
-                new SqlParameter(
-                    "@FechaRegistro",
-                    DateTime.Now
-                ),
-
-                new SqlParameter(
-                    "@Estado",
-                    "Activo"
-                ),
-
-                new SqlParameter(
-                    "@IdRol",
-                    2
-                )
-            };
 
             try
             {
-                await _context.Database.ExecuteSqlRawAsync(
-                    sql,
-                    parameters
+                // ---------------------------------------------
+                // NUEVOS USUARIOS USARÁN SHA-256
+                // ---------------------------------------------
+
+                string hashContrasenia =
+                    HashPassword(nuevoUsuario.Contrasenia);
+
+
+                var sql = @"
+                    INSERT INTO USUARIO
+                    (
+                        NOMBRE,
+                        APELLIDOS,
+                        CORREO,
+                        CONTRASENIA,
+                        TELEFONO,
+                        FECHA_REGISTRO,
+                        ESTADO,
+                        ID_ROL
+                    )
+                    VALUES
+                    (
+                        @Nombre,
+                        @Apellidos,
+                        @Correo,
+                        @Contrasenia,
+                        @Telefono,
+                        @FechaRegistro,
+                        @Estado,
+                        @IdRol
+                    );";
+
+
+                var parameters = new[]
+                {
+                    new SqlParameter(
+                        "@Nombre",
+                        nuevoUsuario.Nombre
+                    ),
+
+                    new SqlParameter(
+                        "@Apellidos",
+                        nuevoUsuario.Apellidos
+                    ),
+
+                    new SqlParameter(
+                        "@Correo",
+                        nuevoUsuario.Correo
+                    ),
+
+                    new SqlParameter(
+                        "@Contrasenia",
+                        hashContrasenia
+                    ),
+
+                    new SqlParameter(
+                        "@Telefono",
+                        (object?)nuevoUsuario.Telefono
+                        ?? DBNull.Value
+                    ),
+
+                    new SqlParameter(
+                        "@FechaRegistro",
+                        DateTime.Now
+                    ),
+
+                    new SqlParameter(
+                        "@Estado",
+                        "Activo"
+                    ),
+
+                    new SqlParameter(
+                        "@IdRol",
+                        2
+                    )
+                };
+
+
+                await _context.Database
+                    .ExecuteSqlRawAsync(
+                        sql,
+                        parameters
+                    );
+
+
+                return RedirectToAction(
+                    "Login",
+                    "Account"
                 );
-
-                return RedirectToAction("Login", "Account");
             }
-            catch (SqlException)
+            catch (Exception ex)
             {
                 ViewBag.Error =
-                    "No se pudo registrar el usuario. " +
-                    "Verifique que el correo no esté registrado.";
-
-                return View(nuevoUsuario);
-            }
-            catch (DbUpdateException)
-            {
-                ViewBag.Error =
-                    "Ocurrió un error al guardar el usuario.";
+                    "No se pudo registrar el usuario: " +
+                    ex.Message;
 
                 return View(nuevoUsuario);
             }
         }
 
 
-        // GET: /Account/AccessDenied
+        // =====================================================
+        // LOGOUT
+        // =====================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
+
+            return RedirectToAction(
+                "Login",
+                "Account"
+            );
+        }
+
+
+        // =====================================================
+        // ACCESS DENIED
+        // =====================================================
+
         [HttpGet]
         public IActionResult AccessDenied()
         {
@@ -219,26 +369,19 @@ VALUES (@Nombre, @Apellidos, @Correo, @Contrasenia, @Telefono, @FechaRegistro, @
         }
 
 
-        // POST: /Account/Logout
-        [HttpPost]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme
-            );
+        // =====================================================
+        // SHA-256
+        // =====================================================
 
-            return RedirectToAction("Login", "Account");
-        }
-
-
-        // Hash de contraseña
         private string HashPassword(string password)
         {
-            using var sha256 = SHA256.Create();
+            using var sha256 =
+                SHA256.Create();
 
-            var bytes = sha256.ComputeHash(
-                Encoding.UTF8.GetBytes(password)
-            );
+            var bytes =
+                sha256.ComputeHash(
+                    Encoding.UTF8.GetBytes(password)
+                );
 
             return Convert.ToBase64String(bytes);
         }

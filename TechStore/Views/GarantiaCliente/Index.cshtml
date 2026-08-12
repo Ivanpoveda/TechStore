@@ -1,0 +1,469 @@
+﻿@model IEnumerable<TechStore.Models.Garantium>
+
+@{
+    ViewData["Title"] = "Mis garantías";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Mis garantías - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
+
+    <header class="bg-slate-900 text-white">
+
+        <div class="max-w-7xl mx-auto px-6 py-4">
+
+            <div class="flex justify-between items-center">
+
+                <div>
+
+                    <h1 class="text-xl font-bold">
+                        TechStore
+                    </h1>
+
+                    <p class="text-sm text-slate-400">
+                        Gestión de garantías
+                    </p>
+
+                </div>
+
+                <div class="flex gap-2">
+
+                    <a href="/Cliente/Catalogo"
+                       class="px-4 py-2
+                        bg-indigo-600
+                        rounded-lg
+                        hover:bg-indigo-700
+                        transition">
+
+                        Catálogo
+
+                    </a>
+
+                    <a href="/Cliente/MisCompras"
+                       class="px-4 py-2
+                        bg-slate-700
+                        rounded-lg
+                        hover:bg-slate-600
+                        transition">
+
+                        Mis compras
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ===================================================== -->
+    <!-- CONTENIDO -->
+    <!-- ===================================================== -->
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+        <!-- ENCABEZADO -->
+
+        <div class="flex flex-col md:flex-row
+            md:justify-between
+            md:items-center
+            gap-4
+            mb-8">
+
+            <div>
+
+                <h2 class="text-3xl font-bold text-slate-900">
+                    Mis garantías
+                </h2>
+
+                <p class="text-slate-500 mt-1">
+                    Consulta el estado de las garantías
+                    solicitadas para tus productos.
+                </p>
+
+            </div>
+
+            <a href="/GarantiaCliente/MisProductos"
+               class="inline-block
+                px-5 py-3
+                bg-indigo-600
+                text-white
+                rounded-lg
+                font-medium
+                hover:bg-indigo-700
+                transition">
+
+                + Solicitar garantía
+
+            </a>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- MENSAJE DE ÉXITO -->
+        <!-- ================================================= -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="mb-6
+                p-4
+                rounded-lg
+                bg-green-50
+                border border-green-200
+                text-green-700">
+
+                <strong>¡Éxito!</strong>
+
+                @TempData["Success"]
+
+            </div>
+        }
+
+
+        <!-- ================================================= -->
+        <!-- MENSAJE DE ERROR -->
+        <!-- ================================================= -->
+        @if (TempData["Error"] != null)
+        {
+            <div class="mb-6
+                p-4
+                rounded-lg
+                bg-red-50
+                border border-red-200
+                text-red-700">
+
+                <strong>Error:</strong>
+
+                @TempData["Error"]
+
+            </div>
+        }
+
+
+        <!-- ================================================= -->
+        <!-- SIN GARANTÍAS -->
+        <!-- ================================================= -->
+        @if (Model == null || !Model.Any())
+        {
+
+            <div class="bg-white
+                rounded-xl
+                shadow-sm
+                border border-slate-200
+                p-12
+                text-center">
+
+                <div class="text-6xl mb-4">
+                    🛡️
+                </div>
+
+                <h3 class="text-xl
+                    font-bold
+                    text-slate-800">
+
+                    No tienes garantías registradas
+
+                </h3>
+
+                <p class="text-slate-500 mt-2">
+
+                    Cuando solicites una garantía
+                    aparecerá aquí.
+
+                </p>
+
+                <a href="/GarantiaCliente/MisProductos"
+                   class="inline-block
+                    mt-6
+                    px-5 py-3
+                    bg-indigo-600
+                    text-white
+                    rounded-lg
+                    hover:bg-indigo-700
+                    transition">
+
+                    Solicitar garantía
+
+                </a>
+
+            </div>
+
+        }
+
+        else
+        {
+
+            <!-- ================================================= -->
+            <!-- TABLA -->
+            <!-- ================================================= -->
+
+            <div class="bg-white
+                rounded-xl
+                shadow-sm
+                border border-slate-200
+                overflow-hidden">
+
+                <div class="px-6 py-4
+                    border-b
+                    border-slate-200">
+
+                    <h3 class="text-lg
+                        font-bold
+                        text-slate-800">
+
+                        Historial de garantías
+
+                    </h3>
+
+                </div>
+
+
+                <div class="overflow-x-auto">
+
+                    <table class="w-full text-left">
+
+                        <!-- ENCABEZADO -->
+
+                        <thead class="bg-slate-900 text-white">
+
+                            <tr>
+
+                                <th class="px-6 py-4">
+                                    Garantía
+                                </th>
+
+                                <th class="px-6 py-4">
+                                    Producto
+                                </th>
+
+                                <th class="px-6 py-4">
+                                    Fecha
+                                </th>
+
+                                <th class="px-6 py-4">
+                                    Motivo
+                                </th>
+
+                                <th class="px-6 py-4">
+                                    Estado
+                                </th>
+
+                                <th class="px-6 py-4 text-center">
+                                    Acción
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <!-- DATOS -->
+
+                        <tbody class="divide-y
+                            divide-slate-200">
+
+                            @foreach (var garantia in Model)
+                            {
+
+                                <tr class="hover:bg-slate-50
+                                    transition">
+
+                                    <!-- ========================= -->
+                                    <!-- ID GARANTÍA -->
+                                    <!-- ========================= -->
+
+                                    <td class="px-6 py-4">
+
+                                        <span class="font-bold
+                                            text-slate-800">
+
+                                            #@garantia.IdGarantia
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- ========================= -->
+                                    <!-- PRODUCTO -->
+                                    <!-- ========================= -->
+
+                                    <td class="px-6 py-4">
+
+                                        <div class="font-semibold
+                                            text-slate-800">
+
+                                            @(garantia
+                                                .IdDetalleVentaNavigation
+                                                ?.IdProductoNavigation
+                                                ?.Nombre ?? "Producto no disponible")
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- ========================= -->
+                                    <!-- FECHA -->
+                                    <!-- ========================= -->
+
+                                    <td class="px-6 py-4
+                                        text-slate-600">
+
+                                        @garantia.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")
+
+                                    </td>
+
+
+                                    <!-- ========================= -->
+                                    <!-- MOTIVO -->
+                                    <!-- ========================= -->
+
+                                    <td class="px-6 py-4">
+
+                                        <span class="text-slate-700">
+
+                                            @(garantia.Motivo ?? "Sin especificar")
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- ========================= -->
+                                    <!-- ESTADO -->
+                                    <!-- ========================= -->
+
+                                    <td class="px-6 py-4">
+
+                                        @if (garantia.Estado == "En proceso")
+                                        {
+
+                                            <span class="inline-flex
+                                                px-3 py-1
+                                                rounded-full
+                                                text-sm
+                                                font-semibold
+                                                bg-yellow-100
+                                                text-yellow-800">
+
+                                                En proceso
+
+                                            </span>
+
+                                        }
+                                        else if (garantia.Estado == "Aprobada")
+                                        {
+
+                                            <span class="inline-flex
+                                                px-3 py-1
+                                                rounded-full
+                                                text-sm
+                                                font-semibold
+                                                bg-green-100
+                                                text-green-800">
+
+                                                Aprobada
+
+                                            </span>
+
+                                        }
+                                        else if (garantia.Estado == "Rechazada")
+                                        {
+
+                                            <span class="inline-flex
+                                                px-3 py-1
+                                                rounded-full
+                                                text-sm
+                                                font-semibold
+                                                bg-red-100
+                                                text-red-800">
+
+                                                Rechazada
+
+                                            </span>
+
+                                        }
+                                        else
+                                        {
+
+                                            <span class="inline-flex
+                                                px-3 py-1
+                                                rounded-full
+                                                text-sm
+                                                font-semibold
+                                                bg-slate-100
+                                                text-slate-700">
+
+                                                @garantia.Estado
+
+                                            </span>
+
+                                        }
+
+                                    </td>
+
+
+                                    <!-- ========================= -->
+                                    <!-- ACCIÓN -->
+                                    <!-- ========================= -->
+
+                                    <td class="px-6 py-4 text-center">
+
+                                        <a href="/GarantiaCliente/Details/@garantia.IdGarantia"
+                                           class="inline-block
+                                            px-4 py-2
+                                            bg-indigo-600
+                                            text-white
+                                            rounded-lg
+                                            text-sm
+                                            font-medium
+                                            hover:bg-indigo-700
+                                            transition">
+
+                                            Ver
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        }
+
+    </main>
+
+</body>
+
+</html>

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using TechStore.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace TechStore.Controllers
 {
@@ -12,44 +13,69 @@ namespace TechStore.Controllers
     {
         private readonly TechStoreContext _context;
 
+        // Hasher para generar y verificar contraseñas
+        private readonly PasswordHasher<Usuario> _passwordHasher;
+
         public UsuarioController(TechStoreContext context)
         {
             _context = context;
+            _passwordHasher = new PasswordHasher<Usuario>();
         }
 
-        // GET: Usuario
+
+        // =========================================================
+        // INDEX
+        // =========================================================
+
         public async Task<IActionResult> Index()
         {
-            var usuarios = _context.Usuarios.Include(u => u.IdRolNavigation);
+            var usuarios = _context.Usuarios
+                .Include(u => u.IdRolNavigation);
+
             return View(await usuarios.ToListAsync());
         }
 
-        // GET: Usuario/Details/5
+
+        // =========================================================
+        // DETAILS
+        // =========================================================
+
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
             var usuario = await _context.Usuarios
                 .Include(u => u.IdRolNavigation)
-                .FirstOrDefaultAsync(m => m.IdUsuario == id);
+                .FirstOrDefaultAsync(
+                    m => m.IdUsuario == id);
 
-            if (usuario == null) return NotFound();
+            if (usuario == null)
+                return NotFound();
 
             return View(usuario);
         }
 
-        // GET: Usuario/Create
+
+        // =========================================================
+        // CREATE - GET
+        // =========================================================
+
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Usuario/Create
+
+        // =========================================================
+        // CREATE - POST
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Usuario usuario)
         {
-            // PRUEBA 1: saber si llega al controlador
             Console.WriteLine("========== CREATE ==========");
             Console.WriteLine("Nombre: " + usuario.Nombre);
             Console.WriteLine("Apellidos: " + usuario.Apellidos);
@@ -57,176 +83,349 @@ namespace TechStore.Controllers
             Console.WriteLine("Telefono: " + usuario.Telefono);
             Console.WriteLine("IdRol: " + usuario.IdRol);
 
-            // PRUEBA 2: revisar ModelState
+
+            // -----------------------------------------------------
+            // VALIDAR MODELO
+            // -----------------------------------------------------
+
             if (!ModelState.IsValid)
             {
                 var errores = ModelState
                     .SelectMany(x => x.Value!.Errors)
                     .Select(x => x.ErrorMessage)
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Where(x =>
+                        !string.IsNullOrWhiteSpace(x))
                     .ToList();
 
-                ViewBag.Error = "ModelState inválido: " +
-                                string.Join(" | ", errores);
+                ViewBag.Error =
+                    "ModelState inválido: " +
+                    string.Join(" | ", errores);
 
                 return View(usuario);
             }
 
+
             try
             {
-                Console.WriteLine("ModelState correcto.");
-                Console.WriteLine("Ejecutando NEW_USUARIO...");
+                // -------------------------------------------------
+                // VERIFICAR SI EL CORREO YA EXISTE
+                // -------------------------------------------------
 
-                var sql = @"EXEC NEW_USUARIO
-                    @p_NOMBRE,
-                    @p_APELLIDOS,
-                    @p_CORREO,
-                    @p_CONTRASENIA,
-                    @p_TELEFONO,
-                    @p_ID_ROL";
+                var correoExiste =
+                    await _context.Usuarios
+                        .AnyAsync(u =>
+                            u.Correo == usuario.Correo);
+
+                if (correoExiste)
+                {
+                    ViewBag.Error =
+                        "Ya existe un usuario registrado con ese correo.";
+
+                    return View(usuario);
+                }
+
+
+                // -------------------------------------------------
+                // VALIDAR CONTRASEÑA
+                // -------------------------------------------------
+
+                if (string.IsNullOrWhiteSpace(
+                    usuario.Contrasenia))
+                {
+                    ViewBag.Error =
+                        "La contraseña es obligatoria.";
+
+                    return View(usuario);
+                }
+
+
+                // -------------------------------------------------
+                // GENERAR HASH
+                // -------------------------------------------------
+
+                string contraseniaHash =
+                    _passwordHasher.HashPassword(
+                        usuario,
+                        usuario.Contrasenia);
+
+
+                Console.WriteLine(
+                    "Contraseña hasheada correctamente.");
+
+
+                // -------------------------------------------------
+                // PROCEDIMIENTO NEW_USUARIO
+                // -------------------------------------------------
+
+                var sql = @"
+                    EXEC NEW_USUARIO
+                        @p_NOMBRE,
+                        @p_APELLIDOS,
+                        @p_CORREO,
+                        @p_CONTRASENIA,
+                        @p_TELEFONO,
+                        @p_ID_ROL";
+
 
                 var parameters = new[]
                 {
-            new SqlParameter("@p_NOMBRE", usuario.Nombre),
-            new SqlParameter("@p_APELLIDOS", usuario.Apellidos),
-            new SqlParameter("@p_CORREO", usuario.Correo),
-            new SqlParameter("@p_CONTRASENIA", usuario.Contrasenia),
-            new SqlParameter(
-                "@p_TELEFONO",
-                (object?)usuario.Telefono ?? DBNull.Value
-            ),
-            new SqlParameter("@p_ID_ROL", usuario.IdRol)
-        };
+                    new SqlParameter(
+                        "@p_NOMBRE",
+                        usuario.Nombre),
 
-                var resultado = await _context.Database
-                    .ExecuteSqlRawAsync(sql, parameters);
+                    new SqlParameter(
+                        "@p_APELLIDOS",
+                        usuario.Apellidos),
 
-                Console.WriteLine("NEW_USUARIO ejecutado.");
-                Console.WriteLine("Resultado: " + resultado);
+                    new SqlParameter(
+                        "@p_CORREO",
+                        usuario.Correo),
+
+                    // IMPORTANTE:
+                    // aquí mandamos el HASH,
+                    // NO la contraseña original
+                    new SqlParameter(
+                        "@p_CONTRASENIA",
+                        contraseniaHash),
+
+                    new SqlParameter(
+                        "@p_TELEFONO",
+                        (object?)usuario.Telefono
+                        ?? DBNull.Value),
+
+                    new SqlParameter(
+                        "@p_ID_ROL",
+                        usuario.IdRol)
+                };
+
+
+                var resultado =
+                    await _context.Database
+                        .ExecuteSqlRawAsync(
+                            sql,
+                            parameters);
+
+
+                Console.WriteLine(
+                    "NEW_USUARIO ejecutado.");
+
+                Console.WriteLine(
+                    "Resultado: " + resultado);
+
 
                 TempData["Mensaje"] =
-                    "Usuario creado correctamente. Filas afectadas: " + resultado;
+                    "Usuario creado correctamente.";
 
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToAction(
+                    nameof(Index));
             }
             catch (Exception ex)
             {
-                Console.WriteLine("ERROR SQL:");
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine(
+                    "ERROR SQL:");
 
-                ViewBag.Error = "ERROR SQL: " + ex.Message;
+                Console.WriteLine(
+                    ex.ToString());
+
+
+                ViewBag.Error =
+                    "ERROR SQL: " +
+                    (ex.InnerException?.Message
+                    ?? ex.Message);
+
 
                 return View(usuario);
             }
         }
 
 
-        // GET: Usuario/Edit/5
+        // =========================================================
+        // EDIT - GET
+        // =========================================================
+
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario == null) return NotFound();
+
+            var usuario =
+                await _context.Usuarios
+                    .FindAsync(id);
+
+
+            if (usuario == null)
+                return NotFound();
+
 
             return View(usuario);
         }
 
-        // POST: Usuario/Edit
+
+        // =========================================================
+        // EDIT - POST
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Usuario usuario)
+        public async Task<IActionResult> Edit(
+            Usuario usuario)
         {
             if (!ModelState.IsValid)
             {
                 var errores = ModelState
                     .SelectMany(x => x.Value!.Errors)
                     .Select(x => x.ErrorMessage)
-                    .Where(x => !string.IsNullOrEmpty(x))
+                    .Where(x =>
+                        !string.IsNullOrEmpty(x))
                     .ToList();
 
-                ViewBag.Error = "ModelState inválido: " + string.Join(" | ", errores);
+                ViewBag.Error =
+                    "ModelState inválido: " +
+                    string.Join(" | ", errores);
 
                 return View(usuario);
             }
 
+
             try
             {
-                var sql = @"EXEC UPD_USUARIO 
-                    @p_ID_USUARIO, 
-                    @p_NOMBRE, 
-                    @p_APELLIDOS, 
-                    @p_TELEFONO";
+                // -------------------------------------------------
+                // ACTUALIZAR DATOS DEL USUARIO
+                // -------------------------------------------------
+
+                var sql = @"
+                    EXEC UPD_USUARIO
+                        @p_ID_USUARIO,
+                        @p_NOMBRE,
+                        @p_APELLIDOS,
+                        @p_TELEFONO";
+
 
                 var parameters = new[]
                 {
-            new SqlParameter("@p_ID_USUARIO", usuario.IdUsuario),
-            new SqlParameter("@p_NOMBRE", usuario.Nombre),
-            new SqlParameter("@p_APELLIDOS", usuario.Apellidos),
-            new SqlParameter("@p_TELEFONO",
-                (object?)usuario.Telefono ?? DBNull.Value)
-        };
+                    new SqlParameter(
+                        "@p_ID_USUARIO",
+                        usuario.IdUsuario),
 
-                var resultado = await _context.Database
-                    .ExecuteSqlRawAsync(sql, parameters);
+                    new SqlParameter(
+                        "@p_NOMBRE",
+                        usuario.Nombre),
 
-                TempData["Mensaje"] = "Usuario actualizado. Filas afectadas: " + resultado;
+                    new SqlParameter(
+                        "@p_APELLIDOS",
+                        usuario.Apellidos),
 
-                return RedirectToAction(nameof(Index));
+                    new SqlParameter(
+                        "@p_TELEFONO",
+                        (object?)usuario.Telefono
+                        ?? DBNull.Value)
+                };
+
+
+                var resultado =
+                    await _context.Database
+                        .ExecuteSqlRawAsync(
+                            sql,
+                            parameters);
+
+
+                TempData["Mensaje"] =
+                    "Usuario actualizado correctamente.";
+
+
+                return RedirectToAction(
+                    nameof(Index));
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "ERROR SQL: " + ex.Message;
+                ViewBag.Error =
+                    "ERROR SQL: " +
+                    (ex.InnerException?.Message
+                    ?? ex.Message);
 
                 return View(usuario);
             }
         }
 
 
-        // GET: Usuario/Delete/5
+        // =========================================================
+        // DELETE - GET
+        // =========================================================
+
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
-            var usuario = await _context.Usuarios
-                .Include(u => u.IdRolNavigation)
-                .FirstOrDefaultAsync(m => m.IdUsuario == id);
 
-            if (usuario == null) return NotFound();
+            var usuario =
+                await _context.Usuarios
+                    .Include(u =>
+                        u.IdRolNavigation)
+                    .FirstOrDefaultAsync(
+                        m => m.IdUsuario == id);
+
+
+            if (usuario == null)
+                return NotFound();
+
 
             return View(usuario);
         }
 
-        // POST: Usuario/Delete
+
+        // =========================================================
+        // DELETE - POST
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int IdUsuario)
+        public async Task<IActionResult> Delete(
+            int IdUsuario)
         {
             try
             {
-                var sql = "EXEC DEL_USUARIO @p_ID_USUARIO";
+                var sql =
+                    "EXEC DEL_USUARIO @p_ID_USUARIO";
+
 
                 var parameters = new[]
                 {
-            new SqlParameter("@p_ID_USUARIO", IdUsuario)
-        };
+                    new SqlParameter(
+                        "@p_ID_USUARIO",
+                        IdUsuario)
+                };
 
-                var resultado = await _context.Database
-                    .ExecuteSqlRawAsync(sql, parameters);
+
+                var resultado =
+                    await _context.Database
+                        .ExecuteSqlRawAsync(
+                            sql,
+                            parameters);
+
 
                 TempData["Mensaje"] =
-                    "Proceso de eliminación ejecutado. Filas afectadas: " + resultado;
+                    "Usuario eliminado correctamente.";
 
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToAction(
+                    nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Mensaje"] = "ERROR SQL: " + ex.Message;
+                TempData["Mensaje"] =
+                    "ERROR SQL: " +
+                    (ex.InnerException?.Message
+                    ?? ex.Message);
 
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToAction(
+                    nameof(Index));
             }
         }
-
     }
 }
-

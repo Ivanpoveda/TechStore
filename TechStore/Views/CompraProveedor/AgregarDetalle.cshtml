@@ -1,0 +1,194 @@
+﻿@{
+    ViewData["Title"] = "Agregar producto";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Agregar producto - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <main class="max-w-3xl mx-auto px-6 py-10">
+
+        <div class="mb-6">
+
+            <h1 class="text-2xl font-bold text-slate-900">
+
+                Agregar producto a la compra
+
+            </h1>
+
+            <p class="text-slate-500 mt-1">
+
+                Compra #@ViewBag.IdCompra
+
+            </p>
+
+        </div>
+
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="mb-5 bg-red-50 border border-red-200
+                text-red-700 px-4 py-3 rounded-lg">
+
+                @TempData["Error"]
+
+            </div>
+        }
+
+
+        <div class="bg-white rounded-xl shadow-sm
+            border border-slate-200 p-6">
+
+            <form asp-action="AgregarDetalle"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="IdCompra"
+                       value="@ViewBag.IdCompra" />
+
+
+                <!-- PRODUCTO -->
+
+                <div class="mb-5">
+
+                    <label for="IdProducto"
+                           class="block text-sm font-semibold
+                        text-slate-700 mb-2">
+
+                        Producto
+
+                    </label>
+
+                    <select id="IdProducto"
+                            name="IdProducto"
+                            required
+                            class="w-full px-4 py-3
+                        border border-slate-300
+                        rounded-lg
+                        focus:ring-2
+                        focus:ring-indigo-500
+                        outline-none">
+
+                        <option value="">
+                            Seleccione un producto
+                        </option>
+
+                        @if (ViewBag.IdProducto != null)
+                        {
+                            foreach (var producto in ViewBag.IdProducto)
+                            {
+                                <option value="@producto.Value">
+                                    @producto.Text
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+
+                    <!-- CANTIDAD -->
+
+                    <div>
+
+                        <label class="block text-sm font-semibold
+                            text-slate-700 mb-2">
+
+                            Cantidad
+
+                        </label>
+
+                        <input type="number"
+                               name="Cantidad"
+                               min="1"
+                               required
+                               class="w-full px-4 py-3
+                        border border-slate-300
+                        rounded-lg
+                        focus:ring-2
+                        focus:ring-indigo-500
+                        outline-none" />
+
+                    </div>
+
+
+                    <!-- PRECIO -->
+
+                    <div>
+
+                        <label class="block text-sm font-semibold
+                            text-slate-700 mb-2">
+
+                            Precio de compra
+
+                        </label>
+
+                        <input type="number"
+                               name="PrecioCompra"
+                               min="0.01"
+                               step="0.01"
+                               required
+                               class="w-full px-4 py-3
+                        border border-slate-300
+                        rounded-lg
+                        focus:ring-2
+                        focus:ring-indigo-500
+                        outline-none" />
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-6 flex justify-end gap-3">
+
+                    <a href="/CompraProveedor/Details/@ViewBag.IdCompra"
+                       class="px-5 py-3 rounded-lg
+                        border border-slate-300
+                        text-slate-700
+                        hover:bg-slate-100">
+
+                        Cancelar
+
+                    </a>
+
+                    <button type="submit"
+                            class="px-5 py-3 rounded-lg
+                        bg-indigo-600 text-white
+                        font-medium
+                        hover:bg-indigo-700">
+
+                        Agregar producto
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>

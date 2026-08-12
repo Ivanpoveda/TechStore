@@ -1,0 +1,320 @@
+﻿@model TechStore.Models.DetalleVentum
+
+@{
+    ViewData["Title"] = "Solicitar garantía";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Solicitar garantía - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+
+    <!-- HEADER -->
+
+    <header class="bg-slate-900 text-white">
+
+        <div class="max-w-5xl mx-auto px-6 py-4">
+
+            <div class="flex justify-between items-center">
+
+                <div>
+
+                    <h1 class="text-xl font-bold">
+                        TechStore
+                    </h1>
+
+                    <p class="text-sm text-slate-400">
+                        Solicitud de garantía
+                    </p>
+
+                </div>
+
+                <a href="/GarantiaCliente/Index"
+                   class="px-4 py-2
+                    bg-slate-700
+                    rounded-lg
+                    hover:bg-slate-600">
+
+                    Mis garantías
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- CONTENIDO -->
+
+    <main class="max-w-5xl mx-auto px-6 py-8">
+
+
+        <div class="mb-8">
+
+            <h2 class="text-3xl font-bold text-slate-900">
+
+                Solicitar garantía
+
+            </h2>
+
+            <p class="text-slate-500 mt-1">
+
+                Completa la información del problema
+                presentado por el producto.
+
+            </p>
+
+        </div>
+
+
+        <!-- PRODUCTO -->
+
+        <div class="bg-white
+            rounded-xl
+            shadow-sm
+            border border-slate-200
+            p-6
+            mb-6">
+
+            <div class="flex items-start gap-4">
+
+                <div class="w-16 h-16
+                    bg-indigo-100
+                    rounded-xl
+                    flex items-center
+                    justify-center
+                    text-2xl">
+
+                    📦
+
+                </div>
+
+
+                <div>
+
+                    <p class="text-sm text-slate-500">
+                        Producto
+                    </p>
+
+                    <h3 class="text-xl font-bold
+                        text-slate-900">
+
+                        @Model.IdProductoNavigation?.Nombre
+
+                    </h3>
+
+                    <p class="text-sm text-slate-500 mt-1">
+
+                        Venta #@Model.IdVenta
+
+                    </p>
+
+                    <p class="text-sm text-slate-500">
+
+                        Cantidad: @Model.Cantidad
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MENSAJE ERROR -->
+        @if (TempData["Error"] != null)
+        {
+
+            <div class="mb-6 p-4 rounded-lg
+                bg-red-50
+                border border-red-200
+                text-red-700">
+
+                @TempData["Error"]
+
+            </div>
+
+        }
+
+
+        <!-- FORMULARIO -->
+
+        <div class="bg-white
+            rounded-xl
+            shadow-sm
+            border border-slate-200
+            p-6">
+
+            <form action="/GarantiaCliente/Solicitar"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+
+                <input type="hidden"
+                       name="IdDetalleVenta"
+                       value="@Model.IdDetalleVenta" />
+
+
+                <!-- MOTIVO -->
+
+                <div class="mb-6">
+
+                    <label for="Motivo"
+                           class="block
+                        text-sm
+                        font-semibold
+                        text-slate-700
+                        mb-2">
+
+                        Motivo de la garantía
+
+                    </label>
+
+                    <select id="Motivo"
+                            name="Motivo"
+                            required
+                            class="w-full
+                        px-4 py-3
+                        border
+                        border-slate-300
+                        rounded-lg
+                        focus:ring-2
+                        focus:ring-indigo-500
+                        focus:border-indigo-500
+                        outline-none">
+
+                        <option value="">
+                            Seleccione un motivo
+                        </option>
+
+                        <option value="Producto defectuoso">
+                            Producto defectuoso
+                        </option>
+
+                        <option value="Producto dañado">
+                            Producto dañado
+                        </option>
+
+                        <option value="No funciona correctamente">
+                            No funciona correctamente
+                        </option>
+
+                        <option value="Falla después del uso">
+                            Falla después del uso
+                        </option>
+
+                        <option value="Otro">
+                            Otro
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DESCRIPCIÓN -->
+
+                <div class="mb-6">
+
+                    <label for="Descripcion"
+                           class="block
+                        text-sm
+                        font-semibold
+                        text-slate-700
+                        mb-2">
+
+                        Descripción del problema
+
+                    </label>
+
+                    <textarea id="Descripcion"
+                              name="Descripcion"
+                              rows="6"
+                              required
+                              maxlength="1000"
+                              placeholder="Describe detalladamente el problema que presenta el producto..."
+                              class="w-full
+                    px-4 py-3
+                    border
+                    border-slate-300
+                    rounded-lg
+                    focus:ring-2
+                    focus:ring-indigo-500
+                    focus:border-indigo-500
+                    outline-none
+                    resize-none"></textarea>
+
+                    <p class="text-xs text-slate-400 mt-2">
+
+                        Describe el problema de la forma
+                        más clara posible.
+
+                    </p>
+
+                </div>
+
+
+                <!-- BOTONES -->
+
+                <div class="flex flex-col
+                    sm:flex-row
+                    gap-3
+                    justify-end">
+
+                    <a href="/GarantiaCliente/MisProductos"
+                       class="px-5 py-3
+                        rounded-lg
+                        border
+                        border-slate-300
+                        text-slate-700
+                        text-center
+                        hover:bg-slate-100
+                        transition">
+
+                        Cancelar
+
+                    </a>
+
+
+                    <button type="submit"
+                            class="px-5 py-3
+                        rounded-lg
+                        bg-indigo-600
+                        text-white
+                        font-medium
+                        hover:bg-indigo-700
+                        transition">
+
+                        Enviar solicitud
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>

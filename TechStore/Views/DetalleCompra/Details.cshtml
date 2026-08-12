@@ -1,48 +1,221 @@
 @model TechStore.Models.DetalleCompra
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalle de compra";
 }
 
-<h1>Details</h1>
+<!DOCTYPE html>
+<html lang="es">
 
-<div>
-    <h4>DetalleCompra</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cantidad)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cantidad)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PrecioCompra)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PrecioCompra)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Subtotal)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Subtotal)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IdCompraNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IdCompraNavigation.IdCompra)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IdProductoNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IdProductoNavigation.IdProducto)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdDetalleCompra">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Detalle de compra - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <div class="min-h-screen bg-slate-100">
+
+        <header class="bg-slate-900 text-white">
+
+            <div class="max-w-5xl mx-auto px-6 py-5">
+
+                <div class="flex justify-between items-center">
+
+                    <div>
+
+                        <h1 class="text-xl font-bold">
+                            TechStore
+                        </h1>
+
+                        <p class="text-sm text-slate-400">
+                            Detalle de compra a proveedor
+                        </p>
+
+                    </div>
+
+                    <a href="/DetalleCompra/Index"
+                       class="px-4 py-2 rounded-lg
+                        bg-slate-700
+                        hover:bg-slate-600">
+
+                        Volver
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <main class="max-w-5xl mx-auto px-6 py-8">
+
+            <div class="mb-6">
+
+                <h2 class="text-3xl font-bold text-slate-900">
+
+                    Detalle de compra
+
+                </h2>
+
+                <p class="text-slate-500 mt-1">
+
+                    Información del producto adquirido.
+
+                </p>
+
+            </div>
+
+
+            <div class="bg-white rounded-xl shadow-sm
+                border border-slate-200 p-6">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            ID detalle
+                        </p>
+
+                        <p class="text-lg font-bold text-slate-900">
+                            #@Model.IdDetalleCompra
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            ID compra
+                        </p>
+
+                        <p class="text-lg font-bold text-slate-900">
+                            #@Model.IdCompra
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            Producto
+                        </p>
+
+                        <p class="text-lg font-bold text-slate-900">
+
+                            @(Model.IdProductoNavigation?.Nombre
+                                ?? "Producto no disponible")
+
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            ID producto
+                        </p>
+
+                        <p class="text-lg font-semibold text-slate-700">
+                            #@Model.IdProducto
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            Cantidad
+                        </p>
+
+                        <p class="text-lg font-bold text-slate-900">
+                            @Model.Cantidad
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            Precio de compra
+                        </p>
+
+                        <p class="text-lg font-bold text-indigo-600">
+
+                            ₡@Model.PrecioCompra.ToString("N2")
+
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            Subtotal
+                        </p>
+
+                        <p class="text-2xl font-bold text-slate-900">
+
+                            ₡@Model.Subtotal.ToString("N2")
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="border-t border-slate-200
+                    mt-8 pt-6">
+
+                    <div class="flex justify-end gap-3">
+
+                        <a href="/DetalleCompra/Edit/@Model.IdDetalleCompra"
+                           class="px-5 py-2.5 rounded-lg
+                            bg-indigo-600 text-white
+                            hover:bg-indigo-700">
+
+                            Editar
+
+                        </a>
+
+                        <a href="/DetalleCompra/Index"
+                           class="px-5 py-2.5 rounded-lg
+                            bg-slate-200 text-slate-700
+                            hover:bg-slate-300">
+
+                            Volver
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>

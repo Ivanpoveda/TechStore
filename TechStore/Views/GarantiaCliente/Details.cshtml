@@ -1,0 +1,394 @@
+﻿@model TechStore.Models.Garantium
+
+@{
+    ViewData["Title"] = "Detalle de garantía";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Detalle de garantía - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+
+    <!-- HEADER -->
+
+    <header class="bg-slate-900 text-white">
+
+        <div class="max-w-5xl mx-auto px-6 py-4">
+
+            <div class="flex justify-between items-center">
+
+                <div>
+
+                    <h1 class="text-xl font-bold">
+                        TechStore
+                    </h1>
+
+                    <p class="text-sm text-slate-400">
+                        Detalle de garantía
+                    </p>
+
+                </div>
+
+
+                <div class="flex gap-2">
+
+                    <a href="/Cliente/Catalogo"
+                       class="px-4 py-2
+                        bg-indigo-600
+                        rounded-lg
+                        hover:bg-indigo-700">
+
+                        Catálogo
+
+                    </a>
+
+                    <a href="/GarantiaCliente/Index"
+                       class="px-4 py-2
+                        bg-slate-700
+                        rounded-lg
+                        hover:bg-slate-600">
+
+                        Mis garantías
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- CONTENIDO -->
+
+    <main class="max-w-5xl mx-auto px-6 py-8">
+
+
+        <div class="mb-8">
+
+            <h2 class="text-3xl font-bold text-slate-900">
+
+                Garantía #@Model.IdGarantia
+
+            </h2>
+
+            <p class="text-slate-500 mt-1">
+
+                Información de tu solicitud de garantía.
+
+            </p>
+
+        </div>
+
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+            <!-- INFORMACIÓN DEL PRODUCTO -->
+
+            <div class="bg-white
+                rounded-xl
+                shadow-sm
+                border border-slate-200
+                p-6">
+
+                <h3 class="text-lg
+                    font-bold
+                    text-slate-900
+                    mb-5">
+
+                    Producto
+
+                </h3>
+
+
+                <div class="space-y-4">
+
+
+                    <!-- PRODUCTO -->
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            Producto
+                        </p>
+
+                        <p class="font-semibold text-slate-800">
+
+                            @(Model.IdDetalleVentaNavigation?
+                                .IdProductoNavigation?
+                                .Nombre ?? "Producto no encontrado")
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- VENTA -->
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            Venta
+                        </p>
+
+                        <p class="font-semibold text-slate-800">
+
+                            @(Model.IdDetalleVentaNavigation?.IdVenta.ToString() ?? "—")
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- CANTIDAD -->
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            Cantidad
+                        </p>
+
+                        <p class="font-semibold text-slate-800">
+
+                            @(Model.IdDetalleVentaNavigation?.Cantidad.ToString() ?? "0")
+
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- INFORMACIÓN GARANTÍA -->
+
+            <div class="bg-white
+                rounded-xl
+                shadow-sm
+                border border-slate-200
+                p-6">
+
+                <h3 class="text-lg
+                    font-bold
+                    text-slate-900
+                    mb-5">
+
+                    Estado de la solicitud
+
+                </h3>
+
+
+                <!-- ESTADO -->
+
+                <div class="mb-5">
+
+                    @if (Model.Estado == "Pendiente")
+                    {
+                        <span class="inline-flex
+                            px-4 py-2
+                            rounded-full
+                            bg-yellow-100
+                            text-yellow-700
+                            font-semibold">
+
+                            Pendiente
+
+                        </span>
+                    }
+                    else if (Model.Estado == "Aprobada")
+                    {
+                        <span class="inline-flex
+                            px-4 py-2
+                            rounded-full
+                            bg-green-100
+                            text-green-700
+                            font-semibold">
+
+                            Aprobada
+
+                        </span>
+                    }
+                    else if (Model.Estado == "Rechazada")
+                    {
+                        <span class="inline-flex
+                            px-4 py-2
+                            rounded-full
+                            bg-red-100
+                            text-red-700
+                            font-semibold">
+
+                            Rechazada
+
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="inline-flex
+                            px-4 py-2
+                            rounded-full
+                            bg-slate-100
+                            text-slate-700
+                            font-semibold">
+
+                            @(Model.Estado ?? "Sin estado")
+
+                        </span>
+                    }
+
+                </div>
+
+
+                <!-- FECHAS -->
+
+                <div class="space-y-4">
+
+                    <!-- FECHA DE SOLICITUD -->
+
+                    <div>
+
+                        <p class="text-sm text-slate-500">
+                            Fecha de solicitud
+                        </p>
+
+                        <p class="font-semibold text-slate-800">
+
+                            @Model.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- FECHA DE RESOLUCIÓN -->
+                    @if (Model.FechaResolucion.HasValue)
+                    {
+                        <div>
+
+                            <p class="text-sm text-slate-500">
+                                Fecha de resolución
+                            </p>
+
+                            <p class="font-semibold text-slate-800">
+
+                                @Model.FechaResolucion.Value.ToString("dd/MM/yyyy HH:mm")
+
+                            </p>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+
+        <!-- MOTIVO Y DESCRIPCIÓN -->
+
+        <div class="bg-white
+            rounded-xl
+            shadow-sm
+            border border-slate-200
+            p-6
+            mt-6">
+
+            <h3 class="text-lg
+                font-bold
+                text-slate-900
+                mb-5">
+
+                Información de la solicitud
+
+            </h3>
+
+
+            <div class="mb-5">
+
+                <p class="text-sm
+                    text-slate-500
+                    mb-1">
+
+                    Motivo
+
+                </p>
+
+                <p class="text-slate-800
+                    font-medium">
+
+                    @Model.Motivo
+
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <p class="text-sm
+                    text-slate-500
+                    mb-1">
+
+                    Descripción
+
+                </p>
+
+                <div class="bg-slate-50
+                    border
+                    border-slate-200
+                    rounded-lg
+                    p-4
+                    text-slate-700">
+
+                    @Model.Descripcion
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- BOTÓN -->
+
+        <div class="mt-6">
+
+            <a href="/GarantiaCliente/Index"
+               class="inline-block
+                px-5 py-3
+                rounded-lg
+                border
+                border-slate-300
+                text-slate-700
+                hover:bg-slate-100
+                transition">
+
+                ← Volver a mis garantías
+
+            </a>
+
+        </div>
+
+
+    </main>
+
+</body>
+
+</html>

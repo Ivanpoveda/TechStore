@@ -14,56 +14,92 @@
 
     <!-- SIDEBAR -->
 
-    <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+    <aside class="w-full md:w-64 bg-slate-900 text-white p-5 flex flex-col justify-between shrink-0">
 
-        <div class="flex items-center gap-3 mb-8">
+        <div>
 
-            <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
-                TS
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">
+                    TS
+                </div>
+
+                <span class="font-bold text-lg tracking-wide">
+                    TechStore Admin
+                </span>
             </div>
 
-            <span class="font-bold text-lg">
-                TechStore Admin
-            </span>
+            <nav class="space-y-1">
+
+                <a href="/Admin/Dashboard"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                    text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                    Dashboard
+                </a>
+
+                <a href="/Usuario/Index"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                    text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                    Usuarios
+                </a>
+
+                <a href="/Producto/Index"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                    text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                    Productos
+                </a>
+
+                <a href="/Venta/Index"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                    text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                    Ventas
+                </a>
+
+                <a href="/Garantia/Index"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                    bg-indigo-600 text-white font-medium">
+                    Garantias
+                </a>
+
+                <a href="/Proveedor/Index"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                    text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
+                    Proveedores
+                </a>
+
+            </nav>
 
         </div>
 
-        <nav class="space-y-1">
+        <div class="border-t border-slate-700 pt-4 mt-6">
 
-            <a href="/Admin/Dashboard"
-               class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
-                Dashboard
-            </a>
+            <form action="/Account/Logout"
+                  method="post">
 
-            <a href="/Usuario/Index"
-               class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
-                Usuarios
-            </a>
+                @Html.AntiForgeryToken()
 
-            <a href="/Producto/Index"
-               class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
-                Productos
-            </a>
+                <button type="submit"
+                        class="w-full flex items-center gap-3
+                    px-4 py-2.5 rounded-lg
+                    text-slate-400
+                    hover:bg-red-600
+                    hover:text-white
+                    transition">
 
-            <a href="/Venta/Index"
-               class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
-                Ventas
-            </a>
+                    <span class="text-lg">
+                        ⇥
+                    </span>
 
-            <a href="/Garantia/Index"
-               class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white">
-                Garantías
-            </a>
+                    <span>
+                        Cerrar sesión
+                    </span>
 
-            <a href="/Proveedor/Index"
-               class="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-indigo-600 hover:text-white transition">
-                Proveedores
-            </a>
+                </button>
 
-        </nav>
+            </form>
+
+        </div>
 
     </aside>
-
 
     <!-- CONTENIDO -->
 

@@ -1,53 +1,398 @@
 @model IEnumerable<TechStore.Models.CompraProveedor>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Compras a Proveedores";
 }
 
-<h1>Index</h1>
+<!DOCTYPE html>
+<html lang="es">
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaCompra)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Total)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Estado)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdProveedorNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaCompra)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Total)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Estado)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdProveedorNavigation.IdProveedor)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdCompra">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdCompra">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdCompra">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Compras a proveedores - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <div class="min-h-screen flex flex-col md:flex-row">
+
+        <!-- SIDEBAR -->
+
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+
+            <div class="flex items-center gap-3 mb-8">
+
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg
+                    flex items-center justify-center font-bold">
+
+                    TS
+
+                </div>
+
+                <span class="font-bold text-lg">
+                    TechStore Admin
+                </span>
+
+            </div>
+
+            <nav class="space-y-1">
+
+                <a href="/Admin/Dashboard"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400
+                    hover:bg-indigo-600 hover:text-white transition">
+
+                    Dashboard
+
+                </a>
+
+                <a href="/Usuario/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400
+                    hover:bg-indigo-600 hover:text-white transition">
+
+                    Usuarios
+
+                </a>
+
+                <a href="/Producto/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400
+                    hover:bg-indigo-600 hover:text-white transition">
+
+                    Productos
+
+                </a>
+
+                <a href="/Venta/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400
+                    hover:bg-indigo-600 hover:text-white transition">
+
+                    Ventas
+
+                </a>
+
+                <a href="/Garantia/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400
+                    hover:bg-indigo-600 hover:text-white transition">
+
+                    Garantías
+
+                </a>
+
+                <a href="/Proveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg text-slate-400
+                    hover:bg-indigo-600 hover:text-white transition">
+
+                    Proveedores
+
+                </a>
+
+                <a href="/CompraProveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    bg-indigo-600 text-white">
+
+                    Compras a proveedores
+
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- CONTENIDO -->
+
+        <main class="flex-1 p-6">
+
+            <div class="max-w-7xl mx-auto">
+
+                <!-- ENCABEZADO -->
+
+                <div class="flex flex-col md:flex-row
+                    md:items-center md:justify-between mb-6">
+
+                    <div>
+
+                        <h1 class="text-2xl font-bold text-slate-900">
+
+                            Compras a proveedores
+
+                        </h1>
+
+                        <p class="text-slate-500 mt-1">
+
+                            Gestiona las compras de productos realizadas
+                            a los proveedores.
+
+                        </p>
+
+                    </div>
+
+
+                    <a href="/CompraProveedor/Create"
+                       class="mt-4 md:mt-0 inline-flex
+                        items-center justify-center
+                        bg-indigo-600 text-white
+                        px-5 py-2.5 rounded-lg
+                        shadow hover:bg-indigo-700 transition">
+
+                        + Nueva compra
+
+                    </a>
+
+                </div>
+
+
+                <!-- MENSAJES -->
+                @if (TempData["Success"] != null)
+                {
+                    <div class="mb-5 bg-green-50
+                        border border-green-200
+                        text-green-700
+                        px-4 py-3 rounded-lg">
+
+                        @TempData["Success"]
+
+                    </div>
+                }
+
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="mb-5 bg-red-50
+                        border border-red-200
+                        text-red-700
+                        px-4 py-3 rounded-lg">
+
+                        @TempData["Error"]
+
+                    </div>
+                }
+
+
+                <!-- TABLA -->
+
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+
+                    <div class="overflow-x-auto">
+
+                        <table class="w-full text-sm text-left">
+
+                            <thead class="bg-slate-50
+                                border-b border-slate-200">
+
+                                <tr>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Compra
+                                    </th>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Fecha
+                                    </th>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Proveedor
+                                    </th>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Total
+                                    </th>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Estado
+                                    </th>
+
+                                    <th class="px-5 py-4 font-semibold text-center">
+                                        Acciones
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody class="divide-y divide-slate-100">
+
+                                @if (Model != null && Model.Any())
+                                {
+
+                                    foreach (var compra in Model)
+                                    {
+
+                                        <tr class="hover:bg-slate-50 transition">
+
+                                            <td class="px-5 py-4 font-bold">
+
+                                                #@compra.IdCompra
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4">
+
+                                                @compra.FechaCompra.ToString("dd/MM/yyyy")
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4">
+
+                                                <span class="font-medium text-slate-800">
+
+                                                    @compra.IdProveedorNavigation?.Nombre
+
+                                                </span>
+
+                                                @if (!string.IsNullOrWhiteSpace(
+                                                    compra.IdProveedorNavigation?.Empresa))
+                                                {
+                                                    <p class="text-xs text-slate-400">
+
+                                                        @compra.IdProveedorNavigation.Empresa
+
+                                                    </p>
+                                                }
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4 font-bold">
+
+                                                ₡@((compra.Total ?? 0).ToString("N2"))
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4">
+
+                                                @if (compra.Estado == "Recibida")
+                                                {
+                                                    <span class="px-3 py-1.5
+                                                        rounded-full
+                                                        bg-green-100
+                                                        text-green-700
+                                                        text-xs font-semibold">
+
+                                                        Recibida
+
+                                                    </span>
+                                                }
+                                                else if (compra.Estado == "En proceso")
+                                                {
+                                                    <span class="px-3 py-1.5
+                                                        rounded-full
+                                                        bg-blue-100
+                                                        text-blue-700
+                                                        text-xs font-semibold">
+
+                                                        En proceso
+
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="px-3 py-1.5
+                                                        rounded-full
+                                                        bg-yellow-100
+                                                        text-yellow-700
+                                                        text-xs font-semibold">
+
+                                                        @compra.Estado
+
+                                                    </span>
+                                                }
+
+                                            </td>
+
+
+                                            <td class="px-5 py-4">
+
+                                                <div class="flex justify-center gap-2">
+
+                                                    <a href="/CompraProveedor/Details/@compra.IdCompra"
+                                                       class="px-3 py-1.5
+                                                        rounded-lg
+                                                        bg-indigo-50
+                                                        text-indigo-600
+                                                        hover:bg-indigo-100">
+
+                                                        Ver
+
+                                                    </a>
+
+                                                    <a href="/CompraProveedor/Edit/@compra.IdCompra"
+                                                       class="px-3 py-1.5
+                                                        rounded-lg
+                                                        bg-slate-100
+                                                        text-slate-700
+                                                        hover:bg-slate-200">
+
+                                                        Editar
+
+                                                    </a>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    }
+
+                                }
+                                else
+                                {
+
+                                    <tr>
+
+                                        <td colspan="6"
+                                            class="px-5 py-12 text-center">
+
+                                            <div class="text-5xl mb-3">
+                                                📦
+                                            </div>
+
+                                            <p class="font-semibold
+                                                text-slate-600">
+
+                                                No hay compras registradas
+
+                                            </p>
+
+                                            <p class="text-sm
+                                                text-slate-400 mt-1">
+
+                                                Crea una compra para comenzar.
+
+                                            </p>
+
+                                        </td>
+
+                                    </tr>
+
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>
