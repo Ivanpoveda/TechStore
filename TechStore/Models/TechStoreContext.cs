@@ -29,8 +29,7 @@ public partial class TechStoreContext : DbContext
 
     public virtual DbSet<Garantium> Garantia { get; set; }
 
-    public virtual DbSet<HistorialInventario> HistorialInventarios { get; set; }
-
+    public virtual DbSet<VisHistorialInventario> VisHistorialInventarios { get; set; }
     public virtual DbSet<Marca> Marcas { get; set; }
 
     public virtual DbSet<Producto> Productos { get; set; }
@@ -42,8 +41,6 @@ public partial class TechStoreContext : DbContext
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
     public virtual DbSet<Ventum> Venta { get; set; }
-
-    public virtual DbSet<VisHistorialInventario> VisHistorialInventarios { get; set; }
 
     public virtual DbSet<VisStockBajo> VisStockBajos { get; set; }
 
@@ -465,23 +462,30 @@ public partial class TechStoreContext : DbContext
                 .HasNoKey()
                 .ToView("VIS_HISTORIAL_INVENTARIO");
 
-            entity.Property(e => e.Cantidad).HasColumnName("CANTIDAD");
-            entity.Property(e => e.Fecha)
-                .HasColumnType("datetime")
-                .HasColumnName("FECHA");
-            entity.Property(e => e.IdMovimiento).HasColumnName("ID_MOVIMIENTO");
-            entity.Property(e => e.Observacion)
-                .HasMaxLength(200)
-                .IsUnicode(false)
-                .HasColumnName("OBSERVACION");
+            entity.Property(e => e.IdMovimiento)
+                .HasColumnName("ID_MOVIMIENTO");
+
             entity.Property(e => e.Producto)
                 .HasMaxLength(80)
                 .IsUnicode(false)
                 .HasColumnName("PRODUCTO");
+
             entity.Property(e => e.TipoMovimiento)
                 .HasMaxLength(10)
                 .IsUnicode(false)
                 .HasColumnName("TIPO_MOVIMIENTO");
+
+            entity.Property(e => e.Cantidad)
+                .HasColumnName("CANTIDAD");
+
+            entity.Property(e => e.Fecha)
+                .HasColumnType("datetime")
+                .HasColumnName("FECHA");
+
+            entity.Property(e => e.Observacion)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("OBSERVACION");
         });
 
         modelBuilder.Entity<VisStockBajo>(entity =>

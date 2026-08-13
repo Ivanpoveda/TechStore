@@ -4,195 +4,324 @@
     ViewData["Title"] = "Eliminar Garantía";
 }
 
-<meta charset="utf-8" />
+<!DOCTYPE html>
+<html lang="es">
 
-<title>Eliminar Garantía - TechStore</title>
+<head>
 
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="utf-8" />
 
-<div class="min-h-screen bg-slate-100 flex flex-col md:flex-row">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
 
-    <!-- SIDEBAR -->
+    <title>Eliminar Garantía - TechStore</title>
 
-    <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        <div class="flex items-center gap-3 mb-8">
+</head>
 
-            <div class="w-8 h-8 bg-indigo-500 rounded-lg
-                flex items-center justify-center font-bold">
-                TS
-            </div>
+<body class="bg-slate-100 min-h-screen">
 
-            <span class="font-bold text-lg">
-                TechStore Admin
-            </span>
+    <div class="min-h-screen flex flex-col md:flex-row">
 
-        </div>
+        <!-- SIDEBAR -->
 
-        <nav class="space-y-1">
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-5 shrink-0">
 
-            <a href="/Admin/Dashboard"
-               class="block px-4 py-2.5 rounded-lg
-                text-slate-400 hover:bg-indigo-600 hover:text-white">
-                Dashboard
-            </a>
+            <div class="flex items-center gap-3 mb-8">
 
-            <a href="/Usuario/Index"
-               class="block px-4 py-2.5 rounded-lg
-                text-slate-400 hover:bg-indigo-600 hover:text-white">
-                Usuarios
-            </a>
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg
+                    flex items-center justify-center font-bold">
 
-            <a href="/Producto/Index"
-               class="block px-4 py-2.5 rounded-lg
-                text-slate-400 hover:bg-indigo-600 hover:text-white">
-                Productos
-            </a>
-
-            <a href="/Venta/Index"
-               class="block px-4 py-2.5 rounded-lg
-                text-slate-400 hover:bg-indigo-600 hover:text-white">
-                Ventas
-            </a>
-
-            <a href="/Garantia/Index"
-               class="block px-4 py-2.5 rounded-lg bg-indigo-600 text-white">
-                Garantías
-            </a>
-
-            <a href="/Proveedor/Index"
-               class="block px-4 py-2.5 rounded-lg
-                text-slate-400 hover:bg-indigo-600 hover:text-white">
-                Proveedores
-            </a>
-
-        </nav>
-
-    </aside>
-
-
-    <!-- CONTENIDO -->
-
-    <main class="flex-1 p-6">
-
-        <div class="max-w-xl mx-auto">
-
-            <div class="bg-white rounded-xl shadow p-6">
-
-                <div class="text-center">
-
-                    <div class="w-16 h-16 bg-red-100
-                        text-red-600 rounded-full
-                        flex items-center justify-center
-                        mx-auto mb-4 text-2xl">
-                        !
-                    </div>
-
-                    <h1 class="text-2xl font-bold text-slate-900">
-                        Eliminar Garantía
-                    </h1>
-
-                    <p class="text-slate-500 mt-2">
-                        ¿Está seguro de que desea eliminar esta garantía?
-                    </p>
+                    TS
 
                 </div>
 
+                <span class="font-bold text-lg">
 
-                <div class="bg-slate-50 rounded-lg p-5 mt-6">
+                    TechStore Admin
 
-                    <div class="mb-3">
-
-                        <p class="text-sm text-slate-500">
-                            Garantía
-                        </p>
-
-                        <p class="font-semibold">
-                            #@Model.IdGarantia
-                        </p>
-
-                    </div>
-
-
-                    <div class="mb-3">
-
-                        <p class="text-sm text-slate-500">
-                            Producto
-                        </p>
-
-                        <p class="font-semibold">
-
-                            @Model.IdDetalleVentaNavigation
-                            ?.IdProductoNavigation
-                            ?.Nombre
-
-                        </p>
-
-                    </div>
-
-
-                    <div class="mb-3">
-
-                        <p class="text-sm text-slate-500">
-                            Motivo
-                        </p>
-
-                        <p class="font-semibold">
-                            @Model.Motivo
-                        </p>
-
-                    </div>
-
-
-                    <div>
-
-                        <p class="text-sm text-slate-500">
-                            Estado
-                        </p>
-
-                        <p class="font-semibold">
-                            @Model.Estado
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <form asp-action="Delete"
-                      method="post"
-                      class="flex justify-end gap-3 mt-6">
-
-                    @Html.AntiForgeryToken()
-
-                    <input type="hidden"
-                           name="id"
-                           value="@Model.IdGarantia" />
-
-                    <a href="/Garantia/Index"
-                       class="px-5 py-2.5 rounded-lg
-                        border border-slate-300
-                        text-slate-600 hover:bg-slate-100">
-
-                        Cancelar
-
-                    </a>
-
-                    <button type="submit"
-                            class="px-5 py-2.5 rounded-lg
-                        bg-red-600 text-white
-                        hover:bg-red-700">
-
-                        Eliminar Garantía
-
-                    </button>
-
-                </form>
+                </span>
 
             </div>
 
-        </div>
 
-    </main>
+            <nav class="space-y-1">
 
-</div>
+                <a href="/Admin/Dashboard"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400 hover:bg-indigo-600
+                    hover:text-white">
+
+                    Dashboard
+
+                </a>
+
+
+                <a href="/Usuario/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400 hover:bg-indigo-600
+                    hover:text-white">
+
+                    Usuarios
+
+                </a>
+
+
+                <a href="/Producto/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400 hover:bg-indigo-600
+                    hover:text-white">
+
+                    Productos
+
+                </a>
+
+
+                <a href="/Venta/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400 hover:bg-indigo-600
+                    hover:text-white">
+
+                    Ventas
+
+                </a>
+
+
+                <a href="/Garantia/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    bg-indigo-600 text-white">
+
+                    Garantías
+
+                </a>
+
+
+                <a href="/Proveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400 hover:bg-indigo-600
+                    hover:text-white">
+
+                    Proveedores
+
+                </a>
+
+
+                <a href="/CompraProveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400 hover:bg-indigo-600
+                    hover:text-white">
+
+                    Compras a proveedores
+
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- CONTENIDO -->
+
+        <main class="flex-1 p-6">
+
+            <div class="max-w-xl mx-auto">
+
+                <div class="bg-white rounded-xl shadow p-6">
+
+                    <!-- ENCABEZADO -->
+
+                    <div class="text-center">
+
+                        <div class="w-16 h-16 bg-red-100
+                            text-red-600 rounded-full
+                            flex items-center justify-center
+                            mx-auto mb-4 text-2xl font-bold">
+
+                            !
+
+                        </div>
+
+
+                        <h1 class="text-2xl font-bold text-slate-900">
+
+                            Eliminar Garantía
+
+                        </h1>
+
+
+                        <p class="text-slate-500 mt-2">
+
+                            ¿Está seguro de que desea eliminar
+                            esta garantía?
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- INFORMACIÓN -->
+
+                    <div class="bg-slate-50 rounded-lg p-5 mt-6">
+
+                        <!-- GARANTÍA -->
+
+                        <div class="mb-4">
+
+                            <p class="text-sm text-slate-500">
+
+                                Garantía
+
+                            </p>
+
+                            <p class="font-semibold text-slate-900">
+
+                                #@Model.IdGarantia
+
+                            </p>
+
+                        </div>
+
+
+                        <!-- PRODUCTO -->
+
+                        <div class="mb-4">
+
+                            <p class="text-sm text-slate-500">
+
+                                Producto
+
+                            </p>
+
+                            <p class="font-semibold text-slate-900">
+
+                                @(Model.IdDetalleVentaNavigation?
+                                    .IdProductoNavigation?
+                                    .Nombre
+                                    ?? "Producto no disponible")
+
+                            </p>
+
+                        </div>
+
+
+                        <!-- MOTIVO -->
+
+                        <div class="mb-4">
+
+                            <p class="text-sm text-slate-500">
+
+                                Motivo
+
+                            </p>
+
+                            <p class="font-semibold text-slate-900">
+
+                                @Model.Motivo
+
+                            </p>
+
+                        </div>
+
+
+                        <!-- ESTADO -->
+
+                        <div>
+
+                            <p class="text-sm text-slate-500">
+
+                                Estado
+
+                            </p>
+
+
+                            @if (Model.Estado == "Aprobada")
+                            {
+                                <span class="inline-block mt-1
+                                    px-3 py-1 rounded-full
+                                    bg-green-100 text-green-700
+                                    text-sm font-semibold">
+
+                                    Aprobada
+
+                                </span>
+                            }
+                            else if (Model.Estado == "Rechazada")
+                            {
+                                <span class="inline-block mt-1
+                                    px-3 py-1 rounded-full
+                                    bg-red-100 text-red-700
+                                    text-sm font-semibold">
+
+                                    Rechazada
+
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="inline-block mt-1
+                                    px-3 py-1 rounded-full
+                                    bg-yellow-100 text-yellow-700
+                                    text-sm font-semibold">
+
+                                    @Model.Estado
+
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- FORMULARIO -->
+
+                    <form action="/Garantia/Delete"
+                          method="post"
+                          class="flex justify-end gap-3 mt-6">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <input type="hidden"
+                               name="id"
+                               value="@Model.IdGarantia" />
+
+
+                        <!-- CANCELAR -->
+
+                        <a href="/Garantia/Index"
+                           class="px-5 py-2.5 rounded-lg
+                            border border-slate-300
+                            text-slate-600
+                            hover:bg-slate-100">
+
+                            Cancelar
+
+                        </a>
+
+
+                        <!-- ELIMINAR -->
+
+                        <button type="submit"
+                                class="px-5 py-2.5 rounded-lg
+                            bg-red-600 text-white
+                            hover:bg-red-700">
+
+                            Eliminar Garantía
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>

@@ -38,18 +38,16 @@ namespace TechStore.Controllers
         // =========================================================
 
         [HttpGet]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
-                return NotFound();
-
             var compra = await _context.CompraProveedors
                 .Include(c => c.IdProveedorNavigation)
-                .FirstOrDefaultAsync(c =>
-                    c.IdCompra == id);
+                .FirstOrDefaultAsync(c => c.IdCompra == id);
 
             if (compra == null)
+            {
                 return NotFound();
+            }
 
             var detalles = await _context.DetalleCompras
                 .Include(d => d.IdProductoNavigation)
@@ -336,31 +334,53 @@ namespace TechStore.Controllers
         // =========================================================
 
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var compra = _context.CompraProveedors
-                .FirstOrDefault(c => c.IdCompra == id);
+            var compra = await _context.CompraProveedors
+                .Include(c => c.IdProveedorNavigation)
+                .FirstOrDefaultAsync(c => c.IdCompra == id);
 
             if (compra == null)
             {
                 return NotFound();
             }
 
+
+            // =================================================
+            // NO EDITAR CANCELADA
+            // =================================================
+
             if (compra.Estado == "Cancelada")
             {
                 TempData["Error"] =
-                    "No se puede editar una compra que está cancelada.";
+                    "No se puede editar una compra cancelada.";
 
-                return RedirectToAction("Index");
+                return RedirectToAction(
+                    nameof(Index));
             }
+
+
+            // =================================================
+            // NO EDITAR RECIBIDA
+            // =================================================
 
             if (compra.Estado == "Recibida")
             {
                 TempData["Error"] =
-                    "No se puede editar una compra que ya fue recibida.";
+                    "No se puede editar una compra recibida.";
 
-                return RedirectToAction("Index");
+                return RedirectToAction(
+                    nameof(Index));
             }
+
+
+            // =================================================
+            // CARGAR PROVEEDORES
+            // =================================================
+
+            await CargarProveedores(
+                compra.IdProveedor);
+
 
             return View(compra);
         }
@@ -372,49 +392,87 @@ namespace TechStore.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, CompraProveedor compra)
+        public async Task<IActionResult> Edit(
+            int id,
+            CompraProveedor compra)
         {
-            var compraExistente = _context.CompraProveedors
-                .FirstOrDefault(c => c.IdCompra == id);
+            var compraExistente =
+                await _context.CompraProveedors
+                    .FirstOrDefaultAsync(c =>
+                        c.IdCompra == id);
 
             if (compraExistente == null)
             {
                 return NotFound();
             }
 
+
+            // =================================================
+            // NO EDITAR CANCELADA
+            // =================================================
+
             if (compraExistente.Estado == "Cancelada")
             {
                 TempData["Error"] =
                     "No se puede editar una compra que está cancelada.";
 
-                return RedirectToAction("Index");
+                return RedirectToAction(
+                    nameof(Index));
             }
+
+
+            // =================================================
+            // NO EDITAR RECIBIDA
+            // =================================================
 
             if (compraExistente.Estado == "Recibida")
             {
                 TempData["Error"] =
                     "No se puede editar una compra que ya fue recibida.";
 
-                return RedirectToAction("Index");
+                return RedirectToAction(
+                    nameof(Index));
             }
+
+
+            // =================================================
+            // VALIDAR MODELO
+            // =================================================
 
             if (!ModelState.IsValid)
             {
+                await CargarProveedores(
+                    compra.IdProveedor);
+
                 return View(compra);
             }
 
-            // Actualiza únicamente los campos que permites modificar
-            compraExistente.IdProveedor = compra.IdProveedor;
-            compraExistente.FechaCompra = compra.FechaCompra;
-            compraExistente.Total = compra.Total;
-            compraExistente.Estado = compra.Estado;
 
-            _context.SaveChanges();
+            // =================================================
+            // ACTUALIZAR
+            // =================================================
+
+            compraExistente.IdProveedor =
+                compra.IdProveedor;
+
+            compraExistente.FechaCompra =
+                compra.FechaCompra;
+
+            compraExistente.Total =
+                compra.Total;
+
+            compraExistente.Estado =
+                compra.Estado;
+
+
+            await _context.SaveChangesAsync();
+
 
             TempData["Success"] =
                 "Compra actualizada correctamente.";
 
-            return RedirectToAction("Index");
+            return RedirectToAction(
+                nameof(Index));
         }
 
 
@@ -432,7 +490,9 @@ namespace TechStore.Controllers
                         c.IdCompra == id);
 
             if (compra == null)
+            {
                 return NotFound();
+            }
 
 
             // =================================================
@@ -510,11 +570,13 @@ namespace TechStore.Controllers
                             c.IdCompra == IdCompra);
 
                 if (compra == null)
+                {
                     return NotFound();
+                }
 
 
                 // =================================================
-                // VERIFICAR ESTADO
+                // NO MODIFICAR RECIBIDA
                 // =================================================
 
                 if (compra.Estado == "Recibida")
@@ -527,6 +589,10 @@ namespace TechStore.Controllers
                         new { id = IdCompra });
                 }
 
+
+                // =================================================
+                // NO MODIFICAR CANCELADA
+                // =================================================
 
                 if (compra.Estado == "Cancelada")
                 {
@@ -663,7 +729,9 @@ namespace TechStore.Controllers
                             c.IdCompra == id);
 
                 if (compra == null)
+                {
                     return NotFound();
+                }
 
 
                 // =================================================
@@ -674,6 +742,20 @@ namespace TechStore.Controllers
                 {
                     TempData["Error"] =
                         "No puedes eliminar una compra recibida.";
+
+                    return RedirectToAction(
+                        nameof(Index));
+                }
+
+
+                // =================================================
+                // NO ELIMINAR CANCELADA
+                // =================================================
+
+                if (compra.Estado == "Cancelada")
+                {
+                    TempData["Error"] =
+                        "No puedes eliminar una compra cancelada.";
 
                     return RedirectToAction(
                         nameof(Index));
@@ -726,6 +808,110 @@ namespace TechStore.Controllers
 
                 return RedirectToAction(
                     nameof(Index));
+            }
+        }
+
+
+        // =========================================================
+        // CAMBIAR ESTADO
+        // =========================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarEstado(
+            int id,
+            string estado)
+        {
+            try
+            {
+                // =================================================
+                // BUSCAR COMPRA
+                // =================================================
+
+                var compra =
+                    await _context.CompraProveedors
+                        .FirstOrDefaultAsync(c =>
+                            c.IdCompra == id);
+
+                if (compra == null)
+                {
+                    return NotFound();
+                }
+
+
+                // =================================================
+                // CANCELADA ES ESTADO FINAL
+                // =================================================
+
+                if (compra.Estado == "Cancelada")
+                {
+                    TempData["Error"] =
+                        "Una compra cancelada no puede cambiar de estado.";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id });
+                }
+
+
+                // =================================================
+                // RECIBIDA ES ESTADO FINAL
+                // =================================================
+
+                if (compra.Estado == "Recibida")
+                {
+                    TempData["Error"] =
+                        "Una compra recibida no puede cambiar de estado.";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id });
+                }
+
+
+                // =================================================
+                // VALIDAR ESTADO
+                // =================================================
+
+                if (estado != "En proceso" &&
+                    estado != "Recibida" &&
+                    estado != "Cancelada")
+                {
+                    TempData["Error"] =
+                        "El estado seleccionado no es válido.";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id });
+                }
+
+
+                // =================================================
+                // CAMBIAR MEDIANTE PROCEDIMIENTO
+                // =================================================
+
+                await CambiarEstadoConProcedimiento(
+                    id,
+                    estado);
+
+
+                TempData["Success"] =
+                    "El estado de la compra fue actualizado correctamente.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "No se pudo cambiar el estado: " +
+                    (ex.InnerException?.Message ??
+                     ex.Message);
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id });
             }
         }
 

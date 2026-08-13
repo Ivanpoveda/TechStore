@@ -16,45 +16,170 @@
 
     <!-- Sidebar -->
     <aside class="w-full md:w-64 bg-slate-900 text-white p-5 flex flex-col justify-between shrink-0">
+
         <div>
+
+            <!-- LOGO -->
             <div class="flex items-center gap-3 mb-8">
-                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold">TS</div>
-                <span class="font-bold text-lg tracking-wide">TechStore Admin</span>
+
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg
+                    flex items-center justify-center font-bold">
+
+                    TS
+
+                </div>
+
+                <span class="font-bold text-lg tracking-wide">
+                    TechStore Admin
+                </span>
+
             </div>
+
+
+            <!-- MENÚ -->
             <nav class="space-y-1">
+
+                <!-- DASHBOARD -->
                 <a href="/Admin/Dashboard"
                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
                     bg-indigo-600 text-white font-medium
                     hover:bg-indigo-700 hover:scale-105">
-                    Dashboard
+
+                    <span>
+                        🏠
+                    </span>
+
+                    <span>
+                        Dashboard
+                    </span>
+
                 </a>
+
+
+                <!-- USUARIOS -->
                 <a href="/Usuario/Index"
                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
-                    text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
-                    Usuarios
+                    text-slate-400 hover:bg-indigo-600 hover:text-white
+                    hover:scale-105">
+
+                    <span>
+                        👤
+                    </span>
+
+                    <span>
+                        Usuarios
+                    </span>
+
                 </a>
+
+
+                <!-- PRODUCTOS -->
                 <a href="/Producto/Index"
                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
-                    text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
-                    Productos
+                    text-slate-400 hover:bg-indigo-600 hover:text-white
+                    hover:scale-105">
+
+                    <span>
+                        📦
+                    </span>
+
+                    <span>
+                        Productos
+                    </span>
+
                 </a>
+
+
+                <!-- VENTAS -->
                 <a href="/Venta/Index"
                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
-                    text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
-                    Ventas
+                    text-slate-400 hover:bg-indigo-600 hover:text-white
+                    hover:scale-105">
+
+                    <span>
+                        🛒
+                    </span>
+
+                    <span>
+                        Ventas
+                    </span>
+
                 </a>
+
+
+                <!-- GARANTÍAS -->
                 <a href="/Garantia/Index"
                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
-                    text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
-                    Garantías
+                    text-slate-400 hover:bg-indigo-600 hover:text-white
+                    hover:scale-105">
+
+                    <span>
+                        🛡️
+                    </span>
+
+                    <span>
+                        Garantías
+                    </span>
+
                 </a>
+
+
+                <!-- PROVEEDORES -->
                 <a href="/Proveedor/Index"
                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
-                    text-slate-400 hover:bg-indigo-600 hover:text-white hover:scale-105">
-                    Proveedores
+                    text-slate-400 hover:bg-indigo-600 hover:text-white
+                    hover:scale-105">
+
+                    <span>
+                        🚚
+                    </span>
+
+                    <span>
+                        Proveedores
+                    </span>
+
                 </a>
+
+
+                <!-- COMPRAS A PROVEEDORES -->
+                <a href="/CompraProveedor/Index"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                    text-slate-400 hover:bg-indigo-600 hover:text-white
+                    hover:scale-105">
+
+                    <span>
+                        🧾
+                    </span>
+
+                    <span>
+                        Compras a proveedores
+                    </span>
+
+                </a>
+
+
+                <!-- HISTORIAL DE INVENTARIO -->
+                <a href="/HistorialInventario/Index"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                    text-slate-400 hover:bg-indigo-600 hover:text-white
+                    hover:scale-105">
+
+                    <span>
+                        📊
+                    </span>
+
+                    <span>
+                        Historial de inventario
+                    </span>
+
+                </a>
+
             </nav>
+
         </div>
+
+
+        <!-- CERRAR SESIÓN -->
         <div class="border-t border-slate-700 pt-4 mt-6">
 
             <form action="/Account/Logout"
@@ -83,8 +208,8 @@
             </form>
 
         </div>
-    </aside>
 
+    </aside>
     <!-- Contenido principal -->
     <main class="flex-1 p-6 md:p-10">
         <header class="flex justify-between items-center mb-8">

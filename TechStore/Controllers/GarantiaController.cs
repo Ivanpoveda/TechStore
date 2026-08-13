@@ -36,21 +36,15 @@ namespace TechStore.Controllers
         // =========================================================
         // DETAILS
         // =========================================================
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var garantia = await _context.Garantia
                 .Include(g => g.IdDetalleVentaNavigation)
                     .ThenInclude(d => d.IdProductoNavigation)
                 .Include(g => g.IdDetalleVentaNavigation)
                     .ThenInclude(d => d.IdVentaNavigation)
-                        .ThenInclude(v => v.IdUsuarioNavigation)
-                .FirstOrDefaultAsync(g =>
-                    g.IdGarantia == id);
+                .FirstOrDefaultAsync(g => g.IdGarantia == id);
 
             if (garantia == null)
             {
@@ -350,21 +344,11 @@ namespace TechStore.Controllers
         // DELETE - GET
         // =========================================================
         [HttpGet]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var garantia = await _context.Garantia
-                .Include(g => g.IdDetalleVentaNavigation)
+            var garantia = await _context.Garantia                .Include(g => g.IdDetalleVentaNavigation)
                     .ThenInclude(d => d.IdProductoNavigation)
-                .Include(g => g.IdDetalleVentaNavigation)
-                    .ThenInclude(d => d.IdVentaNavigation)
-                        .ThenInclude(v => v.IdUsuarioNavigation)
-                .FirstOrDefaultAsync(g =>
-                    g.IdGarantia == id);
+                .FirstOrDefaultAsync(g => g.IdGarantia == id);
 
             if (garantia == null)
             {

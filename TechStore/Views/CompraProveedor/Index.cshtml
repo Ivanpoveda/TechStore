@@ -228,6 +228,8 @@
 
                                         <tr class="hover:bg-slate-50 transition">
 
+                                            <!-- COMPRA -->
+
                                             <td class="px-5 py-4 font-bold">
 
                                                 #@compra.IdCompra
@@ -235,12 +237,16 @@
                                             </td>
 
 
+                                            <!-- FECHA -->
+
                                             <td class="px-5 py-4">
 
                                                 @compra.FechaCompra.ToString("dd/MM/yyyy")
 
                                             </td>
 
+
+                                            <!-- PROVEEDOR -->
 
                                             <td class="px-5 py-4">
 
@@ -263,6 +269,8 @@
                                             </td>
 
 
+                                            <!-- TOTAL -->
+
                                             <td class="px-5 py-4 font-bold">
 
                                                 ₡@((compra.Total ?? 0).ToString("N2"))
@@ -270,10 +278,14 @@
                                             </td>
 
 
+                                            <!-- ESTADO -->
+
                                             <td class="px-5 py-4">
 
                                                 @if (compra.Estado == "Recibida")
                                                 {
+                                                    <!-- RECIBIDA -->
+
                                                     <span class="px-3 py-1.5
                                                         rounded-full
                                                         bg-green-100
@@ -284,8 +296,24 @@
 
                                                     </span>
                                                 }
+                                                else if (compra.Estado == "Cancelada")
+                                                {
+                                                    <!-- CANCELADA -->
+
+                                                    <span class="px-3 py-1.5
+                                                        rounded-full
+                                                        bg-red-100
+                                                        text-red-700
+                                                        text-xs font-semibold">
+
+                                                        Cancelada
+
+                                                    </span>
+                                                }
                                                 else if (compra.Estado == "En proceso")
                                                 {
+                                                    <!-- EN PROCESO -->
+
                                                     <span class="px-3 py-1.5
                                                         rounded-full
                                                         bg-blue-100
@@ -298,6 +326,8 @@
                                                 }
                                                 else
                                                 {
+                                                    <!-- PENDIENTE -->
+
                                                     <span class="px-3 py-1.5
                                                         rounded-full
                                                         bg-yellow-100
@@ -312,9 +342,13 @@
                                             </td>
 
 
+                                            <!-- ACCIONES -->
+
                                             <td class="px-5 py-4">
 
                                                 <div class="flex justify-center gap-2">
+
+                                                    <!-- VER -->
 
                                                     <a href="/CompraProveedor/Details/@compra.IdCompra"
                                                        class="px-3 py-1.5
@@ -327,16 +361,22 @@
 
                                                     </a>
 
-                                                    <a href="/CompraProveedor/Edit/@compra.IdCompra"
-                                                       class="px-3 py-1.5
-                                                        rounded-lg
-                                                        bg-slate-100
-                                                        text-slate-700
-                                                        hover:bg-slate-200">
 
-                                                        Editar
+                                                    <!-- EDITAR -->
+                                                    @if (compra.Estado != "Recibida" &&
+                                                                                                             compra.Estado != "Cancelada")
+                                                    {
+                                                        <a href="/CompraProveedor/Edit/@compra.IdCompra"
+                                                           class="px-3 py-1.5
+                                                            rounded-lg
+                                                            bg-slate-100
+                                                            text-slate-700
+                                                            hover:bg-slate-200">
 
-                                                    </a>
+                                                            Editar
+
+                                                        </a>
+                                                    }
 
                                                 </div>
 

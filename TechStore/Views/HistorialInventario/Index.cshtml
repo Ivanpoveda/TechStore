@@ -1,59 +1,532 @@
-@model IEnumerable<TechStore.Models.HistorialInventario>
+@model IEnumerable<TechStore.Models.VisHistorialInventario>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Historial de Inventario";
 }
 
-<h1>Index</h1>
+<!DOCTYPE html>
+<html lang="es">
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.TipoMovimiento)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cantidad)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Fecha)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Observacion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdProductoNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.TipoMovimiento)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cantidad)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Fecha)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Observacion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdProductoNavigation.IdProducto)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdMovimiento">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdMovimiento">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdMovimiento">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Historial de Inventario - TechStore</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <div class="min-h-screen flex flex-col md:flex-row">
+
+        <!-- ===================================================== -->
+        <!-- SIDEBAR -->
+        <!-- ===================================================== -->
+
+        <aside class="w-full md:w-64 bg-slate-900
+            text-white p-5 shrink-0">
+
+            <div class="flex items-center gap-3 mb-8">
+
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg
+                    flex items-center justify-center font-bold">
+
+                    TS
+
+                </div>
+
+                <span class="font-bold text-lg">
+                    TechStore Admin
+                </span>
+
+            </div>
+
+
+            <nav class="space-y-1">
+
+                <!-- DASHBOARD -->
+
+                <a href="/Admin/Dashboard"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400
+                    hover:bg-indigo-600
+                    hover:text-white
+                    transition">
+
+                    Dashboard
+
+                </a>
+
+
+                <!-- USUARIOS -->
+
+                <a href="/Usuario/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400
+                    hover:bg-indigo-600
+                    hover:text-white
+                    transition">
+
+                    Usuarios
+
+                </a>
+
+
+                <!-- PRODUCTOS -->
+
+                <a href="/Producto/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400
+                    hover:bg-indigo-600
+                    hover:text-white
+                    transition">
+
+                    Productos
+
+                </a>
+
+
+                <!-- VENTAS -->
+
+                <a href="/Venta/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400
+                    hover:bg-indigo-600
+                    hover:text-white
+                    transition">
+
+                    Ventas
+
+                </a>
+
+
+                <!-- GARANTÍAS -->
+
+                <a href="/Garantia/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400
+                    hover:bg-indigo-600
+                    hover:text-white
+                    transition">
+
+                    Garantías
+
+                </a>
+
+
+                <!-- PROVEEDORES -->
+
+                <a href="/Proveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400
+                    hover:bg-indigo-600
+                    hover:text-white
+                    transition">
+
+                    Proveedores
+
+                </a>
+
+
+                <!-- COMPRAS -->
+
+                <a href="/CompraProveedor/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    text-slate-400
+                    hover:bg-indigo-600
+                    hover:text-white
+                    transition">
+
+                    Compras a proveedores
+
+                </a>
+
+
+                <!-- HISTORIAL -->
+
+                <a href="/HistorialInventario/Index"
+                   class="block px-4 py-2.5 rounded-lg
+                    bg-indigo-600
+                    text-white">
+
+                    Historial de inventario
+
+                </a>
+
+            </nav>
+
+
+            <!-- LOGOUT -->
+
+            <div class="border-t border-slate-700
+                pt-4 mt-6">
+
+                <form action="/Account/Logout"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="w-full flex items-center gap-3
+                        px-4 py-2.5 rounded-lg
+                        text-slate-400
+                        hover:bg-red-600
+                        hover:text-white
+                        transition">
+
+                        <span class="text-lg">
+                            ⇥
+                        </span>
+
+                        <span>
+                            Cerrar sesión
+                        </span>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </aside>
+
+
+        <!-- ===================================================== -->
+        <!-- CONTENIDO -->
+        <!-- ===================================================== -->
+
+        <main class="flex-1 p-6">
+
+            <div class="max-w-7xl mx-auto">
+
+
+                <!-- ================================================= -->
+                <!-- ENCABEZADO -->
+                <!-- ================================================= -->
+
+                <div class="mb-6">
+
+                    <h1 class="text-2xl font-bold text-slate-900">
+
+                        Historial de inventario
+
+                    </h1>
+
+                    <p class="text-slate-500 mt-1">
+
+                        Consulta todas las entradas y salidas
+                        registradas automáticamente en el inventario.
+
+                    </p>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- TABLA -->
+                <!-- ================================================= -->
+
+                <div class="bg-white rounded-xl
+                    shadow-sm
+                    border border-slate-200
+                    overflow-hidden">
+
+                    <div class="overflow-x-auto">
+
+                        <table class="w-full text-sm text-left">
+
+
+                            <!-- CABECERA -->
+
+                            <thead class="bg-slate-50
+                                border-b border-slate-200">
+
+                                <tr>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Movimiento
+                                    </th>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Producto
+                                    </th>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Tipo
+                                    </th>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Cantidad
+                                    </th>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Fecha
+                                    </th>
+
+                                    <th class="px-5 py-4 font-semibold">
+                                        Observación
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <!-- CUERPO -->
+
+                            <tbody class="divide-y
+                                divide-slate-100">
+
+
+                                @if (Model != null && Model.Any())
+                                {
+
+                                    foreach (var movimiento in Model)
+                                    {
+
+                                        <tr class="hover:bg-slate-50
+                                            transition">
+
+
+                                            <!-- ================================= -->
+                                            <!-- ID MOVIMIENTO -->
+                                            <!-- ================================= -->
+
+                                            <td class="px-5 py-4
+                                                font-bold
+                                                text-slate-700">
+
+                                                #@movimiento.IdMovimiento
+
+                                            </td>
+
+
+                                            <!-- ================================= -->
+                                            <!-- PRODUCTO -->
+                                            <!-- ================================= -->
+
+                                            <td class="px-5 py-4">
+
+                                                <span class="font-semibold
+                                                    text-slate-800">
+
+                                                    @movimiento.Producto
+
+                                                </span>
+
+                                            </td>
+
+
+                                            <!-- ================================= -->
+                                            <!-- TIPO -->
+                                            <!-- ================================= -->
+
+                                            <td class="px-5 py-4">
+
+                                                @if (movimiento.TipoMovimiento
+                                                    == "ENTRADA")
+                                                {
+
+                                                    <span class="inline-flex
+                                                        px-3 py-1.5
+                                                        rounded-full
+                                                        bg-green-100
+                                                        text-green-700
+                                                        text-xs
+                                                        font-semibold">
+
+                                                        Entrada
+
+                                                    </span>
+
+                                                }
+                                                else if (movimiento.TipoMovimiento
+                                                         == "SALIDA")
+                                                {
+
+                                                    <span class="inline-flex
+                                                        px-3 py-1.5
+                                                        rounded-full
+                                                        bg-red-100
+                                                        text-red-700
+                                                        text-xs
+                                                        font-semibold">
+
+                                                        Salida
+
+                                                    </span>
+
+                                                }
+                                                else
+                                                {
+
+                                                    <span class="inline-flex
+                                                        px-3 py-1.5
+                                                        rounded-full
+                                                        bg-slate-100
+                                                        text-slate-700
+                                                        text-xs
+                                                        font-semibold">
+
+                                                        @movimiento.TipoMovimiento
+
+                                                    </span>
+
+                                                }
+
+                                            </td>
+
+
+                                            <!-- ================================= -->
+                                            <!-- CANTIDAD -->
+                                            <!-- ================================= -->
+
+                                            <td class="px-5 py-4
+                                                font-semibold">
+
+                                                @movimiento.Cantidad
+
+                                            </td>
+
+
+                                            <!-- ================================= -->
+                                            <!-- FECHA -->
+                                            <!-- ================================= -->
+
+                                            <td class="px-5 py-4
+                                                whitespace-nowrap">
+
+                                                @if (movimiento.Fecha != DateTime.MinValue)
+                                                {
+                                                    @movimiento.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-slate-400">
+                                                        Sin fecha
+                                                    </span>
+                                                }
+
+                                            </td>
+
+
+                                            <!-- ================================= -->
+                                            <!-- OBSERVACIÓN -->
+                                            <!-- ================================= -->
+
+                                            <td class="px-5 py-4
+                                                text-slate-600">
+
+                                                @if (!string.IsNullOrWhiteSpace(
+                                                    movimiento.Observacion))
+                                                {
+                                                    @movimiento.Observacion
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-slate-400">
+                                                        Sin observación
+                                                    </span>
+                                                }
+
+                                            </td>
+
+                                        </tr>
+
+                                    }
+
+                                }
+                                else
+                                {
+
+                                    <!-- ================================= -->
+                                    <!-- SIN REGISTROS -->
+                                    <!-- ================================= -->
+
+                                    <tr>
+
+                                        <td colspan="6"
+                                            class="px-5 py-12
+                                            text-center">
+
+                                            <div class="text-5xl mb-3">
+
+                                                📦
+
+                                            </div>
+
+
+                                            <p class="font-semibold
+                                                text-slate-600">
+
+                                                No hay movimientos registrados
+
+                                            </p>
+
+
+                                            <p class="text-sm
+                                                text-slate-400 mt-1">
+
+                                                Los movimientos aparecerán
+                                                automáticamente cuando se
+                                                realicen ventas o compras.
+
+                                            </p>
+
+                                        </td>
+
+                                    </tr>
+
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- PIE -->
+                    <!-- ================================================= -->
+                    @if (Model != null && Model.Any())
+                    {
+
+                        <div class="border-t
+                            border-slate-200
+                            px-5 py-4
+                            bg-slate-50">
+
+                            <p class="text-sm text-slate-500">
+
+                                Total de movimientos:
+
+                                <span class="font-semibold
+                                    text-slate-700">
+
+                                    @Model.Count()
+
+                                </span>
+
+                            </p>
+
+                        </div>
+
+                    }
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>
