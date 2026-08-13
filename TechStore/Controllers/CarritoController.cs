@@ -99,9 +99,7 @@ namespace TechStore.Controllers
                 return RedirectToAction("Catalogo", "Cliente");
             }
 
-            // =================================================
-            // BUSCAR PRODUCTO
-            // =================================================
+
 
             var producto = await _context.Productos
                 .FirstOrDefaultAsync(p =>
@@ -116,9 +114,7 @@ namespace TechStore.Controllers
                 return RedirectToAction("Catalogo", "Cliente");
             }
 
-            // =================================================
-            // BUSCAR CARRITO ACTIVO
-            // =================================================
+
 
             var carrito = await _context.Carritos
                 .Include(c => c.DetalleCarritos)
@@ -126,9 +122,7 @@ namespace TechStore.Controllers
                     c.IdUsuario == userId.Value &&
                     c.Estado == "Activo");
 
-            // =================================================
-            // CREAR CARRITO SI NO EXISTE
-            // =================================================
+
 
             if (carrito == null)
             {
@@ -144,9 +138,7 @@ namespace TechStore.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // =================================================
-            // BUSCAR SI EL PRODUCTO YA ESTÁ EN EL CARRITO
-            // =================================================
+
 
             var detalle = carrito.DetalleCarritos
                 .FirstOrDefault(dc =>
@@ -164,9 +156,7 @@ namespace TechStore.Controllers
                     detalle.Cantidad + cantidad;
             }
 
-            // =================================================
-            // VALIDAR STOCK
-            // =================================================
+
 
             if (cantidadFinal > producto.Stock)
             {
@@ -180,9 +170,7 @@ namespace TechStore.Controllers
                     new { id = productoId });
             }
 
-            // =================================================
-            // AGREGAR O ACTUALIZAR
-            // =================================================
+
 
             if (detalle == null)
             {

@@ -336,32 +336,31 @@ namespace TechStore.Controllers
         // =========================================================
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int id)
         {
-            if (id == null)
-                return NotFound();
-
-            var compra = await _context.CompraProveedors
-                .FirstOrDefaultAsync(c =>
-                    c.IdCompra == id);
+            var compra = _context.CompraProveedors
+                .FirstOrDefault(c => c.IdCompra == id);
 
             if (compra == null)
+            {
                 return NotFound();
+            }
 
+            if (compra.Estado == "Cancelada")
+            {
+                TempData["Error"] =
+                    "No se puede editar una compra que está cancelada.";
+
+                return RedirectToAction("Index");
+            }
 
             if (compra.Estado == "Recibida")
             {
                 TempData["Error"] =
                     "No se puede editar una compra que ya fue recibida.";
 
-                return RedirectToAction(
-                    nameof(Details),
-                    new { id });
+                return RedirectToAction("Index");
             }
-
-
-            await CargarProveedores(
-                compra.IdProveedor);
 
             return View(compra);
         }
@@ -373,241 +372,49 @@ namespace TechStore.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            int id,
-            int IdProveedor,
-            DateTime FechaCompra,
-            string Estado)
+        public IActionResult Edit(int id, CompraProveedor compra)
         {
-            try
+            var compraExistente = _context.CompraProveedors
+                .FirstOrDefault(c => c.IdCompra == id);
+
+            if (compraExistente == null)
             {
-                var compra =
-                    await _context.CompraProveedors
-                        .FirstOrDefaultAsync(c =>
-                            c.IdCompra == id);
-
-                if (compra == null)
-                    return NotFound();
-
-
-                if (compra.Estado == "Recibida")
-                {
-                    TempData["Error"] =
-                        "No se puede modificar una compra recibida.";
-
-                    return RedirectToAction(
-                        nameof(Details),
-                        new { id });
-                }
-
-
-                // =================================================
-                // VALIDAR PROVEEDOR
-                // =================================================
-
-                var proveedorExiste =
-                    await _context.Proveedors
-                        .AnyAsync(p =>
-                            p.IdProveedor == IdProveedor);
-
-                if (!proveedorExiste)
-                {
-                    TempData["Error"] =
-                        "El proveedor seleccionado no existe.";
-
-                    await CargarProveedores(
-                        IdProveedor);
-
-                    return View(compra);
-                }
-
-
-                // =================================================
-                // VALIDAR ESTADO
-                // =================================================
-
-                string[] estados =
-                {
-                    "Pendiente",
-                    "En proceso",
-                    "Recibida",
-                    "Cancelada"
-                };
-
-
-                if (!estados.Contains(Estado))
-                {
-                    TempData["Error"] =
-                        "El estado seleccionado no es válido.";
-
-                    await CargarProveedores(
-                        IdProveedor);
-
-                    return View(compra);
-                }
-
-
-                // =================================================
-                // SI CAMBIA A RECIBIDA
-                // EL PROCEDIMIENTO ACTUALIZA EL ESTADO
-                // Y EL TRIGGER ACTUALIZA EL STOCK
-                // =================================================
-
-                if (Estado == "Recibida" &&
-                    compra.Estado != "Recibida")
-                {
-                    // Primero actualizamos proveedor y fecha
-                    compra.IdProveedor = IdProveedor;
-                    compra.FechaCompra = FechaCompra;
-
-                    await _context.SaveChangesAsync();
-
-
-                    // Luego cambiamos el estado
-                    await CambiarEstadoConProcedimiento(
-                        id,
-                        Estado);
-                }
-                else
-                {
-                    compra.IdProveedor = IdProveedor;
-                    compra.FechaCompra = FechaCompra;
-                    compra.Estado = Estado;
-
-                    await _context.SaveChangesAsync();
-                }
-
-
-                TempData["Success"] =
-                    "La compra fue actualizada correctamente.";
-
-                return RedirectToAction(
-                    nameof(Details),
-                    new { id });
+                return NotFound();
             }
-            catch (Exception ex)
+
+            if (compraExistente.Estado == "Cancelada")
             {
                 TempData["Error"] =
-                    "No se pudo actualizar la compra: " +
-                    (ex.InnerException?.Message ??
-                     ex.Message);
+                    "No se puede editar una compra que está cancelada.";
 
-                return RedirectToAction(
-                    nameof(Details),
-                    new { id });
+                return RedirectToAction("Index");
             }
-        }
 
-
-        // =========================================================
-        // CAMBIAR ESTADO
-        // =========================================================
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CambiarEstado(
-            int id,
-            string estado)
-        {
-            try
-            {
-                var compra =
-                    await _context.CompraProveedors
-                        .FirstOrDefaultAsync(c =>
-                            c.IdCompra == id);
-
-                if (compra == null)
-                    return NotFound();
-
-
-                // =================================================
-                // NO MODIFICAR RECIBIDA
-                // =================================================
-
-                if (compra.Estado == "Recibida")
-                {
-                    TempData["Error"] =
-                        "La compra ya fue recibida y no puede cambiar de estado.";
-
-                    return RedirectToAction(
-                        nameof(Details),
-                        new { id });
-                }
-
-
-                // =================================================
-                // VALIDAR ESTADO
-                // =================================================
-
-                string[] estados =
-                {
-                    "Pendiente",
-                    "En proceso",
-                    "Recibida",
-                    "Cancelada"
-                };
-
-
-                if (!estados.Contains(estado))
-                {
-                    TempData["Error"] =
-                        "Estado no válido.";
-
-                    return RedirectToAction(
-                        nameof(Details),
-                        new { id });
-                }
-
-
-                // =================================================
-                // VERIFICAR PRODUCTOS
-                // =================================================
-
-                var tieneDetalles =
-                    await _context.DetalleCompras
-                        .AnyAsync(d =>
-                            d.IdCompra == id);
-
-                if (!tieneDetalles)
-                {
-                    TempData["Error"] =
-                        "No se puede cambiar el estado " +
-                        "de una compra sin productos.";
-
-                    return RedirectToAction(
-                        nameof(Details),
-                        new { id });
-                }
-
-
-                // =================================================
-                // CAMBIAR ESTADO
-                // =================================================
-
-                await CambiarEstadoConProcedimiento(
-                    id,
-                    estado);
-
-
-                TempData["Success"] =
-                    $"La compra ahora está en estado: {estado}.";
-
-
-                return RedirectToAction(
-                    nameof(Details),
-                    new { id });
-            }
-            catch (Exception ex)
+            if (compraExistente.Estado == "Recibida")
             {
                 TempData["Error"] =
-                    "No se pudo cambiar el estado: " +
-                    (ex.InnerException?.Message ??
-                     ex.Message);
+                    "No se puede editar una compra que ya fue recibida.";
 
-                return RedirectToAction(
-                    nameof(Details),
-                    new { id });
+                return RedirectToAction("Index");
             }
+
+            if (!ModelState.IsValid)
+            {
+                return View(compra);
+            }
+
+            // Actualiza únicamente los campos que permites modificar
+            compraExistente.IdProveedor = compra.IdProveedor;
+            compraExistente.FechaCompra = compra.FechaCompra;
+            compraExistente.Total = compra.Total;
+            compraExistente.Estado = compra.Estado;
+
+            _context.SaveChanges();
+
+            TempData["Success"] =
+                "Compra actualizada correctamente.";
+
+            return RedirectToAction("Index");
         }
 
 

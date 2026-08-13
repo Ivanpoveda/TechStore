@@ -20,9 +20,6 @@ namespace TechStore.Controllers
             _context = context;
         }
 
-        // =====================================================
-        // LOGIN - GET
-        // =====================================================
 
         [HttpGet]
         public IActionResult Login()
@@ -31,9 +28,6 @@ namespace TechStore.Controllers
         }
 
 
-        // =====================================================
-        // LOGIN - POST
-        // =====================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -56,16 +50,12 @@ namespace TechStore.Controllers
             }
 
 
-            // =================================================
-            // VALIDAR CONTRASEÑA
-            // =================================================
+
 
             bool contraseñaCorrecta = false;
 
 
-            // -------------------------------------------------
-            // 1. INTENTAR SHA-256
-            // -------------------------------------------------
+
 
             string hashSha256 =
                 HashPassword(contrasenia);
@@ -76,9 +66,7 @@ namespace TechStore.Controllers
             }
 
 
-            // -------------------------------------------------
-            // 2. INTENTAR ASP.NET IDENTITY
-            // -------------------------------------------------
+
 
             if (!contraseñaCorrecta &&
                 usuario.Contrasenia.StartsWith("AQAAAA"))
@@ -103,9 +91,6 @@ namespace TechStore.Controllers
             }
 
 
-            // =================================================
-            // CONTRASEÑA INCORRECTA
-            // =================================================
 
             if (!contraseñaCorrecta)
             {
@@ -116,9 +101,7 @@ namespace TechStore.Controllers
             }
 
 
-            // =================================================
-            // OBTENER ROL
-            // =================================================
+
 
             string nombreRol =
                 usuario.IdRolNavigation?.Nombre ?? "";
@@ -133,9 +116,7 @@ namespace TechStore.Controllers
             }
 
 
-            // =================================================
-            // CREAR CLAIMS
-            // =================================================
+
 
             var claims = new List<Claim>
             {
@@ -171,9 +152,7 @@ namespace TechStore.Controllers
                 new ClaimsPrincipal(identity);
 
 
-            // =================================================
-            // CREAR COOKIE
-            // =================================================
+
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
@@ -181,9 +160,6 @@ namespace TechStore.Controllers
             );
 
 
-            // =================================================
-            // REDIRECCIÓN POR ROL
-            // =================================================
 
             if (usuario.IdRol == 1)
             {
@@ -210,9 +186,7 @@ namespace TechStore.Controllers
         }
 
 
-        // =====================================================
-        // REGISTER - GET
-        // =====================================================
+
 
         [HttpGet]
         public IActionResult Register()
@@ -221,9 +195,6 @@ namespace TechStore.Controllers
         }
 
 
-        // =====================================================
-        // REGISTER - POST
-        // =====================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -238,9 +209,6 @@ namespace TechStore.Controllers
 
             try
             {
-                // ---------------------------------------------
-                // NUEVOS USUARIOS USARÁN SHA-256
-                // ---------------------------------------------
 
                 string hashContrasenia =
                     HashPassword(nuevoUsuario.Contrasenia);
@@ -339,9 +307,7 @@ namespace TechStore.Controllers
         }
 
 
-        // =====================================================
-        // LOGOUT
-        // =====================================================
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -358,9 +324,6 @@ namespace TechStore.Controllers
         }
 
 
-        // =====================================================
-        // ACCESS DENIED
-        // =====================================================
 
         [HttpGet]
         public IActionResult AccessDenied()
@@ -369,9 +332,6 @@ namespace TechStore.Controllers
         }
 
 
-        // =====================================================
-        // SHA-256
-        // =====================================================
 
         private string HashPassword(string password)
         {

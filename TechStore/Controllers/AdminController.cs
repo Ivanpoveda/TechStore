@@ -22,7 +22,6 @@ namespace TechStore.Controllers
 
         public async Task<IActionResult> Dashboard()
         {
-            // 1. Métricas Principales (Consultas directas en BD)
             var ingresosTotales = await _context.Venta
                 .SumAsync(v => (decimal?)v.Total) ?? 0m;
 
@@ -35,7 +34,6 @@ namespace TechStore.Controllers
             var ordenesPendientes = await _context.Venta
                 .CountAsync(v => v.Estado == "Pendiente");
 
-            // 2. Ventas por Mes (Nombres de meses en español)
             var ventasAgrupadasMes = await _context.Venta
                 .Where(v => v.Fecha.Year == DateTime.Now.Year)
                 .GroupBy(v => v.Fecha.Month)
@@ -56,7 +54,6 @@ namespace TechStore.Controllers
                 .Select(x => x.Total)
                 .ToList();
 
-            // 3. Ventas por Estado
             var ventasAgrupadasEstado = await _context.Venta
                 .GroupBy(v => v.Estado)
                 .Select(g => new
@@ -66,7 +63,6 @@ namespace TechStore.Controllers
                 })
                 .ToListAsync();
 
-            // 4. Últimos Pedidos (Mapeo DTO)
             var ultimosPedidos = await _context.Venta
                 .Include(v => v.IdUsuarioNavigation)
                 .OrderByDescending(v => v.Fecha)
@@ -81,7 +77,6 @@ namespace TechStore.Controllers
                 })
                 .ToListAsync();
 
-            // 5. Carga de vistas SQL
             var productosStockBajo = await _context.VisStockBajos.ToListAsync();
 
             var detalleVentas = await _context.VisVentasDetalles
@@ -89,7 +84,6 @@ namespace TechStore.Controllers
                 .Take(10)
                 .ToListAsync();
 
-            // 6. Construcción del ViewModel final
             var model = new DashboardViewModel
             {
                 IngresosTotales = ingresosTotales,

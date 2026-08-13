@@ -1,11 +1,7 @@
-@model TechStore.Models.CompraProveedor
+@model IEnumerable<TechStore.Models.CompraProveedor>
 
 @{
-    ViewData["Title"] = "Detalle de compra";
-
-    var detalles =
-        ViewBag.Detalles as IEnumerable<TechStore.Models.DetalleCompra>
-        ?? Enumerable.Empty<TechStore.Models.DetalleCompra>();
+    ViewData["Title"] = "Compras a proveedores";
 }
 
 <!DOCTYPE html>
@@ -18,7 +14,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0" />
 
-    <title>Detalle de compra - TechStore</title>
+    <title>Compras a proveedores - TechStore</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -34,6 +30,8 @@
         <aside class="w-full md:w-64 bg-slate-900
             text-white p-5 shrink-0">
 
+            <!-- LOGO -->
+
             <div class="flex items-center gap-3 mb-8">
 
                 <div class="w-8 h-8 bg-indigo-500 rounded-lg
@@ -44,11 +42,15 @@
                 </div>
 
                 <span class="font-bold text-lg">
+
                     TechStore Admin
+
                 </span>
 
             </div>
 
+
+            <!-- MENU -->
 
             <nav class="space-y-1">
 
@@ -118,51 +120,35 @@
 
                         <h1 class="text-2xl font-bold text-slate-900">
 
-                            Compra #@Model.IdCompra
+                            Compras a proveedores
 
                         </h1>
 
                         <p class="text-slate-500 mt-1">
 
-                            Detalle de la compra al proveedor
+                            Gestión de compras realizadas a proveedores
 
                         </p>
 
                     </div>
 
 
-                    <div class="flex gap-2 mt-4 md:mt-0">
+                    <!-- NUEVA COMPRA -->
 
-                        <a href="/CompraProveedor/Index"
-                           class="px-4 py-2 rounded-lg
-                            border border-slate-300
-                            text-slate-700
-                            hover:bg-slate-100">
+                    <a href="/CompraProveedor/Create"
+                       class="mt-4 md:mt-0
+                        px-4 py-2 rounded-lg
+                        bg-indigo-600 text-white
+                        hover:bg-indigo-700">
 
-                            Volver
+                        + Nueva compra
 
-                        </a>
-
-
-                        @if (Model.Estado != "Recibida" &&
-                             Model.Estado != "Cancelada")
-                        {
-                            <a href="/CompraProveedor/Edit/@Model.IdCompra"
-                               class="px-4 py-2 rounded-lg
-                                bg-indigo-600 text-white
-                                hover:bg-indigo-700">
-
-                                Editar
-
-                            </a>
-                        }
-
-                    </div>
+                    </a>
 
                 </div>
 
 
-                <!-- MENSAJES -->
+                <!-- MENSAJE EXITOSO -->
                 @if (TempData["Success"] != null)
                 {
                     <div class="mb-5 bg-green-50
@@ -176,6 +162,7 @@
                 }
 
 
+                <!-- MENSAJE DE ERROR -->
                 @if (TempData["Error"] != null)
                 {
                     <div class="mb-5 bg-red-50
@@ -189,165 +176,69 @@
                 }
 
 
-                <!-- INFORMACIÓN GENERAL -->
+                <!-- TABLA -->
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-
-
-                    <div class="bg-white rounded-xl shadow-sm
-                        border border-slate-200 p-5">
-
-                        <p class="text-sm text-slate-500">
-                            Proveedor
-                        </p>
-
-                        <p class="text-lg font-bold text-slate-900 mt-1">
-
-                            @Model.IdProveedorNavigation?.Nombre
-
-                        </p>
-
-                    </div>
-
-
-                    <div class="bg-white rounded-xl shadow-sm
-                        border border-slate-200 p-5">
-
-                        <p class="text-sm text-slate-500">
-                            Fecha
-                        </p>
-
-                        <p class="text-lg font-bold text-slate-900 mt-1">
-
-                            @Model.FechaCompra.ToString("dd/MM/yyyy")
-
-                        </p>
-
-                    </div>
-
-
-                    <div class="bg-white rounded-xl shadow-sm
-                        border border-slate-200 p-5">
-
-                        <p class="text-sm text-slate-500">
-                            Estado
-                        </p>
-
-                        @if (Model.Estado == "Recibida")
-                        {
-                            <span class="inline-block mt-2
-                                px-3 py-1 rounded-full
-                                bg-green-100 text-green-700
-                                font-semibold">
-
-                                Recibida
-
-                            </span>
-                        }
-                        else if (Model.Estado == "Cancelada")
-                        {
-                            <span class="inline-block mt-2
-                                px-3 py-1 rounded-full
-                                bg-red-100 text-red-700
-                                font-semibold">
-
-                                Cancelada
-
-                            </span>
-                        }
-                        else if (Model.Estado == "En proceso")
-                        {
-                            <span class="inline-block mt-2
-                                px-3 py-1 rounded-full
-                                bg-blue-100 text-blue-700
-                                font-semibold">
-
-                                En proceso
-
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="inline-block mt-2
-                                px-3 py-1 rounded-full
-                                bg-yellow-100 text-yellow-700
-                                font-semibold">
-
-                                Pendiente
-
-                            </span>
-                        }
-
-                    </div>
-
-                </div>
-
-
-                <!-- PRODUCTOS -->
-
-                <div class="bg-white rounded-xl shadow-sm
-                    border border-slate-200 overflow-hidden">
-
-                    <div class="p-5 border-b
-                        border-slate-200
-                        flex justify-between items-center">
-
-                        <div>
-
-                            <h2 class="text-lg font-bold text-slate-900">
-
-                                Productos de la compra
-
-                            </h2>
-
-                            <p class="text-sm text-slate-500">
-
-                                @detalles.Count() producto(s)
-
-                            </p>
-
-                        </div>
-
-
-                        @if (Model.Estado != "Recibida" &&
-                             Model.Estado != "Cancelada")
-                        {
-                            <a href="/CompraProveedor/AgregarDetalle/@Model.IdCompra"
-                               class="px-4 py-2 rounded-lg
-                                bg-indigo-600 text-white
-                                hover:bg-indigo-700">
-
-                                + Agregar producto
-
-                            </a>
-                        }
-
-                    </div>
-
+                <div class="bg-white rounded-xl
+                    shadow-sm border border-slate-200
+                    overflow-hidden">
 
                     <div class="overflow-x-auto">
 
                         <table class="w-full text-sm text-left">
+
+                            <!-- CABECERA -->
 
                             <thead class="bg-slate-50
                                 border-b border-slate-200">
 
                                 <tr>
 
-                                    <th class="px-5 py-4">
-                                        Producto
+                                    <th class="px-5 py-4
+                                        text-slate-600
+                                        font-semibold">
+
+                                        Compra
+
                                     </th>
 
-                                    <th class="px-5 py-4">
-                                        Cantidad
+                                    <th class="px-5 py-4
+                                        text-slate-600
+                                        font-semibold">
+
+                                        Fecha
+
                                     </th>
 
-                                    <th class="px-5 py-4">
-                                        Precio compra
+                                    <th class="px-5 py-4
+                                        text-slate-600
+                                        font-semibold">
+
+                                        Proveedor
+
                                     </th>
 
-                                    <th class="px-5 py-4">
-                                        Subtotal
+                                    <th class="px-5 py-4
+                                        text-slate-600
+                                        font-semibold">
+
+                                        Total
+
+                                    </th>
+
+                                    <th class="px-5 py-4
+                                        text-slate-600
+                                        font-semibold">
+
+                                        Estado
+
+                                    </th>
+
+                                    <th class="px-5 py-4
+                                        text-slate-600
+                                        font-semibold">
+
+                                        Acciones
+
                                     </th>
 
                                 </tr>
@@ -355,38 +246,170 @@
                             </thead>
 
 
+                            <!-- CUERPO -->
+
                             <tbody class="divide-y
                                 divide-slate-100">
 
-                                @if (detalles.Any())
+                                @if (Model != null && Model.Any())
                                 {
-                                    foreach (var detalle in detalles)
+                                    foreach (var item in Model)
                                     {
                                         <tr class="hover:bg-slate-50">
 
-                                            <td class="px-5 py-4
-                                                font-semibold">
 
-                                                @detalle.IdProductoNavigation?.Nombre
-
-                                            </td>
+                                            <!-- ID COMPRA -->
 
                                             <td class="px-5 py-4">
 
-                                                @detalle.Cantidad
+                                                <span class="font-bold
+                                                    text-slate-900">
+
+                                                    #@item.IdCompra
+
+                                                </span>
 
                                             </td>
+
+
+                                            <!-- FECHA -->
+
+                                            <td class="px-5 py-4
+                                                text-slate-600">
+
+                                                @item.FechaCompra.ToString("dd-MM-yyyy")
+
+                                            </td>
+
+
+                                            <!-- PROVEEDOR -->
 
                                             <td class="px-5 py-4">
 
-                                                ₡@detalle.PrecioCompra.ToString("N2")
+                                                <span class="font-semibold
+                                                    text-slate-900">
+
+                                                    @item.IdProveedorNavigation?.Nombre
+
+                                                </span>
 
                                             </td>
 
-                                            <td class="px-5 py-4
-                                                font-semibold">
 
-                                                ₡@detalle.Subtotal.ToString("N2")
+                                            <!-- TOTAL -->
+
+                                            <td class="px-5 py-4">
+
+                                                <span class="font-bold
+                                                    text-slate-900">
+
+                                                    ₡@((item.Total ?? 0).ToString("N2"))
+
+                                                </span>
+
+                                            </td>
+
+
+                                            <!-- ESTADO -->
+
+                                            <td class="px-5 py-4">
+
+                                                @if (item.Estado == "Recibida")
+                                                {
+                                                    <span class="inline-block
+                                                        px-3 py-1
+                                                        rounded-full
+                                                        bg-green-100
+                                                        text-green-700
+                                                        font-semibold">
+
+                                                        Recibida
+
+                                                    </span>
+                                                }
+                                                else if (item.Estado == "Cancelada")
+                                                {
+                                                    <span class="inline-block
+                                                        px-3 py-1
+                                                        rounded-full
+                                                        bg-red-100
+                                                        text-red-700
+                                                        font-semibold">
+
+                                                        Cancelada
+
+                                                    </span>
+                                                }
+                                                else if (item.Estado == "En proceso")
+                                                {
+                                                    <span class="inline-block
+                                                        px-3 py-1
+                                                        rounded-full
+                                                        bg-blue-100
+                                                        text-blue-700
+                                                        font-semibold">
+
+                                                        En proceso
+
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="inline-block
+                                                        px-3 py-1
+                                                        rounded-full
+                                                        bg-yellow-100
+                                                        text-yellow-700
+                                                        font-semibold">
+
+                                                        @item.Estado
+
+                                                    </span>
+                                                }
+
+                                            </td>
+
+
+                                            <!-- ACCIONES -->
+
+                                            <td class="px-5 py-4">
+
+                                                <div class="flex
+                                                    items-center gap-2">
+
+
+                                                    <!-- VER -->
+
+                                                    <a href="/CompraProveedor/Details/@item.IdCompra"
+                                                       class="px-3 py-1.5
+                                                        rounded-lg
+                                                        border
+                                                        border-slate-300
+                                                        text-slate-700
+                                                        hover:bg-slate-100">
+
+                                                        Ver
+
+                                                    </a>
+
+
+                                                    <!-- EDITAR -->
+                                                    @if (item.Estado != "Recibida" &&
+                                                                                                             item.Estado != "Cancelada")
+                                                    {
+                                                        <a href="/CompraProveedor/Edit/@item.IdCompra"
+                                                           class="px-3 py-1.5
+                                                            rounded-lg
+                                                            bg-indigo-600
+                                                            text-white
+                                                            hover:bg-indigo-700">
+
+                                                            Editar
+
+                                                        </a>
+                                                    }
+
+                                                </div>
 
                                             </td>
 
@@ -397,12 +420,25 @@
                                 {
                                     <tr>
 
-                                        <td colspan="4"
-                                            class="px-5 py-10
-                                            text-center
-                                            text-slate-500">
+                                        <td colspan="6"
+                                            class="px-5 py-12
+                                            text-center">
 
-                                            Esta compra no tiene productos.
+                                            <div class="text-slate-400
+                                                mb-2">
+
+                                                No hay compras registradas.
+
+                                            </div>
+
+                                            <a href="/CompraProveedor/Create"
+                                               class="text-indigo-600
+                                                hover:text-indigo-800
+                                                font-semibold">
+
+                                                Registrar una compra
+
+                                            </a>
 
                                         </td>
 
@@ -415,134 +451,7 @@
 
                     </div>
 
-
-                    <!-- TOTAL -->
-
-                    <div class="border-t border-slate-200
-                        p-5 flex justify-end">
-
-                        <div class="text-right">
-
-                            <p class="text-sm text-slate-500">
-                                Total de la compra
-                            </p>
-
-                            <p class="text-2xl font-bold
-                                text-slate-900">
-
-                                ₡@((Model.Total ?? 0).ToString("N2"))
-
-                            </p>
-
-                        </div>
-
-                    </div>
-
                 </div>
-
-
-                @if (Model.Estado != "Recibida" && Model.Estado != "Cancelada")
-                {
-                    <div class="mt-6 bg-white rounded-xl
-                        shadow-sm border border-slate-200 p-5">
-
-                        <h2 class="font-bold text-slate-900 mb-1">
-                            Actualizar estado
-                        </h2>
-
-                        <p class="text-sm text-slate-500 mb-4">
-                            Al marcar la compra como
-                            <strong>Recibida</strong>, el stock de los
-                            productos será actualizado automáticamente.
-                        </p>
-
-
-                        <div class="flex flex-wrap gap-3">
-
-                            <!-- EN PROCESO -->
-
-                            <form action="/CompraProveedor/CambiarEstado"
-                                  method="post">
-
-                                @Html.AntiForgeryToken()
-
-                                <input type="hidden"
-                                       name="id"
-                                       value="@Model.IdCompra" />
-
-                                <input type="hidden"
-                                       name="estado"
-                                       value="En proceso" />
-
-                                <button type="submit"
-                                        class="px-4 py-2 rounded-lg
-                                    bg-blue-600 text-white
-                                    hover:bg-blue-700 transition">
-
-                                    En proceso
-
-                                </button>
-
-                            </form>
-
-
-                            <!-- RECIBIDA -->
-
-                            <form action="/CompraProveedor/CambiarEstado"
-                                  method="post">
-
-                                @Html.AntiForgeryToken()
-
-                                <input type="hidden"
-                                       name="id"
-                                       value="@Model.IdCompra" />
-
-                                <input type="hidden"
-                                       name="estado"
-                                       value="Recibida" />
-
-                                <button type="submit"
-                                        class="px-4 py-2 rounded-lg
-                                    bg-green-600 text-white
-                                    hover:bg-green-700 transition">
-
-                                    Marcar como recibida
-
-                                </button>
-
-                            </form>
-
-
-                            <!-- CANCELADA -->
-
-                            <form action="/CompraProveedor/CambiarEstado"
-                                  method="post">
-
-                                @Html.AntiForgeryToken()
-
-                                <input type="hidden"
-                                       name="id"
-                                       value="@Model.IdCompra" />
-
-                                <input type="hidden"
-                                       name="estado"
-                                       value="Cancelada" />
-
-                                <button type="submit"
-                                        class="px-4 py-2 rounded-lg
-                                    bg-red-600 text-white
-                                    hover:bg-red-700 transition">
-
-                                    Cancelar compra
-
-                                </button>
-
-                            </form>
-
-                        </div>
-
-                    </div>
-                }
 
             </div>
 
@@ -553,4 +462,3 @@
 </body>
 
 </html>
-
