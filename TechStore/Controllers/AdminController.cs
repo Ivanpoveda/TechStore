@@ -22,8 +22,10 @@ namespace TechStore.Controllers
 
         public async Task<IActionResult> Dashboard()
         {
-            var ingresosTotales = await _context.Venta
-                .SumAsync(v => (decimal?)v.Total) ?? 0m;
+            var IngresosTotales = _context.Venta
+    .Where(v => v.Estado == "Completada")
+    .Select(v => (decimal?)v.Total)
+    .Sum() ?? 0;
 
             var usuariosActivos = await _context.Usuarios
                 .CountAsync(u => u.Estado == "Activo");
@@ -86,7 +88,7 @@ namespace TechStore.Controllers
 
             var model = new DashboardViewModel
             {
-                IngresosTotales = ingresosTotales,
+                IngresosTotales = IngresosTotales,
                 UsuariosActivos = usuariosActivos,
                 ProductosEnStock = productosEnStock,
                 OrdenesPendientes = ordenesPendientes,
