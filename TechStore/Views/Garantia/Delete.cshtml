@@ -276,12 +276,14 @@
 
                     <!-- FORMULARIO -->
 
-                    <form action="/Garantia/Delete"
+                    <form action="/Garantia/DeleteConfirmed"
                           method="post"
                           class="flex justify-end gap-3 mt-6">
 
                         @Html.AntiForgeryToken()
 
+
+                        <!-- ID DE LA GARANTÍA -->
 
                         <input type="hidden"
                                name="id"

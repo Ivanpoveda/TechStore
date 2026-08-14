@@ -19,6 +19,7 @@ namespace TechStore.Controllers
         // =========================================================
         // INDEX
         // =========================================================
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var garantias = await _context.Garantia
@@ -44,6 +45,7 @@ namespace TechStore.Controllers
                     .ThenInclude(d => d.IdProductoNavigation)
                 .Include(g => g.IdDetalleVentaNavigation)
                     .ThenInclude(d => d.IdVentaNavigation)
+                        .ThenInclude(v => v.IdUsuarioNavigation)
                 .FirstOrDefaultAsync(g => g.IdGarantia == id);
 
             if (garantia == null)
@@ -99,9 +101,9 @@ namespace TechStore.Controllers
         {
             try
             {
-                // =================================================
-                // VALIDAR DETALLE
-                // =================================================
+                // -------------------------------------------------
+                // VALIDAR DETALLE DE VENTA
+                // -------------------------------------------------
 
                 var detalle = await _context.DetalleVenta
                     .Include(d => d.IdProductoNavigation)
@@ -126,9 +128,9 @@ namespace TechStore.Controllers
                     });
                 }
 
-                // =================================================
-                // VALIDAR CAMPOS
-                // =================================================
+                // -------------------------------------------------
+                // VALIDAR MOTIVO
+                // -------------------------------------------------
 
                 if (string.IsNullOrWhiteSpace(Motivo))
                 {
@@ -147,6 +149,10 @@ namespace TechStore.Controllers
                     });
                 }
 
+                // -------------------------------------------------
+                // VALIDAR DESCRIPCIÓN
+                // -------------------------------------------------
+
                 if (string.IsNullOrWhiteSpace(Descripcion))
                 {
                     TempData["Error"] =
@@ -164,23 +170,17 @@ namespace TechStore.Controllers
                     });
                 }
 
-                // =================================================
+                // -------------------------------------------------
                 // CREAR GARANTÍA
-                // =================================================
+                // -------------------------------------------------
 
                 var garantia = new Garantium
                 {
                     FechaSolicitud = DateTime.Now,
-
                     Motivo = Motivo.Trim(),
-
                     Descripcion = Descripcion.Trim(),
-
-                    // Estado permitido por SQL Server
                     Estado = "En proceso",
-
                     FechaResolucion = null,
-
                     IdDetalleVenta = IdDetalleVenta
                 };
 
@@ -193,10 +193,27 @@ namespace TechStore.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex)
             {
                 TempData["Error"] =
                     "No se pudo registrar la garantía: " +
+                    ObtenerMensajeError(ex);
+
+                await CargarDetallesVenta(IdDetalleVenta);
+
+                return View(new Garantium
+                {
+                    Motivo = Motivo,
+                    Descripcion = Descripcion,
+                    IdDetalleVenta = IdDetalleVenta,
+                    FechaSolicitud = DateTime.Now,
+                    Estado = "En proceso"
+                });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "Error inesperado: " +
                     ObtenerMensajeError(ex);
 
                 await CargarDetallesVenta(IdDetalleVenta);
@@ -262,9 +279,9 @@ namespace TechStore.Controllers
                     return NotFound();
                 }
 
-                // =================================================
+                // -------------------------------------------------
                 // VALIDAR ESTADO
-                // =================================================
+                // -------------------------------------------------
 
                 if (Estado != "En proceso" &&
                     Estado != "Aprobada" &&
@@ -278,9 +295,9 @@ namespace TechStore.Controllers
                         new { id = IdGarantia });
                 }
 
-                // =================================================
-                // ACTUALIZAR DATOS
-                // =================================================
+                // -------------------------------------------------
+                // ACTUALIZAR
+                // -------------------------------------------------
 
                 garantia.Motivo =
                     Motivo?.Trim();
@@ -291,9 +308,9 @@ namespace TechStore.Controllers
                 garantia.Estado =
                     Estado;
 
-                // =================================================
+                // -------------------------------------------------
                 // FECHA DE RESOLUCIÓN
-                // =================================================
+                // -------------------------------------------------
 
                 if (Estado == "En proceso")
                 {
@@ -328,10 +345,20 @@ namespace TechStore.Controllers
                     nameof(Edit),
                     new { id = IdGarantia });
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex)
             {
                 TempData["Error"] =
                     "No se pudo actualizar la garantía: " +
+                    ObtenerMensajeError(ex);
+
+                return RedirectToAction(
+                    nameof(Edit),
+                    new { id = IdGarantia });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "Error inesperado: " +
                     ObtenerMensajeError(ex);
 
                 return RedirectToAction(
@@ -346,9 +373,14 @@ namespace TechStore.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-            var garantia = await _context.Garantia                .Include(g => g.IdDetalleVentaNavigation)
+            var garantia = await _context.Garantia
+                .Include(g => g.IdDetalleVentaNavigation)
                     .ThenInclude(d => d.IdProductoNavigation)
-                .FirstOrDefaultAsync(g => g.IdGarantia == id);
+                .Include(g => g.IdDetalleVentaNavigation)
+                    .ThenInclude(d => d.IdVentaNavigation)
+                        .ThenInclude(v => v.IdUsuarioNavigation)
+                .FirstOrDefaultAsync(g =>
+                    g.IdGarantia == id);
 
             if (garantia == null)
             {
@@ -388,10 +420,33 @@ namespace TechStore.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!GarantiumExists(id))
+                {
+                    TempData["Error"] =
+                        "La garantía ya no existe.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                TempData["Error"] =
+                    "La garantía fue modificada por otro usuario.";
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException ex)
             {
                 TempData["Error"] =
                     "No se pudo eliminar la garantía: " +
+                    ObtenerMensajeError(ex);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] =
+                    "Error inesperado: " +
                     ObtenerMensajeError(ex);
 
                 return RedirectToAction(nameof(Index));
@@ -431,6 +486,11 @@ namespace TechStore.Controllers
         // =========================================================
         private string ObtenerMensajeError(Exception ex)
         {
+            if (ex.InnerException?.InnerException != null)
+            {
+                return ex.InnerException.InnerException.Message;
+            }
+
             if (ex.InnerException != null)
             {
                 return ex.InnerException.Message;
