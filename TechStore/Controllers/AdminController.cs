@@ -37,7 +37,7 @@ namespace TechStore.Controllers
                 .CountAsync(v => v.Estado == "Pendiente");
 
             var ventasAgrupadasMes = await _context.Venta
-                .Where(v => v.Fecha.Year == DateTime.Now.Year)
+                .Where(v => v.Fecha.Year == DateTime.Now.Year && v.Estado == "Completada")
                 .GroupBy(v => v.Fecha.Month)
                 .Select(g => new
                 {
@@ -55,6 +55,7 @@ namespace TechStore.Controllers
             var montosMes = ventasAgrupadasMes
                 .Select(x => x.Total)
                 .ToList();
+
 
             var ventasAgrupadasEstado = await _context.Venta
                 .GroupBy(v => v.Estado)

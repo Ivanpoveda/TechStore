@@ -295,7 +295,7 @@
             datasets: [{
                 label: 'Ventas por mes',
                 data: @Html.Raw(Json.Serialize(Model.VentasPorMes)),
-                backgroundColor: '#3b82f6' // azul Tailwind
+                backgroundColor: '#3b82f6'
             }]
         },
         options: {
@@ -305,7 +305,8 @@
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return '₡' + context.formattedValue;
+                            let value = context.raw;
+                            return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(value);
                         }
                     }
                 }
@@ -313,10 +314,12 @@
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { color: '#374151' }
+                    ticks: { color: '#374151' },
+                    grid: { color: '#e5e7eb' }
                 },
                 x: {
-                    ticks: { color: '#374151' }
+                    ticks: { color: '#374151' },
+                    grid: { color: '#e5e7eb' }
                 }
             }
         }
